@@ -29,7 +29,7 @@ package cy.alavrov.jminerguide.data.api;
 import cy.alavrov.jminerguide.data.character.APIKey;
 
 /**
- *
+ * A task to load and check API Key and pilot data from the server.
  * @author alavrov
  */
 public class APIKeyLoader implements Runnable{

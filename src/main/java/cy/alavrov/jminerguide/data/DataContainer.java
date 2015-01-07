@@ -60,16 +60,28 @@ public class DataContainer {
         return chars;
     }
     
+    /**
+     * Loads all the data from configuration files.
+     * Should normally be called only on the start of the application lifecycle.
+     */
     public void load() {
         JMGLogger.logWarning("Loading data...");
         chars.load();
     }
     
+    /**
+     * Saves all the data to the configuration files.
+     */
     public void save() {
         JMGLogger.logWarning("Saving data...");
         chars.save();
     }
     
+    /**
+     * Submits API Key loader to the executor pool.
+     * Can be called from any context or thread.
+     * @param loader 
+     */
     public void startAPILoader(APIKeyLoader loader) {
         pool.submit(loader);
     }

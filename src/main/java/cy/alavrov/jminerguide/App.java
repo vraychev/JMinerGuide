@@ -36,7 +36,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- *
+ * A place for the main[] code.
  * @author alavrov
  */
 public final class App {

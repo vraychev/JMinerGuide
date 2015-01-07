@@ -41,18 +41,28 @@ import org.joda.time.format.DateTimeFormatter;
 public class APIKey {
     private final static DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
     
-    private Integer id;
-    private String verification;
+    private final Integer id;
+    private final String verification;
     private DateTime expires = null;
     
     private LinkedHashMap<Integer, EVECharacter> chars;
     
+    /**
+     * Constructor for the new API key.
+     * @param id key's ID
+     * @param verif key's verification code
+     */
     public APIKey(Integer id, String verif) {
         this.id = id;
         this.verification = verif;
         this.chars = new LinkedHashMap<>();
     }
     
+    /**
+     * Constructor for loading API key data from the XML.
+     * @param root root element for key's XML data.
+     * @throws Exception 
+     */
     public APIKey(Element root) throws Exception {
         Attribute attr = root.getAttribute("id");
         id = attr.getIntValue();
@@ -74,6 +84,10 @@ public class APIKey {
         chars = newChars;
     }
     
+    /**
+     * Returns XML Element with API key data inside, to be used in saving.
+     * @return 
+     */
     public Element getXMLElement() {
         Element root = new Element("apikey");
         root.setAttribute(new Attribute("id", String.valueOf(id)));    
@@ -90,14 +104,27 @@ public class APIKey {
         return root;
     }
     
+    /**
+     * Returns API key's ID.
+     * @return 
+     */
     public Integer getID() {
         return id;        
     }
     
+    /**
+     * Returns API key's verification code.
+     * @return 
+     */
     public String getVerification() {
         return verification;
     }
     
+    /**
+     * Returns API key's expiration date and time in a string form, or "Never",
+     * if the key have no expiration date.
+     * @return 
+     */
     public String getExpires() {
         if (expires == null) return "Never";
         

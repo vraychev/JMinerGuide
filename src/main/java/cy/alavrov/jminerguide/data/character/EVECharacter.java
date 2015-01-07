@@ -30,19 +30,28 @@ import org.jdom2.Attribute;
 import org.jdom2.Element;
 
 /**
- *
+ * Pilot character. 
  * @author alavrov
  */
 public class EVECharacter {
     private Integer id;
     private String name;
     
+    /**
+     * Constructor to load character's data from the XML.
+     * @param root root element for character's XML data.
+     * @throws Exception 
+     */
     public EVECharacter(Element root) throws Exception {
         Attribute attr = root.getAttribute("id");
         id = attr.getIntValue();
         name = root.getChildText("name");
     }
     
+    /**
+     * Returns XML Element with character's data inside, to be used in saving.
+     * @return 
+     */
     public Element getXMLElement() {
         Element root = new Element("character");
         root.setAttribute(new Attribute("id", String.valueOf(id)));    
@@ -51,10 +60,18 @@ public class EVECharacter {
         return root;
     }
     
+    /**
+     * Returns character's ID.
+     * @return 
+     */
     public Integer getID() {
         return id;        
     }
     
+    /**
+     * Returns character's name.
+     * @return 
+     */
     public String getName() {
         return name;
     }

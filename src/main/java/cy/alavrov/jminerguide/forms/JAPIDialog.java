@@ -472,6 +472,10 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         dCont.startAPILoader(loader);
     }//GEN-LAST:event_jButtonReloadActionPerformed
 
+    /**
+     * Called when the user is trying to close dialog.
+     * @param evt 
+     */
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         if (!loading) {
             this.setVisible(false);
@@ -534,6 +538,9 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         
     }
 
+    /**
+     * Document listener to check verification key data.
+     */
     private class APIDialogDocumentListener implements DocumentListener {
         @Override
         public void insertUpdate(DocumentEvent e) {
