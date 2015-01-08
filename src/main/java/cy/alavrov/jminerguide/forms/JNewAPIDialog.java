@@ -30,6 +30,7 @@ import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.api.APIKeyLoader;
 import cy.alavrov.jminerguide.data.api.IKeyLoadingResultReceiver;
 import cy.alavrov.jminerguide.data.character.APIKey;
+import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import cy.alavrov.jminerguide.util.IntegerDocumentFilter;
 import java.awt.Desktop;
@@ -48,6 +49,7 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
     private final JAPIDialog parent;
     
     private volatile APIKey tempKey;
+    
     /**
      * Creates new form JNewAPIDialog
      */
@@ -88,7 +90,7 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
         jButtonCancel = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jListCharacters = new javax.swing.JList();
+        jListCharacters = new javax.swing.JList<EVECharacter>();
         jLabel4 = new javax.swing.JLabel();
         jLabelExpires = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
@@ -147,7 +149,7 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
             }
         });
 
-        jLabel3.setText("Charaters");
+        jLabel3.setText("Characters");
 
         jScrollPane1.setViewportView(jListCharacters);
 
@@ -233,6 +235,10 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * "Create Predefined" button. Creates API key with needed access mask via the browser.
+     * @param evt 
+     */
     private void jButtonCreatePredefinedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCreatePredefinedActionPerformed
         if (loading) return;
         
@@ -327,6 +333,9 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
         jButtonOK.setEnabled(false);
     }
     
+    /**
+     * Checks API key data on typing and makes appropriate changes in the interface.
+     */
     public void checkDataOnType() {
         tempKey = null;
         disableOKButton();
@@ -356,7 +365,7 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
             }            
         }
         
-        jLabelExpires.setText("");
+        jLabelExpires.setText("");        
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -371,7 +380,7 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabelExpires;
     private javax.swing.JLabel jLabelStatus;
-    private javax.swing.JList jListCharacters;
+    private javax.swing.JList<EVECharacter> jListCharacters;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTextField jTextFieldKeyID;
@@ -382,19 +391,19 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
     public void loadingDone(boolean success, String result, APIKey processed) {
         jButtonCancel.setEnabled(true);
         jButtonCreatePredefined.setEnabled(true);
+        jButtonLoad.setEnabled(false);
         loading = false;
         
         if (success) {
-            tempKey = processed;
-            jButtonLoad.setEnabled(false);
+            tempKey = processed;;
             jTextFieldKeyID.setEnabled(false);
             jTextFieldVerification.setEnabled(false);
             jButtonOK.setEnabled(true);
             jLabelStatus.setText("Key loaded successfully");
             jLabelExpires.setText(processed.getExpires());
+            jListCharacters.setModel(processed.getListModel());
         } else {
             tempKey = null;
-            jButtonLoad.setEnabled(false);
             jTextFieldKeyID.setEnabled(true);
             jTextFieldVerification.setEnabled(true);
             jButtonOK.setEnabled(false);
@@ -403,6 +412,9 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
         }
     }
 
+    /**
+     * A listener to be called on API key fields changes (both ID and verification)
+     */
     private class NewAPIDocumentListener implements DocumentListener {
 
         @Override

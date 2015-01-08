@@ -58,6 +58,7 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         
         initComponents();
         loadKeys(true);
+        checkDataOnType();
         
         AbstractDocument verDoc = ((AbstractDocument)jTextFieldVerification.getDocument());
         verDoc.addDocumentListener(new APIDialogDocumentListener());
@@ -329,6 +330,8 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
             
             jTextFieldKeyID.setText(String.valueOf(sel.getID()));
             jTextFieldVerification.setText(sel.getVerification());
+            
+            jListCharacters.setModel(sel.getListModel());
         }
     }
     
@@ -538,7 +541,7 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
             jLabelStatus.setText(result);
         }
         
-        
+        jButtonReload.setEnabled(false);
     }
 
     /**

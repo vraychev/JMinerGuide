@@ -26,10 +26,22 @@
 
 package cy.alavrov.jminerguide.data.character;
 
+import cy.alavrov.jminerguide.App;
+import cy.alavrov.jminerguide.log.JMGLogger;
+import cy.alavrov.jminerguide.util.HTTPClient;
+import java.io.IOException;
+import java.io.StringReader;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.LinkedHashMap;
 import java.util.List;
+import javax.swing.DefaultListModel;
+import org.apache.http.client.methods.HttpGet;
 import org.jdom2.Attribute;
+import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -39,13 +51,16 @@ import org.joda.time.format.DateTimeFormatter;
  * @author alavrov
  */
 public class APIKey {
-    private final static DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+    private final static DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy, HH:mm");
+    private final static DateTimeFormatter APIfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
     
     private final Integer id;
     private final String verification;
-    private DateTime expires = null;
+    private volatile DateTime expires = null;
     
-    private LinkedHashMap<Integer, EVECharacter> chars;
+    private volatile LinkedHashMap<Integer, EVECharacter> chars;
+    
+    private final Object blocker = new Object();
     
     /**
      * Constructor for the new API key.
@@ -77,7 +92,7 @@ public class APIKey {
         
         List<Element> charList = root.getChildren("character");
         for (Element charEl : charList) {
-            EVECharacter character = new EVECharacter(charEl);
+            EVECharacter character = new EVECharacter(charEl, id);
             newChars.put(character.getID(), character);
         }
         
@@ -126,13 +141,128 @@ public class APIKey {
      * @return 
      */
     public String getExpires() {
-        if (expires == null) return "Never";
-        
-        return expires.toString(fmt);
+        synchronized(blocker) {
+            if (expires == null) return "Never";        
+            return expires.toString(fmt);
+        }
     }
     
     @Override
     public String toString() {
-        return id+" ("+chars.size()+" pilots)";
+        synchronized(blocker) {
+            return id+" ("+chars.size()+" pilots)";
+        }
+    }
+    
+    /**
+     * Loads API data into this object.
+     * Either completes 100% succesfully or doesn't change
+     * anything at all.
+     * 
+     * @throws APIException thrown when something fails. Exception message
+     * contains human-readable text, that can be passed to end-user
+     */
+    public void loadAPIData() throws APIException {
+        String keyVerifyURL = "https://api.eveonline.com/account/APIKeyInfo.xml.aspx?keyID="
+                +id+"&vCode="+verification;
+        
+        // we're doing this instead of just passing URI into the builder because 
+        // we need to provide an User-Agent header.
+        HTTPClient client;
+        try {
+            client = new HTTPClient();
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            JMGLogger.logSevere("Unable to create http client", e);
+            throw new APIException("Critical error, please see logs.");
+        }
+        
+        HttpGet req = new HttpGet(keyVerifyURL);
+        // CCP is asking us to pass useragent, so we'll do that.
+        req.addHeader("User-Agent", "JMinerGuide "+App.getVersion());
+        String xml = client.getStringFromURL(req);
+        if (xml == null) {
+            // logging will be done in a client already.
+            throw new APIException("Unable to fetch data, please see logs.");        
+        }
+        
+        SAXBuilder builder = new SAXBuilder();
+        try {            
+            Document doc = builder.build(new StringReader(xml));
+            Element rootNode = doc.getRootElement();            
+            Element error = rootNode.getChild("error");
+            if (error != null) {
+                // TODO: better error handling. 
+                int errorid = error.getAttribute("code").getIntValue();
+                String errortext = error.getText();
+                JMGLogger.logWarning("Unable to fetch API key status, error #"
+                        +errorid+": "+errortext+", key: "+id
+                        +", verification: "+verification);
+                throw new APIException("API Error: "+errortext);      
+            }
+            
+            Element result = rootNode.getChild("result");
+            Element key = result.getChild("key");
+            
+            int accessMask = key.getAttribute("accessMask").getIntValue();
+            if ((accessMask & 8) == 0) {
+                JMGLogger.logWarning("Unable to use API key, bad access mask ("
+                        +accessMask+"), "+id+", verification: "+verification);
+                throw new APIException("Unable to use API key, bad access mask.");
+            }
+            
+            String expiresStr = key.getAttributeValue("expires");
+            DateTime expiresNew = APIfmt.parseDateTime(expiresStr);
+            
+            Element rowset = key.getChild("rowset");
+            List<Element> rows = rowset.getChildren("row");
+            LinkedHashMap<Integer, EVECharacter> newChars = new LinkedHashMap<>();
+            
+            for(Element row : rows) {
+                int charid = row.getAttribute("characterID").getIntValue();
+                EVECharacter theChar = chars.get(charid);
+                
+                if (theChar == null) {
+                    String name = row.getAttributeValue("characterName");
+                    theChar = new EVECharacter(charid, name, id);
+                } else {
+                    // we'd better use a clone here, so we will be able to safely
+                    // discard it if something will go wrong.
+                    theChar = theChar.clone();
+                }
+                
+                // character data will be loaded there.
+                
+                newChars.put(theChar.getID(), theChar);
+            }
+            
+            // if we got there, there was no errors on the way.
+            synchronized(blocker) {
+                expires = expiresNew;
+                chars = newChars;
+            }            
+        } catch (JDOMException | IOException | IllegalArgumentException | NullPointerException e ) {
+            JMGLogger.logSevere("Cricical failure during API parsing", e);
+            throw new APIException("Unable to parse data, please see logs.");        
+        } 
+    }
+    
+    
+    
+    /**
+     * Returns a list model for a Swing list. Characters are sorted by insertion order.
+     * @return 
+     */
+    public DefaultListModel<EVECharacter> getListModel() {
+        DefaultListModel<EVECharacter> out = new DefaultListModel<>();
+                
+        if (chars.isEmpty()) return out;
+                
+        synchronized(blocker) {
+            for (EVECharacter theChar : chars.values()) {
+                out.addElement(theChar);
+            }
+        }
+        
+        return out;
     }
 }

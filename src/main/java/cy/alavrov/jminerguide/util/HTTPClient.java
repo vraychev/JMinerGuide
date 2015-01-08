@@ -24,7 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import cy.alavrov.jminerguide.log.JMGLogFormatter;
+package cy.alavrov.jminerguide.util;
+
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,7 +56,7 @@ public class HTTPClient {
         SSLContextBuilder builder = new SSLContextBuilder();
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
 
-        RequestConfig config = RequestConfig.custom()
+        RequestConfig config = RequestConfig.custom()             
             .setSocketTimeout(10000)
             .setConnectTimeout(10000)
             .build();
@@ -85,7 +86,9 @@ public class HTTPClient {
             
             EntityUtils.consume(entity);
             
-            if (rstatus.getStatusCode() != HttpStatus.SC_OK) {
+            // EVE API returns XML not only with OK status.
+            if (rstatus.getStatusCode() != HttpStatus.SC_OK 
+                    && rstatus.getStatusCode() != HttpStatus.SC_FORBIDDEN) {
                 try {
                     response.close();
                     httpclient.close();

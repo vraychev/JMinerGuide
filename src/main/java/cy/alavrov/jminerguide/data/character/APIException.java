@@ -23,44 +23,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-package cy.alavrov.jminerguide.data.api;
-
-import cy.alavrov.jminerguide.data.character.APIException;
-import cy.alavrov.jminerguide.data.character.APIKey;
+package cy.alavrov.jminerguide.data.character;
 
 /**
- * A task to load and check API Key and pilot data from the server.
- * @author alavrov
+ * Something went wrong with API.
+ * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class APIKeyLoader implements Runnable{
-    private final APIKey key;
-    private final IKeyLoadingResultReceiver receiver;
-    
-    public APIKeyLoader(APIKey key, IKeyLoadingResultReceiver receiver) {
-        this.key = key;
-        this.receiver = receiver;
-    }
-
-    @Override
-    public void run() {
-        try {
-            key.loadAPIData();
-        } catch (APIException e) {
-            final String message = e.getMessage();
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    receiver.loadingDone(false, message, key);
-                }
-            });
-            return;
-        }
-        
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                receiver.loadingDone(true, "OK", key);
-            }
-        });
-    }
-    
+public class APIException extends Exception {
+    public APIException(String message) {
+        super(message);
+    }    
 }

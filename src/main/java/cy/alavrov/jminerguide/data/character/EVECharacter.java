@@ -34,18 +34,30 @@ import org.jdom2.Element;
  * @author alavrov
  */
 public class EVECharacter {
+    /**
+     *  Parent API key id - we need to distinct same characters from different APIs.
+     */
+    private Integer parentID;
     private Integer id;
     private String name;
+    
+    public EVECharacter(Integer id, String name, Integer parentID) {
+        this.id = id;
+        this.name = name;
+        this.parentID = parentID;
+    }
     
     /**
      * Constructor to load character's data from the XML.
      * @param root root element for character's XML data.
+     * @param parentID ID of the parent API key.
      * @throws Exception 
      */
-    public EVECharacter(Element root) throws Exception {
+    public EVECharacter(Element root, Integer parentID) throws Exception {
         Attribute attr = root.getAttribute("id");
         id = attr.getIntValue();
         name = root.getChildText("name");
+        this.parentID = parentID;
     }
     
     /**
@@ -73,6 +85,17 @@ public class EVECharacter {
      * @return 
      */
     public String getName() {
+        return name;
+    }
+    
+    @Override
+    public EVECharacter clone() {
+        EVECharacter out = new EVECharacter(id, name, parentID);
+        return out;
+    }
+    
+    @Override
+    public String toString() {
         return name;
     }
 }
