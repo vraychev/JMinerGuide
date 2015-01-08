@@ -166,10 +166,17 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator1)
                     .addComponent(jTextFieldVerification)
+                    .addComponent(jSeparator1)
+                    .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabelExpires))
                             .addComponent(jLabel1)
                             .addComponent(jLabel2)
                             .addGroup(layout.createSequentialGroup()
@@ -181,19 +188,12 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButtonOK)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonCancel)
-                                .addGap(18, 18, 18)
+                                .addComponent(jButtonCancel))
+                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel5)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabelStatus))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel3)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLabel4)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabelExpires)))
-                        .addGap(0, 60, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1))
+                                .addComponent(jLabelStatus)))
+                        .addGap(0, 60, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -211,11 +211,13 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
                 .addComponent(jTextFieldVerification, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButtonLoad)
-                    .addComponent(jButtonOK)
-                    .addComponent(jButtonCancel)
                     .addComponent(jLabel5)
                     .addComponent(jLabelStatus))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonLoad)
+                    .addComponent(jButtonOK)
+                    .addComponent(jButtonCancel))
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -333,6 +335,9 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
         if (id == null || ver == null || id.isEmpty() || ver.isEmpty()) {
             jButtonLoad.setEnabled(false);
             jLabelStatus.setText("Fields can't be empty");
+        } else if (ver.length() != 64) {
+            jButtonLoad.setEnabled(false);
+            jLabelStatus.setText("Verification code must be 64 symbols long ("+ver.length()+" now)");
         } else {
             Integer realid;
             try {

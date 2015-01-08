@@ -372,6 +372,9 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         if (ver == null ||  ver.isEmpty()) {
             jLabelStatus.setText("Verification code can't be empty");
             jButtonReload.setEnabled(false);
+        } else if (ver.length() != 64) {
+            jLabelStatus.setText("Verification code must be 64 symbols long ("+ver.length()+" now)");
+            jButtonReload.setEnabled(false);
         } else {
             jLabelStatus.setText("Ready to verify");     
             jButtonReload.setEnabled(true);                    
