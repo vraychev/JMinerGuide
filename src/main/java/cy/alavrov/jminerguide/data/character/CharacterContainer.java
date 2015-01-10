@@ -32,6 +32,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -45,9 +46,14 @@ import org.jdom2.output.XMLOutputter;
  */
 public class CharacterContainer {
     
+    private final EVECharacter all5 = new All5Character();
+    private final EVECharacter all0 = new All0Character();
+    
     private final String path;
     
     private LinkedHashMap<Integer, APIKey> keys;
+    
+    private final Object blocker = new Object();
     
     /**
      * Constructor.
@@ -109,7 +115,7 @@ public class CharacterContainer {
         Element root = new Element("apikeys");
         Document doc = new Document(root);
         
-        synchronized(keys) {
+        synchronized(blocker) {
             for (APIKey key : keys.values()) {
                 Element elem = key.getXMLElement();
                 root.addContent(elem);
@@ -126,15 +132,15 @@ public class CharacterContainer {
     }
     
     /**
-     * Returns a list model for a Swing list. Keys are sorted by insertion order.
+     * Returns a list model with API keys for a Swing list. Keys are sorted by insertion order.
      * @return 
      */
     public DefaultListModel<APIKey> getListModel() {
         DefaultListModel<APIKey> out = new DefaultListModel<>();
-                
-        if (keys.isEmpty()) return out;
-                
-        synchronized(keys) {
+                                        
+        synchronized(blocker) {
+            if (keys.isEmpty()) return out;
+            
             for (APIKey key : keys.values()) {
                 out.addElement(key);
             }
@@ -151,7 +157,7 @@ public class CharacterContainer {
     public void addAPIKey(APIKey key) {
         if (key == null) return;
         
-        synchronized(keys) {
+        synchronized(blocker) {
             if (keys.containsKey(key.getID())) return;
             
             keys.put(key.getID(), key);
@@ -165,7 +171,7 @@ public class CharacterContainer {
     public void removeAPIKey(APIKey key) {
         if (key == null) return;
         
-        synchronized(keys) {
+        synchronized(blocker) {
             keys.remove(key.getID());
         }
     }
@@ -179,7 +185,7 @@ public class CharacterContainer {
     public APIKey getAPIKey(Integer id) {
         if (id == null) return null;
         
-        synchronized(keys) {
+        synchronized(blocker) {
             return keys.get(id);
         }
     }
@@ -194,10 +200,34 @@ public class CharacterContainer {
     public void updateAPIKey(APIKey key) {
         if (key == null) return;
         
-        synchronized(keys) {
+        synchronized(blocker) {
             if (keys.containsKey(key.getID())) {
                 keys.put(key.getID(), key);
             }
         }
+    }
+    
+    /**
+     * Returns a combo box model with all chars of all keys for a Swing combo box. 
+     * Keys are sorted by insertion order. Always contains at least "All 5" and "All 0"
+     * characters.
+     * @return 
+     */
+    public DefaultComboBoxModel<EVECharacter> getCharModel() {
+        DefaultComboBoxModel<EVECharacter> out = new DefaultComboBoxModel<>();
+                      
+        out.addElement(all5);
+        out.addElement(all0);
+        
+        synchronized(blocker) {            
+            for (APIKey key : keys.values()) {
+                List<EVECharacter> chrs = key.getCharacters();
+                for (EVECharacter chr : chrs) {
+                    out.addElement(chr);
+                }
+            }
+        }
+        
+        return out;
     }
 }

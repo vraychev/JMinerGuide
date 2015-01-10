@@ -34,7 +34,6 @@ import java.io.StringReader;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.http.client.methods.HttpGet;
@@ -49,6 +48,19 @@ import org.jdom2.input.SAXBuilder;
  * @author alavrov
  */
 public class EVECharacter {
+    
+    public final static int SKILL_ASTROGEOLOGY = 3410;
+    public final static int SKILL_DRONE_INTERFACING = 3442;
+    public final static int SKILL_DRONES = 3436;
+    public final static int SKILL_EXHUMERS = 22551;
+    public final static int SKILL_EXPEDITION_FRIGATES = 33856;
+    public final static int SKILL_GAS_CLOUD_HARVESTING = 25544;
+    public final static int SKILL_ICE_HARVESTING = 16281;
+    public final static int SKILL_MINING = 3386;
+    public final static int SKILL_MINING_BARGE = 17940;
+    public final static int SKILL_MINING_DRONE_OPERATION = 3438;
+    public final static int SKILL_MINING_FRIGATE = 32918;
+    
     /**
      * Parent API key - we need its parameters to make API requests 
      * and to distinct same characters from different APIs.
@@ -137,7 +149,12 @@ public class EVECharacter {
         return name;
     }
     
-    public Integer getSkillValue(Integer skillID) {
+    /**
+     * Returns level of a skill with a given id.
+     * @param skillID
+     * @return skill level or 0 for unknown skill.
+     */
+    public Integer getSkillLevel(Integer skillID) {
         synchronized(blocker) {
             Integer ret = skills.get(skillID);
             return (ret == null ? 0 : ret);
@@ -247,5 +264,9 @@ public class EVECharacter {
     @Override
     public String toString() {
         return name;
+    }
+    
+    public boolean isPreset() {
+        return false;
     }
 }

@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import javax.swing.DefaultListModel;
@@ -260,12 +261,26 @@ public class APIKey {
      */
     public DefaultListModel<EVECharacter> getListModel() {
         DefaultListModel<EVECharacter> out = new DefaultListModel<>();
-                
-        if (chars.isEmpty()) return out;
-                
+        
         synchronized(blocker) {
             for (EVECharacter theChar : chars.values()) {
                 out.addElement(theChar);
+            }
+        }
+        
+        return out;
+    }
+    
+    /**
+     * Returns a list of all characters. Characters are sorted by insertion order.
+     * @return 
+     */
+    public List<EVECharacter> getCharacters() {
+        ArrayList<EVECharacter> out = new ArrayList<>();
+        
+        synchronized(blocker) {        
+            for (EVECharacter chr : chars.values()) {
+                out.add(chr);
             }
         }
         
