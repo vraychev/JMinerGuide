@@ -92,7 +92,7 @@ public class APIKey {
         
         List<Element> charList = root.getChildren("character");
         for (Element charEl : charList) {
-            EVECharacter character = new EVECharacter(charEl, id);
+            EVECharacter character = new EVECharacter(charEl, this);
             newChars.put(character.getID(), character);
         }
         
@@ -182,7 +182,7 @@ public class APIKey {
         String xml = client.getStringFromURL(req);
         if (xml == null) {
             // logging will be done in a client already.
-            throw new APIException("Unable to fetch data, please see logs.");        
+            throw new APIException("Unable to fetch API key data, please see logs.");        
         }
         
         SAXBuilder builder = new SAXBuilder();
@@ -211,7 +211,13 @@ public class APIKey {
             }
             
             String expiresStr = key.getAttributeValue("expires");
-            DateTime expiresNew = APIfmt.parseDateTime(expiresStr);
+            DateTime expiresNew;
+                    
+            if (expiresStr.isEmpty()) {
+                expiresNew = null;
+            } else {
+                expiresNew = APIfmt.parseDateTime(expiresStr);
+            }
             
             Element rowset = key.getChild("rowset");
             List<Element> rows = rowset.getChildren("row");
@@ -223,14 +229,14 @@ public class APIKey {
                 
                 if (theChar == null) {
                     String name = row.getAttributeValue("characterName");
-                    theChar = new EVECharacter(charid, name, id);
+                    theChar = new EVECharacter(charid, name, this);
                 } else {
                     // we'd better use a clone here, so we will be able to safely
                     // discard it if something will go wrong.
                     theChar = theChar.clone();
                 }
                 
-                // character data will be loaded there.
+                theChar.loadAPIData();
                 
                 newChars.put(theChar.getID(), theChar);
             }
