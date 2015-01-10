@@ -139,7 +139,8 @@ public class EVECharacter {
     
     public Integer getSkillValue(Integer skillID) {
         synchronized(blocker) {
-            return skills.get(skillID);
+            Integer ret = skills.get(skillID);
+            return (ret == null ? 0 : ret);
         }
     }
     
