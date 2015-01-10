@@ -45,6 +45,10 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
     private volatile boolean loading = false;
     
     private DataContainer dCont;
+    
+    private final MainFrame parent;
+    
+    private boolean updated = false;
 
     /**
      * Creates new form JAPIDialog
@@ -52,9 +56,10 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
      * @param modal
      * @param container 
      */
-    public JAPIDialog(java.awt.Frame parent, boolean modal, DataContainer container) {        
+    public JAPIDialog(MainFrame parent, boolean modal, DataContainer container) {        
         super(parent, modal);
-        dCont = container;                
+        dCont = container;       
+        this.parent = parent;
         
         initComponents();
         loadKeys(true);
@@ -384,14 +389,22 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         }        
     }
     
+    public void updateParent() {
+        if (updated) {
+            parent.loadsMinerList(true);
+        }
+    }
+    
     /**
      * "Close" button. Closes the dialog.
      * @param evt 
      */
     private void jButtonCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCloseActionPerformed
         if (!loading) {
+            updateParent();
+            
             this.setVisible(false);
-            this.dispose();
+            this.dispose();            
         }
     }//GEN-LAST:event_jButtonCloseActionPerformed
 
@@ -402,6 +415,7 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
     private void jButtonAddKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddKeyActionPerformed
         if (loading) return;
         
+        updated = true;
         JNewAPIDialog dlg = new JNewAPIDialog(this, true, dCont);
         dlg.setLocationRelativeTo(this);
         dlg.setVisible(true);
@@ -419,6 +433,8 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
             disableAll(true);
             return;            
         }
+        
+        updated = true;
         
         int pos = jListAPIKey.getSelectedIndex();
         
@@ -467,6 +483,7 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
             jButtonReload.setEnabled(false);
         }
         
+        updated = true;
         loading = true;
         disableAll(false);
         jButtonAddKey.setEnabled(false);
@@ -484,6 +501,8 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
      */
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         if (!loading) {
+            updateParent();
+            
             this.setVisible(false);
             this.dispose();
         }
