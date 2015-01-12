@@ -318,13 +318,43 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jLabel2.setText("Ice Harvesting");
 
+        jComboBoxMiningFrig.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxMiningFrigItemStateChanged(evt);
+            }
+        });
+
+        jComboBoxExpeFrig.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxExpeFrigItemStateChanged(evt);
+            }
+        });
+
+        jComboBoxMiningBarge.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxMiningBargeItemStateChanged(evt);
+            }
+        });
+
         jLabel4.setText("Mining Frigate");
 
         jLabel5.setText("Mining Barge");
 
         jLabel6.setText("Expedition Frigates");
 
+        jComboBoxExhumers.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxExhumersItemStateChanged(evt);
+            }
+        });
+
         jLabel7.setText("Exhumers");
+
+        jComboBoxDroneInt.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxDroneIntItemStateChanged(evt);
+            }
+        });
 
         jLabel8.setText("Drone Interfacing");
 
@@ -691,6 +721,93 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_jComboBoxGasHarItemStateChanged
+
+    private void jComboBoxMiningFrigItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMiningFrigItemStateChanged
+        Integer level = (Integer) jComboBoxMiningFrig.getSelectedItem();
+                                                       
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+        
+        curChar.setSkillLevel(EVECharacter.SKILL_MINING_FRIGATE, level);
+        
+        if (level < 3) {
+            curChar.setSkillLevel(EVECharacter.SKILL_MINING_BARGE, 0);
+            jComboBoxMiningBarge.setSelectedItem(0);           
+        }
+    }//GEN-LAST:event_jComboBoxMiningFrigItemStateChanged
+
+    private void jComboBoxExpeFrigItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxExpeFrigItemStateChanged
+        Integer level = (Integer) jComboBoxExpeFrig.getSelectedItem();
+                                                       
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+        
+        curChar.setSkillLevel(EVECharacter.SKILL_EXPEDITION_FRIGATES, level);
+        // The most independent skill of them all.
+    }//GEN-LAST:event_jComboBoxExpeFrigItemStateChanged
+
+    private void jComboBoxMiningBargeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMiningBargeItemStateChanged
+        Integer level = (Integer) jComboBoxMiningBarge.getSelectedItem();
+                                                       
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+        
+        curChar.setSkillLevel(EVECharacter.SKILL_MINING_BARGE, level);
+        
+        if (level > 0) {
+            if (curChar.getSkillLevel(EVECharacter.SKILL_MINING) < 4) {
+                curChar.setSkillLevel(EVECharacter.SKILL_MINING, 4);
+                jComboBoxMining.setSelectedItem(4);
+            }
+            
+            if (curChar.getSkillLevel(EVECharacter.SKILL_ASTROGEOLOGY) < 3) {
+                curChar.setSkillLevel(EVECharacter.SKILL_ASTROGEOLOGY, 3);
+                jComboBoxAstrogeo.setSelectedItem(3);
+            }
+            
+            if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_FRIGATE) < 3) {
+                curChar.setSkillLevel(EVECharacter.SKILL_MINING_FRIGATE, 3);
+                jComboBoxMiningFrig.setSelectedItem(3);
+            }
+        }
+    }//GEN-LAST:event_jComboBoxMiningBargeItemStateChanged
+
+    private void jComboBoxExhumersItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxExhumersItemStateChanged
+        Integer level = (Integer) jComboBoxExhumers.getSelectedItem();
+                                                       
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+        
+        curChar.setSkillLevel(EVECharacter.SKILL_EXHUMERS, level);
+        
+        if (level > 0) {
+            if (curChar.getSkillLevel(EVECharacter.SKILL_MINING) < 4) {
+                curChar.setSkillLevel(EVECharacter.SKILL_MINING, 4);
+                jComboBoxMining.setSelectedItem(4);
+            }
+            
+            if (curChar.getSkillLevel(EVECharacter.SKILL_ASTROGEOLOGY) < 5) {
+                curChar.setSkillLevel(EVECharacter.SKILL_ASTROGEOLOGY, 5);
+                jComboBoxAstrogeo.setSelectedItem(5);
+            }
+        }
+    }//GEN-LAST:event_jComboBoxExhumersItemStateChanged
+
+    private void jComboBoxDroneIntItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDroneIntItemStateChanged
+        Integer level = (Integer) jComboBoxDroneInt.getSelectedItem();
+                                                       
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+        
+        curChar.setSkillLevel(EVECharacter.SKILL_DRONE_INTERFACING, level);
+        
+        if (level > 0) {
+            if (curChar.getSkillLevel(EVECharacter.SKILL_DRONES) < 5) {
+                curChar.setSkillLevel(EVECharacter.SKILL_DRONES, 5);
+                jComboBoxDrones.setSelectedItem(5);
+            }
+        }
+    }//GEN-LAST:event_jComboBoxDroneIntItemStateChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
