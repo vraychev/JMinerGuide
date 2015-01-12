@@ -28,6 +28,7 @@ package cy.alavrov.jminerguide.forms;
 
 import cy.alavrov.jminerguide.App;
 import cy.alavrov.jminerguide.data.DataContainer;
+import cy.alavrov.jminerguide.data.api.APICharLoader;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.log.JMGLogger;
@@ -65,10 +66,10 @@ public final class MainFrame extends javax.swing.JFrame {
         
         Integer[] skillv = {0, 1, 2, 3, 4, 5};
         
-        loadsMinerList(true);
+        loadMinerList(true);
     }
     
-    public void loadsMinerList(boolean loadSelection) {
+    public void loadMinerList(boolean loadSelection) {
         
         CharacterContainer cCont = dCont.getCharacterContainer();    
         
@@ -287,6 +288,11 @@ public final class MainFrame extends javax.swing.JFrame {
         });
 
         jButtonCharReload.setText("Reload");
+        jButtonCharReload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonCharReloadActionPerformed(evt);
+            }
+        });
 
         jLabel3.setText("Mining");
 
@@ -495,6 +501,33 @@ public final class MainFrame extends javax.swing.JFrame {
     private void jComboBoxMinerItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMinerItemStateChanged
         loadSelectedMiner();
     }//GEN-LAST:event_jComboBoxMinerItemStateChanged
+
+    private void jButtonCharReloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCharReloadActionPerformed
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+                
+        final JWaitDialog dlg = new JWaitDialog(MainFrame.this, true, "Character Data");
+        
+        // As setVisible blocks until the dialog is closed,
+        // we'll have to run it in a different thread.        
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {  
+                synchronized(dlg) {
+                    // hypotetically, we can find ourself in a situation
+                    // where loader stopped worked already, and dialog
+                    // still haven't showed up. practically, we shouldn't,
+                    // but because of THREADS, we'd better be overparanoid here.
+                    if (!dlg.isFinished()) {
+                        dlg.setLocationRelativeTo(MainFrame.this);
+                        dlg.setVisible(true);
+                    }
+                }
+            }
+        });
+        
+        APICharLoader loader = new APICharLoader(curChar, dlg);
+        dCont.startAPILoader(loader);
+    }//GEN-LAST:event_jButtonCharReloadActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

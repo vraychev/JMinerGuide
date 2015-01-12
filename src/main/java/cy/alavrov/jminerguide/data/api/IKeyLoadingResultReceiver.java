@@ -30,7 +30,7 @@ import cy.alavrov.jminerguide.data.character.APIKey;
 
 /**
  * Something to receive result of a API key loading.
- * @author alavrov
+ * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public interface IKeyLoadingResultReceiver {
     /**

@@ -23,34 +23,33 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 package cy.alavrov.jminerguide.data.api;
 
 import cy.alavrov.jminerguide.data.character.APIException;
-import cy.alavrov.jminerguide.data.character.APIKey;
+import cy.alavrov.jminerguide.data.character.EVECharacter;
 
 /**
- * A task to load and check API Key and pilot data from the server.
+ * A task to load a pilot data from the server.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class APIKeyLoader implements Runnable{
-    private final APIKey key;
-    private final IKeyLoadingResultReceiver receiver;
+public class APICharLoader implements Runnable{
+    private final EVECharacter target;
+    private final ICharLoadingResultReceiver receiver;
     
-    public APIKeyLoader(APIKey key, IKeyLoadingResultReceiver receiver) {
-        this.key = key;
+    public APICharLoader(EVECharacter target, ICharLoadingResultReceiver receiver) {
+        this.target = target;
         this.receiver = receiver;
     }
 
     @Override
     public void run() {
         try {
-            key.loadAPIData();
+            target.loadAPIData();
         } catch (APIException e) {
             final String message = e.getMessage();
             java.awt.EventQueue.invokeLater(new Runnable() {
                 public void run() {
-                    receiver.loadingDone(false, message, key);
+                    receiver.loadingDone(false, message, target);
                 }
             });
             return;
@@ -58,8 +57,9 @@ public class APIKeyLoader implements Runnable{
         
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                receiver.loadingDone(true, "OK", key);
+                receiver.loadingDone(true, "OK", target);
             }
         });
     }    
+    
 }

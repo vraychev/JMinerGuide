@@ -391,7 +391,7 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
     
     public void updateParent() {
         if (updated) {
-            parent.loadsMinerList(true);
+            parent.loadMinerList(true);
         }
     }
     

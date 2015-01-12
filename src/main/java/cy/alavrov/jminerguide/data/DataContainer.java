@@ -82,7 +82,7 @@ public class DataContainer {
      * Can be called from any context or thread.
      * @param loader 
      */
-    public void startAPILoader(APIKeyLoader loader) {
+    public void startAPILoader(Runnable loader) {
         pool.submit(loader);
     }
 }
