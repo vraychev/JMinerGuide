@@ -54,4 +54,9 @@ public class All5Character extends EVECharacter{
     public boolean isPreset() {
         return true;
     }
+    
+    @Override
+    public void setSkillLevel(Integer skillID, Integer level) {
+        
+    }
 }

@@ -78,7 +78,8 @@ public class DataContainer {
     }
     
     /**
-     * Submits API Key loader to the executor pool.
+     * Submits API loader to the executor pool.
+     * Or, well, any runnable.
      * Can be called from any context or thread.
      * @param loader 
      */

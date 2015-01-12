@@ -296,7 +296,25 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jLabel3.setText("Mining");
 
+        jComboBoxMining.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxMiningItemStateChanged(evt);
+            }
+        });
+
+        jComboBoxAstrogeo.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxAstrogeoItemStateChanged(evt);
+            }
+        });
+
         jLabel1.setText("Astrogeology");
+
+        jComboBoxIceHar.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxIceHarItemStateChanged(evt);
+            }
+        });
 
         jLabel2.setText("Ice Harvesting");
 
@@ -310,13 +328,31 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jLabel8.setText("Drone Interfacing");
 
+        jComboBoxMiningDrones.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxMiningDronesItemStateChanged(evt);
+            }
+        });
+
         jLabel9.setText("Mining Drone Operation");
+
+        jComboBoxDrones.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxDronesItemStateChanged(evt);
+            }
+        });
 
         jLabel10.setText("Drones");
 
         jLabel11.setText("Slot 10");
 
         jLabel12.setText("Slot 8");
+
+        jComboBoxGasHar.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxGasHarItemStateChanged(evt);
+            }
+        });
 
         jLabel13.setText("Gas Cloud Harvesting");
 
@@ -477,12 +513,14 @@ public final class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JButtonQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JButtonQuitActionPerformed
+        dCont.save();
         JQuitDialog dlg = new JQuitDialog(this, true);
         dlg.setLocationRelativeTo(this);
         dlg.setVisible(true);
     }//GEN-LAST:event_JButtonQuitActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        dCont.save();
         JQuitDialog dlg = new JQuitDialog(this, true);
         dlg.setLocationRelativeTo(this);
         dlg.setVisible(true);
@@ -528,6 +566,131 @@ public final class MainFrame extends javax.swing.JFrame {
         APICharLoader loader = new APICharLoader(curChar, dlg);
         dCont.startAPILoader(loader);
     }//GEN-LAST:event_jButtonCharReloadActionPerformed
+
+    private void jComboBoxMiningItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMiningItemStateChanged
+        Integer level = (Integer) jComboBoxMining.getSelectedItem();
+                                                       
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+        
+        curChar.setSkillLevel(EVECharacter.SKILL_MINING, level);
+        
+        if (level < 4) {
+            curChar.setSkillLevel(EVECharacter.SKILL_ASTROGEOLOGY, 0);
+            jComboBoxAstrogeo.setSelectedItem(0);
+            curChar.setSkillLevel(EVECharacter.SKILL_GAS_CLOUD_HARVESTING, 0);
+            jComboBoxGasHar.setSelectedItem(0);
+            curChar.setSkillLevel(EVECharacter.SKILL_ICE_HARVESTING, 0);
+            jComboBoxIceHar.setSelectedItem(0);
+            curChar.setSkillLevel(EVECharacter.SKILL_MINING_BARGE, 0);
+            jComboBoxMiningBarge.setSelectedItem(0);
+            curChar.setSkillLevel(EVECharacter.SKILL_EXHUMERS, 0);
+            jComboBoxExhumers.setSelectedItem(0);
+        }
+        
+        if (level < 2) {            
+            curChar.setSkillLevel(EVECharacter.SKILL_MINING_DRONE_OPERATION, 0);
+            jComboBoxMiningDrones.setSelectedItem(0);
+        }
+    }//GEN-LAST:event_jComboBoxMiningItemStateChanged
+
+    private void jComboBoxAstrogeoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxAstrogeoItemStateChanged
+        Integer level = (Integer) jComboBoxAstrogeo.getSelectedItem();
+                                                       
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+        
+        curChar.setSkillLevel(EVECharacter.SKILL_ASTROGEOLOGY, level);
+        
+        if (level < 5) {
+            curChar.setSkillLevel(EVECharacter.SKILL_EXHUMERS, 0);
+            jComboBoxExhumers.setSelectedItem(0);            
+        }
+        
+        if (level < 3) {
+            curChar.setSkillLevel(EVECharacter.SKILL_MINING_BARGE, 0);
+            jComboBoxMiningBarge.setSelectedItem(0);           
+        }
+        
+        if (level > 0) {
+            if (curChar.getSkillLevel(EVECharacter.SKILL_MINING) < 4) {
+                curChar.setSkillLevel(EVECharacter.SKILL_MINING, 4);
+                jComboBoxMining.setSelectedItem(4);
+            }
+        }
+    }//GEN-LAST:event_jComboBoxAstrogeoItemStateChanged
+
+    private void jComboBoxIceHarItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxIceHarItemStateChanged
+        Integer level = (Integer) jComboBoxIceHar.getSelectedItem();
+                                                       
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+        
+        curChar.setSkillLevel(EVECharacter.SKILL_ICE_HARVESTING, level);
+        
+        if (level > 0) {
+            if (curChar.getSkillLevel(EVECharacter.SKILL_MINING) < 4) {
+                curChar.setSkillLevel(EVECharacter.SKILL_MINING, 4);
+                jComboBoxMining.setSelectedItem(4);
+            }
+        }
+    }//GEN-LAST:event_jComboBoxIceHarItemStateChanged
+
+    private void jComboBoxDronesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDronesItemStateChanged
+        Integer level = (Integer) jComboBoxDrones.getSelectedItem();
+                                                       
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+        
+        curChar.setSkillLevel(EVECharacter.SKILL_DRONES, level);
+        
+        if (level < 5) {
+            curChar.setSkillLevel(EVECharacter.SKILL_DRONE_INTERFACING, 0);
+            jComboBoxDroneInt.setSelectedItem(0);            
+        }
+        
+        if (level < 1) {
+            curChar.setSkillLevel(EVECharacter.SKILL_MINING_DRONE_OPERATION, 0);
+            jComboBoxMiningDrones.setSelectedItem(0);            
+        }
+    }//GEN-LAST:event_jComboBoxDronesItemStateChanged
+
+    private void jComboBoxMiningDronesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMiningDronesItemStateChanged
+        Integer level = (Integer) jComboBoxMiningDrones.getSelectedItem();
+                                                       
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+        
+        curChar.setSkillLevel(EVECharacter.SKILL_MINING_DRONE_OPERATION, level);
+        
+        if (level > 0) {
+            if (curChar.getSkillLevel(EVECharacter.SKILL_MINING) < 2) {
+                curChar.setSkillLevel(EVECharacter.SKILL_MINING, 2);
+                jComboBoxMining.setSelectedItem(2);
+            }
+            
+            if (curChar.getSkillLevel(EVECharacter.SKILL_DRONES) < 1) {
+                curChar.setSkillLevel(EVECharacter.SKILL_DRONES, 1);
+                jComboBoxDrones.setSelectedItem(1);
+            }
+        }
+    }//GEN-LAST:event_jComboBoxMiningDronesItemStateChanged
+
+    private void jComboBoxGasHarItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxGasHarItemStateChanged
+        Integer level = (Integer) jComboBoxGasHar.getSelectedItem();
+                                                       
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+        
+        curChar.setSkillLevel(EVECharacter.SKILL_GAS_CLOUD_HARVESTING, level);
+        
+        if (level > 0) {
+            if (curChar.getSkillLevel(EVECharacter.SKILL_MINING) < 4) {
+                curChar.setSkillLevel(EVECharacter.SKILL_MINING, 4);
+                jComboBoxMining.setSelectedItem(4);
+            }
+        }
+    }//GEN-LAST:event_jComboBoxGasHarItemStateChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

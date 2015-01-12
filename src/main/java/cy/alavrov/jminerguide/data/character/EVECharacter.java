@@ -162,6 +162,19 @@ public class EVECharacter {
     }
     
     /**
+     * Sets level of a skill. 
+     * Ingores bad level values. Null-safe (does nothing on nulls).
+     * @param skillID ID of a skill
+     * @param level desired level
+     */
+    public void setSkillLevel(Integer skillID, Integer level) {
+        if (skillID == null || level == null || level < 0 || level > 5) return;
+        synchronized(blocker) {
+            skills.put(skillID, level);
+        }
+    }
+    
+    /**
      * Loads API data into this object.
      * Either completes 100% succesfully or doesn't change
      * anything at all.
