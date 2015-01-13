@@ -182,7 +182,7 @@ public class APIKey {
         
         HttpGet req = new HttpGet(keyVerifyURL);
         // CCP is asking us to pass useragent, so we'll do that.
-        req.addHeader("User-Agent", "JMinerGuide "+App.getVersion());
+        req.addHeader("User-Agent", "JMinerGuide "+App.getVersion()+", https://github.com/alavrov/JMinerGuide");
         String xml = client.getStringFromURL(req);
         if (xml == null) {
             // logging will be done in a client already.
