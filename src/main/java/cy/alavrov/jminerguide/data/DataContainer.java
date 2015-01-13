@@ -26,7 +26,6 @@
 
 package cy.alavrov.jminerguide.data;
 
-import cy.alavrov.jminerguide.data.api.APIKeyLoader;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.util.concurrent.ExecutorService;
@@ -37,6 +36,11 @@ import java.util.concurrent.Executors;
  * @author alavrov
  */
 public class DataContainer {
+    public final static String baseURL = "https://api.eveonline.com";
+    //public final static String baseURL = "https://api.testeveonline.com";
+    // TODO: make it configurable.
+    
+    
     /**
      * Path to the directory with configuration files with a leading slash.
      */
@@ -85,5 +89,5 @@ public class DataContainer {
      */
     public void startAPILoader(Runnable loader) {
         pool.submit(loader);
-    }
+    }        
 }

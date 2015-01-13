@@ -31,6 +31,7 @@ import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.api.APICharLoader;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
+import cy.alavrov.jminerguide.data.implant.Implant;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.awt.Image;
 import java.io.InputStream;
@@ -63,8 +64,6 @@ public final class MainFrame extends javax.swing.JFrame {
         this.setTitle("JMinerGuide "+App.getVersion());                
         initComponents();                    
         this.setLocationRelativeTo(null);
-        
-        Integer[] skillv = {0, 1, 2, 3, 4, 5};
         
         loadMinerList(true);
     }
@@ -149,6 +148,10 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxMiningFrig.setSelectedItem(sel
                 .getSkillLevel(EVECharacter.SKILL_MINING_FRIGATE));
         
+        jComboBoxImplant8.setSelectedItem(sel.getSlot8Implant());
+        jComboBoxImplant10.setSelectedItem(sel.getSlot10Implant());
+        
+        jCheckBoxMichi.setSelected(sel.getSlot7Implant() == Implant.MICHI);
     }
     
     /**
@@ -193,8 +196,8 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxDrones = new javax.swing.JComboBox<Integer>(skillLvls);
         jLabel10 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
-        jComboBoxImplant10 = new javax.swing.JComboBox();
-        jComboBoxImplant8 = new javax.swing.JComboBox();
+        jComboBoxImplant10 = new javax.swing.JComboBox<Implant>(Implant.slot10Imps);
+        jComboBoxImplant8 = new javax.swing.JComboBox<Implant>(Implant.slot8Imps);
         jLabel12 = new javax.swing.JLabel();
         jComboBoxGasHar = new javax.swing.JComboBox<Integer>(skillLvls);
         jLabel13 = new javax.swing.JLabel();
@@ -376,6 +379,18 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jLabel11.setText("Slot 10");
 
+        jComboBoxImplant10.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxImplant10ItemStateChanged(evt);
+            }
+        });
+
+        jComboBoxImplant8.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxImplant8ItemStateChanged(evt);
+            }
+        });
+
         jLabel12.setText("Slot 8");
 
         jComboBoxGasHar.addItemListener(new java.awt.event.ItemListener() {
@@ -387,6 +402,11 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel13.setText("Gas Cloud Harvesting");
 
         jCheckBoxMichi.setText("Michi's Excavation Augmentor");
+        jCheckBoxMichi.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxMichiItemStateChanged(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -809,6 +829,30 @@ public final class MainFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jComboBoxDroneIntItemStateChanged
 
+    private void jComboBoxImplant8ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxImplant8ItemStateChanged
+        Implant imp = (Implant) jComboBoxImplant8.getSelectedItem();
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null) return;
+        
+        curChar.setSlot8Implant(imp);
+    }//GEN-LAST:event_jComboBoxImplant8ItemStateChanged
+
+    private void jComboBoxImplant10ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxImplant10ItemStateChanged
+        Implant imp = (Implant) jComboBoxImplant10.getSelectedItem();
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null) return;
+        
+        curChar.setSlot10Implant(imp);
+    }//GEN-LAST:event_jComboBoxImplant10ItemStateChanged
+
+    private void jCheckBoxMichiItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxMichiItemStateChanged
+        boolean checked = jCheckBoxMichi.isSelected();
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar == null) return;
+        
+        curChar.setSlot7Implant(checked? Implant.MICHI : Implant.NOTHING);
+    }//GEN-LAST:event_jCheckBoxMichiItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JButtonManageAPI;
@@ -823,8 +867,8 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox<Integer> jComboBoxExpeFrig;
     private javax.swing.JComboBox<Integer> jComboBoxGasHar;
     private javax.swing.JComboBox<Integer> jComboBoxIceHar;
-    private javax.swing.JComboBox jComboBoxImplant10;
-    private javax.swing.JComboBox jComboBoxImplant8;
+    private javax.swing.JComboBox<Implant> jComboBoxImplant10;
+    private javax.swing.JComboBox<Implant> jComboBoxImplant8;
     private javax.swing.JComboBox<EVECharacter> jComboBoxMiner;
     private javax.swing.JComboBox<Integer> jComboBoxMining;
     private javax.swing.JComboBox<Integer> jComboBoxMiningBarge;

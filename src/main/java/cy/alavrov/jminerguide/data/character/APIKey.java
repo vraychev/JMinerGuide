@@ -27,6 +27,7 @@
 package cy.alavrov.jminerguide.data.character;
 
 import cy.alavrov.jminerguide.App;
+import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import cy.alavrov.jminerguide.util.HTTPClient;
 import java.io.IOException;
@@ -105,19 +106,21 @@ public class APIKey {
      * @return 
      */
     public Element getXMLElement() {
-        Element root = new Element("apikey");
-        root.setAttribute(new Attribute("id", String.valueOf(id)));    
-        root.addContent(new Element("verification").setText(verification));
-        if (expires != null) {
-            root.addContent(new Element("expires").setText(String.valueOf(expires.getMillis())));
+        synchronized(blocker) {
+            Element root = new Element("apikey");
+            root.setAttribute(new Attribute("id", String.valueOf(id)));    
+            root.addContent(new Element("verification").setText(verification));
+            if (expires != null) {
+                root.addContent(new Element("expires").setText(String.valueOf(expires.getMillis())));
+            }
+
+            for (EVECharacter character : chars.values()) {
+                Element elem = character.getXMLElement();
+                root.addContent(elem);
+            }
+
+            return root;
         }
-        
-        for (EVECharacter character : chars.values()) {
-            Element elem = character.getXMLElement();
-            root.addContent(elem);
-        }
-        
-        return root;
     }
     
     /**
@@ -164,7 +167,7 @@ public class APIKey {
      * contains human-readable text, that can be passed to end-user
      */
     public void loadAPIData() throws APIException {
-        String keyVerifyURL = "https://api.eveonline.com/account/APIKeyInfo.xml.aspx?keyID="
+        String keyVerifyURL = DataContainer.baseURL+"/account/APIKeyInfo.xml.aspx?keyID="
                 +id+"&vCode="+verification;
         
         // we're doing this instead of just passing URI into the builder because 
