@@ -378,7 +378,6 @@ public class EVECharacter {
                 for (Element row : rows) {
                     int impid = row.getAttribute("typeID").getIntValue();
                     Implant imp = Implant.implants.get(impid);
-                    System.err.println(imp);
                     if (imp != null) {
                         switch(imp.getSlot()) {
                             case 7:
@@ -426,6 +425,9 @@ public class EVECharacter {
      */
     public EVECharacter clone(APIKey parentKey) {
         EVECharacter out = new EVECharacter(id, name, parentKey);
+        out.slot7 = slot7;
+        out.slot8 = slot8;
+        out.slot10 = slot10;
         return out;
     }
     
@@ -434,7 +436,80 @@ public class EVECharacter {
         return name;
     }
     
+    /**
+     * Returns true for preset characters (ALL 5, ALL 0), false otherwise.
+     * @return 
+     */
     public boolean isPreset() {
         return false;
+    }
+    
+    /**
+     * Returns bonus to mining amount, granted by skills and implants.
+     * @return 
+     */
+    public float getMiningAmountModificator () {
+        float out = 1;
+        
+        int miningLevel = this.getSkillLevel(SKILL_MINING);
+        if (miningLevel > 0) {
+            out = out * (1f + 0.05f*miningLevel);
+        }
+        
+        int astroLevel = this.getSkillLevel(SKILL_ASTROGEOLOGY);
+        if (astroLevel > 0) {
+            out = out * (1f + 0.05f*astroLevel);
+        }
+        
+        int slot7Yield = this.slot7.getMiningYieldBonus();
+        if (slot7Yield > 0) {
+            out = out * (1f + 0.01f*slot7Yield);
+        }
+        
+        // slot 8 contains gas implants only, so we may pass it.
+        
+        int slot10Yield = this.slot10.getMiningYieldBonus();
+        if (slot10Yield > 0) {
+            out = out * (1f + 0.01f*slot10Yield);
+        }
+        
+        return out;
+    }
+    
+    /**
+     * Returns bonus to ice harvester cycle time, granted by skills and implants.
+     * @return 
+     */
+    public float getIceCycleBonus() {
+        float out = 1;
+        
+        int iceLevel = this.getSkillLevel(SKILL_ICE_HARVESTING);
+        if (iceLevel > 0) {
+            out = out * (1f - 0.05f*iceLevel);
+        }
+        
+        // ice bonus only in slot 10
+        int slot10CycleBonus = this.slot10.getIceCycleBonus();
+        if (slot10CycleBonus > 0) {
+            out = out * (1f - 0.01f*slot10CycleBonus);
+        }
+        
+        return out;
+    }
+    
+    /**
+     * Returns bonus to gas harvester cycle time, granted by implants.
+     * @return 
+     */
+    public float getGasCycleBonus() {
+        float out = 1;
+        
+        // gas bonus only in slot 8
+        int slot8CycleBonus = this.slot8.getIceCycleBonus();
+        if (slot8CycleBonus > 0) {
+            out = out * (1f - 0.01f*slot8CycleBonus);
+        }
+        
+        return out;
     }
 }
