@@ -50,7 +50,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Account's API key
- * @author alavrov
+ * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class APIKey {
     private final static DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM yyyy, HH:mm");

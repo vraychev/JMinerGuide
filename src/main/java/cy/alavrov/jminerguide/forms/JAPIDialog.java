@@ -39,7 +39,7 @@ import javax.swing.text.AbstractDocument;
 
 /**
  * API management dialog.
- * @author alavrov
+ * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoadingResultReceiver{
     private volatile boolean loading = false;

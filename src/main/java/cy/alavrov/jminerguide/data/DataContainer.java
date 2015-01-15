@@ -33,7 +33,7 @@ import java.util.concurrent.Executors;
 
 /**
  * A container for all the data.
- * @author alavrov
+ * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class DataContainer {
     public final static String baseURL = "https://api.eveonline.com";

@@ -30,62 +30,89 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Different levels of a mining crystal.
+ * Mining dronesMap.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public enum MiningCrystalLevel {
-    NOTHING("- nothing -", 0, 1, 1),
-    T1("T1", 1, 1.625f, 1.25f),
-    T2("T2", 2,  1.75f, 1.375f);
+public enum MiningDrone {
+    NOTHING ("- nothing -", 0, 0, 0, 0),
+    CIVILIAN ("Civilian Mining Drone", 
+            1202, 13, 60, 5),
+    MININGI ("Mining Drone I", 
+            10246, 20, 60, 5),
+    MININGII ("Mining Drone II", 
+            10250, 33, 60, 5),
+    HARVESTER ("Harvester Mining Drone", 
+            3218, 40, 60, 10);
     
-    private final String name;
+    private final String name; 
     private final int id;
-    private final float oreMod;
-    private final float mercMod;
+    private final int baseYield;
+    private final int cycleDuration;
+    private final int bandwidth;
     
-    public final static Map<Integer, MiningCrystalLevel> crystalLevelsMap;
+    
+    public final static Map<Integer, MiningDrone> dronesMap;
     
     static {
-        Map<Integer, MiningCrystalLevel> levels = new HashMap<>();
-        for (MiningCrystalLevel lvl : MiningCrystalLevel.values()) {
-            levels.put(lvl.id, lvl);
+        Map<Integer, MiningDrone> drons = new HashMap<>();
+        for (MiningDrone drone : MiningDrone.values()) {
+            drons.put(drone.id, drone);
         }
-        crystalLevelsMap = Collections.unmodifiableMap(levels);
+        dronesMap = Collections.unmodifiableMap(drons);
     }
-    
-    MiningCrystalLevel(String name, int id,  float oreMod, float mercMod) {
+
+    private MiningDrone(String name, int id, int baseYield, int cycleDuration, int bandwidth) {
         this.name = name;
         this.id = id;
-        this.oreMod = oreMod;
-        this.mercMod = mercMod;
+        this.baseYield = baseYield;
+        this.cycleDuration = cycleDuration;
+        this.bandwidth = bandwidth;
     }
     
+    /**
+     * Returns drone's name - just as you see it ingame.
+     * @return 
+     */
     public String getName() {
         return name;
     }
     
+    /**
+     * Returns internal drone's id.
+     * @return 
+     */
     public int getID() {
         return id;
     }
     
+    
     /**
-     * Yield modificator for common ores
+     * Returns base yield of a drone, in cubic metres.
      * @return 
      */
-    public float getOreMod() {
-        return oreMod;
+    public int getBaseYield() {
+        return baseYield;
     }
     
     /**
-     * Yield modificator for mercoxit
+     * Returns base cycle duration of a drone, in seconds.
      * @return 
      */
-    public float getMercMod() {
-        return mercMod;
+    public int getCycleDuration() {
+        return cycleDuration;
+    }
+    
+    /**
+     * Returns bandwidth, needed to use a drone.
+     * @return 
+     */
+    public int getBandwidth() {
+        return bandwidth;
     }
     
     @Override
     public String toString() {
         return name;
     }
+    
 }

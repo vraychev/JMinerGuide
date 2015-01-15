@@ -102,14 +102,14 @@ public enum Turret {
         ICEHARVESTERI, ICEHARVESTERII, OREICEHARVESTER
     };
     
-    public final static Map<Integer, Turret> turrets;
+    public final static Map<Integer, Turret> turretsMap;
     
     static {
         Map<Integer, Turret> turrs = new HashMap<>();
         for (Turret turr : Turret.values()) {
             turrs.put(turr.id, turr);
         }
-        turrets = Collections.unmodifiableMap(turrs);
+        turretsMap = Collections.unmodifiableMap(turrs);
     }
     
     private final String name; 

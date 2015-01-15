@@ -47,7 +47,7 @@ import org.jdom2.input.SAXBuilder;
 
 /**
  * Pilot character. 
- * @author alavrov
+ * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class EVECharacter {
     

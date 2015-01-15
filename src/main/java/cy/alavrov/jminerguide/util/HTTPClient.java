@@ -47,7 +47,7 @@ import org.apache.http.util.EntityUtils;
 
 /**
  * HTTP Client utility class. Basically, a wrapper for the Apache http client.
- * @author alavrov
+ * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class HTTPClient {
     private CloseableHttpClient httpclient;

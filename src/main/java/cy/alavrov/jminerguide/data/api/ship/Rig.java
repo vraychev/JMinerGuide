@@ -25,63 +25,84 @@
  */
 package cy.alavrov.jminerguide.data.api.ship;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Different levels of a mining crystal.
+ * Mining rigs.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public enum MiningCrystalLevel {
-    NOTHING("- nothing -", 0, 1, 1),
-    T1("T1", 1, 1.625f, 1.25f),
-    T2("T2", 2,  1.75f, 1.375f);
+public enum Rig {
+    NOTHING ("- nothing -", 0, 0, 0, 0, 0),
+    DRONEAUGMENTORI ("Drone Mining Augmentor I", 
+            32043, 10, 0, 0, 100),
+    DRONEAUGMENTORII ("Drone Mining Augmentor II", 
+            32047, 15, 0, 0, 150),
+    ICEACCELERATOR ("Medium Ice Harvester Accelerator I", 
+            32819, 0, 0, 12, 250),
+    MERCOXITOPTIMIZATOR ("Medium Mercoxit Mining Crystal Optimization I", 
+            32817, 0, 16, 0, 250);
     
-    private final String name;
+    private final String name; 
     private final int id;
-    private final float oreMod;
-    private final float mercMod;
-    
-    public final static Map<Integer, MiningCrystalLevel> crystalLevelsMap;
-    
-    static {
-        Map<Integer, MiningCrystalLevel> levels = new HashMap<>();
-        for (MiningCrystalLevel lvl : MiningCrystalLevel.values()) {
-            levels.put(lvl.id, lvl);
-        }
-        crystalLevelsMap = Collections.unmodifiableMap(levels);
-    }
-    
-    MiningCrystalLevel(String name, int id,  float oreMod, float mercMod) {
+    private final int droneYieldBonus;
+    private final int mercoxitYieldBonus;
+    private final int iceCycleBonus;
+    private final int calibrationCost;
+
+    private Rig(String name, int id, int droneYieldBonus, int mercoxitYieldBonus, 
+            int iceCycleBonus, int calibrationCost) {
         this.name = name;
         this.id = id;
-        this.oreMod = oreMod;
-        this.mercMod = mercMod;
+        this.droneYieldBonus = droneYieldBonus;
+        this.mercoxitYieldBonus = mercoxitYieldBonus;
+        this.iceCycleBonus = iceCycleBonus;
+        this.calibrationCost = calibrationCost;
     }
     
+     /**
+     * Returns rig name - just as you see it ingame.
+     * @return 
+     */
     public String getName() {
         return name;
     }
     
+    /**
+     * Returns internal rig's id.
+     * @return 
+     */
     public int getID() {
         return id;
     }
     
     /**
-     * Yield modificator for common ores
+     * Returns drone yield bonus, in percents.
      * @return 
      */
-    public float getOreMod() {
-        return oreMod;
+    public int getDroneYieldBonus() {
+        return droneYieldBonus;
     }
     
     /**
-     * Yield modificator for mercoxit
+     * Returns mercoxit yield bonus, in percents.
      * @return 
      */
-    public float getMercMod() {
-        return mercMod;
+    public int getMercoxitYieldBonus() {
+        return mercoxitYieldBonus;
+    }
+    
+    /**
+     * Returns ice cycle bonus, in percents.
+     * @return 
+     */
+    public int getIceCycleBonus() {
+        return iceCycleBonus;
+    }
+    
+    /**
+     * Returns rig calibration cost.
+     * @return 
+     */
+    public int getCalibrationCost() {
+        return calibrationCost;
     }
     
     @Override
@@ -89,3 +110,4 @@ public enum MiningCrystalLevel {
         return name;
     }
 }
+

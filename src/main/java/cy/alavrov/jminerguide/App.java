@@ -37,7 +37,7 @@ import java.util.Properties;
 
 /**
  * A place for the main[] code.
- * @author alavrov
+ * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public final class App {
     
