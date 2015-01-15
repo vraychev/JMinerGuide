@@ -25,6 +25,10 @@
  */
 package cy.alavrov.jminerguide.data.api.ship;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Mining rigs.
  * @author Andrey Lavrov <lavroff@gmail.com>
@@ -46,6 +50,16 @@ public enum Rig {
     private final int mercoxitYieldBonus;
     private final int iceCycleBonus;
     private final int calibrationCost;
+    
+    public final static Map<Integer, Rig> rigsMap;
+    
+    static {
+        Map<Integer, Rig> rigs = new HashMap<>();
+        for (Rig rig : Rig.values()) {
+            rigs.put(rig.id, rig);
+        }
+        rigsMap = Collections.unmodifiableMap(rigs);
+    }
 
     private Rig(String name, int id, int droneYieldBonus, int mercoxitYieldBonus, 
             int iceCycleBonus, int calibrationCost) {
