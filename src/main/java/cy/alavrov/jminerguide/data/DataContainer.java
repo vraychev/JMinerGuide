@@ -26,10 +26,22 @@
 
 package cy.alavrov.jminerguide.data;
 
+import cy.alavrov.jminerguide.data.api.ship.Ship;
+import cy.alavrov.jminerguide.data.character.APIKey;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.log.JMGLogger;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
 /**
  * A container for all the data.
@@ -38,7 +50,7 @@ import java.util.concurrent.Executors;
 public class DataContainer {
     public final static String baseURL = "https://api.eveonline.com";
     //public final static String baseURL = "https://api.testeveonline.com";
-    // TODO: make it configurable.
+    // TODO: make it configurable per-key.
     
     
     /**
@@ -47,6 +59,8 @@ public class DataContainer {
     private final String path;
     
     private CharacterContainer chars;
+    
+    private volatile Ship ship;
     
     private ExecutorService pool;
     
@@ -71,6 +85,34 @@ public class DataContainer {
     public void load() {
         JMGLogger.logWarning("Loading data...");
         chars.load();
+        loadShip();
+    }
+    
+    /**
+     * Loads saved ship.
+     * Later, when we'll have multiple ship loadouts with saving/loading, we'll
+     * move this out of root container.
+     */
+    private void loadShip() {
+        JMGLogger.logWarning("Loading ship...");
+        File src = new File(path+File.separator+"ships.dat");
+        if (!src.exists()) {            
+            JMGLogger.logWarning("No ship file found, creating new.");
+            ship = new Ship();
+            saveShip();
+            return;
+        }
+        
+        SAXBuilder builder = new SAXBuilder();
+        try {
+            Document doc = builder.build(src);
+            Element rootNode = doc.getRootElement();
+            Element shipNode = rootNode.getChild("ship");
+            ship = new Ship(shipNode);
+        } catch (Exception e) {
+            JMGLogger.logSevere("Unable to load a ship", e);
+            ship = new Ship();
+        }
     }
     
     /**
@@ -79,6 +121,37 @@ public class DataContainer {
     public void save() {
         JMGLogger.logWarning("Saving data...");
         chars.save();
+        saveShip();
+    }
+    
+    private void saveShip() {
+        File src = new File(path+File.separator+"ships.dat");
+        if (!src.exists()) {
+            try {
+                if (!src.createNewFile()) {
+                    JMGLogger.logSevere("Unable to create a configuration file for ships");
+                    return;
+                }
+            } catch (IOException e) {
+                JMGLogger.logSevere("Unable to create a configuration file for ships", e);
+                return;
+            }
+        }
+        
+        
+        Element root = new Element("ships");
+        Document doc = new Document(root);
+        
+        Element elem = ship.getXMLElement();
+        root.addContent(elem);
+        
+        XMLOutputter xmlOutput = new XMLOutputter();
+        xmlOutput.setFormat(Format.getPrettyFormat());
+        try (FileWriter fw = new FileWriter(path+File.separator+"ships.dat")){
+            xmlOutput.output(doc, fw);
+        } catch (Exception e) {
+            JMGLogger.logSevere("Unable to save "+path+File.separator+"ships.dat", e);
+        }
     }
     
     /**

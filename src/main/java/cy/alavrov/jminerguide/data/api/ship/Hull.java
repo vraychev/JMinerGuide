@@ -193,7 +193,7 @@ public enum Hull {
      * Returns true, if strip miners and ice harvesters can be fitted on.
      * @return 
      */
-    public boolean isStripMiners() {
+    public boolean isUsingStripMiners() {
         return stripMiners;
     }    
     

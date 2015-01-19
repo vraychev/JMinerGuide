@@ -103,6 +103,7 @@ public class EVECharacter {
      * @throws Exception 
      */
     public EVECharacter(Element root, APIKey parentKey) throws Exception {
+        // if we can't get ID and name, it's a failure.
         Attribute attr = root.getAttribute("id");
         id = attr.getIntValue();
         name = root.getChildText("name");
@@ -111,19 +112,23 @@ public class EVECharacter {
         this.slot8 = Implant.NOTHING;
         this.slot10 = Implant.NOTHING;
         
+        // skills and implants on the other hand are expendable.
+        // they can be pulled via API anyway.
         HashMap<Integer, Integer> newSkills = new HashMap<>();
         Element skillSet = root.getChild("skills");
-        if (skillSet != null) {
+        try {
             List<Element> skillList = skillSet.getChildren("skill");
             for(Element skill : skillList) {
                 int skid = skill.getAttribute("id").getIntValue();
                 int skvalue = skill.getAttribute("value").getIntValue();
                 newSkills.put(skid, skvalue);
             }
+        } catch (NullPointerException e) {
+            JMGLogger.logWarning("Unable to load character skills for "+name, e);
         }
         
         Element implantSet = root.getChild("implants");
-        if (implantSet != null) {
+        try {
             List<Element> impList = implantSet.getChildren("implant");
             for(Element impElem : impList) {
                 int impid = impElem.getAttribute("id").getIntValue();
@@ -142,6 +147,8 @@ public class EVECharacter {
                     }
                 }                
             }
+        } catch (NullPointerException e) {
+            JMGLogger.logWarning("Unable to load character implants for "+name, e);
         }
         
         this.skills = newSkills;
