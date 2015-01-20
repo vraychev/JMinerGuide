@@ -27,14 +27,11 @@
 package cy.alavrov.jminerguide.data;
 
 import cy.alavrov.jminerguide.data.api.ship.Ship;
-import cy.alavrov.jminerguide.data.character.APIKey;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.jdom2.Document;
@@ -124,6 +121,11 @@ public class DataContainer {
         saveShip();
     }
     
+    /**
+     * Saves a ship.
+     * Later, when we'll have multiple ship loadouts with saving/loading, we'll
+     * move this out of root container.
+     */
     private void saveShip() {
         File src = new File(path+File.separator+"ships.dat");
         if (!src.exists()) {
@@ -163,4 +165,8 @@ public class DataContainer {
     public void startAPILoader(Runnable loader) {
         pool.submit(loader);
     }        
+    
+    public Ship getShip() {
+        return ship;
+    }
 }

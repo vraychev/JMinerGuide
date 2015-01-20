@@ -29,6 +29,8 @@ package cy.alavrov.jminerguide.forms;
 import cy.alavrov.jminerguide.App;
 import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.api.APICharLoader;
+import cy.alavrov.jminerguide.data.api.ship.Hull;
+import cy.alavrov.jminerguide.data.api.ship.Ship;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.implant.Implant;
@@ -66,6 +68,7 @@ public final class MainFrame extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
         
         loadMinerList(true);
+        loadShip();
     }
     
     public void loadMinerList(boolean loadSelection) {
@@ -154,6 +157,29 @@ public final class MainFrame extends javax.swing.JFrame {
         jCheckBoxMichi.setSelected(sel.getSlot7Implant() == Implant.MICHI);
     }
     
+    public void loadShip() {
+        Ship ship = dCont.getShip();
+        Hull hull = ship.getHull();
+        
+        jComboBoxHull.setSelectedItem(hull);
+        
+        jComboBoxTurrets.setModel(getIntegerModel(hull.getMaxTurrets()));
+        jComboBoxTurrets.setSelectedItem(ship.getTurretCount());
+    }
+    
+    public DefaultComboBoxModel<Integer> getIntegerModel(int upto) {
+        DefaultComboBoxModel<Integer> out = new DefaultComboBoxModel<>();
+        
+        if (upto > 0) {
+            for (int i = upto; i > 0; i-- ) {
+                out.addElement(i);
+            }
+        }
+        out.addElement(0);
+        
+        return out;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -173,8 +199,8 @@ public final class MainFrame extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         JLabel14 = new javax.swing.JLabel();
-        jComboBoxHull = new javax.swing.JComboBox();
-        jComboBoxTurrets = new javax.swing.JComboBox();
+        jComboBoxHull = new javax.swing.JComboBox<Hull>(Hull.values());
+        jComboBoxTurrets = new javax.swing.JComboBox<Integer>();
         jLabel14 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
         jComboBoxTurretType = new javax.swing.JComboBox();
@@ -319,6 +345,18 @@ public final class MainFrame extends javax.swing.JFrame {
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Mining Ship"));
 
         JLabel14.setText("Hull");
+
+        jComboBoxHull.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxHullItemStateChanged(evt);
+            }
+        });
+
+        jComboBoxTurrets.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxTurretsItemStateChanged(evt);
+            }
+        });
 
         jLabel14.setText("Turrets");
 
@@ -1193,6 +1231,23 @@ public final class MainFrame extends javax.swing.JFrame {
         curChar.setSlot7Implant(checked? Implant.MICHI : Implant.NOTHING);
     }//GEN-LAST:event_jCheckBoxMichiItemStateChanged
 
+    private void jComboBoxHullItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxHullItemStateChanged
+        Ship ship = dCont.getShip();
+        Hull newHull = (Hull) jComboBoxHull.getSelectedItem();
+        ship.setHull(newHull);
+        
+        newHull = ship.getHull();
+        
+        jComboBoxTurrets.setModel(getIntegerModel(newHull.getMaxTurrets()));
+        jComboBoxTurrets.setSelectedItem(ship.getTurretCount());
+    }//GEN-LAST:event_jComboBoxHullItemStateChanged
+
+    private void jComboBoxTurretsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxTurretsItemStateChanged
+        Ship ship = dCont.getShip();
+        Integer turretcnt = (Integer) jComboBoxTurrets.getSelectedItem();
+        ship.setTurrentCount(turretcnt);        
+    }//GEN-LAST:event_jComboBoxTurretsItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JButtonManageAPI;
@@ -1213,7 +1268,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox<Integer> jComboBoxGasHar;
     private javax.swing.JComboBox jComboBoxHUpgradeType;
     private javax.swing.JComboBox jComboBoxHUpgrades;
-    private javax.swing.JComboBox jComboBoxHull;
+    private javax.swing.JComboBox<Hull> jComboBoxHull;
     private javax.swing.JComboBox<Integer> jComboBoxIceHar;
     private javax.swing.JComboBox<Implant> jComboBoxImplant10;
     private javax.swing.JComboBox<Implant> jComboBoxImplant8;
@@ -1226,7 +1281,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox jComboBoxRig2;
     private javax.swing.JComboBox jComboBoxRig3;
     private javax.swing.JComboBox jComboBoxTurretType;
-    private javax.swing.JComboBox jComboBoxTurrets;
+    private javax.swing.JComboBox<Integer> jComboBoxTurrets;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

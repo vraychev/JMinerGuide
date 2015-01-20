@@ -122,7 +122,7 @@ public enum Hull {
         public BonusCalculationResult calculate(EVECharacter pilot) {
             return new BonusCalculationResult(1, 1, 1, 1, 1);
         }
-    });
+    });        
     
     public final static Map<Integer, Hull> hullsMap;
     
@@ -261,6 +261,11 @@ public enum Hull {
      */
     public int getRoleIceCycleBonus() {
         return roleIceCycleBonus;
+    }
+    
+    @Override
+    public String toString() {
+        return name;
     }
     
     private interface BonusCalculator {

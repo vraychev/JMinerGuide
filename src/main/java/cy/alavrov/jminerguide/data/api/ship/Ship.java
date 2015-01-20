@@ -60,7 +60,7 @@ public class Ship {
         turretCount = hull.getMaxTurrets();
         miningCrystal = MiningCrystalLevel.NOTHING;
         harvestUpgrade = HarvestUpgrade.MININGI;
-        harvestUpgradeCount = hull.getMaxUpgrades();
+        harvestUpgradeCount = hull.getMaxUpgrades();        
     }
     
     public Ship(Element root) throws Exception {
