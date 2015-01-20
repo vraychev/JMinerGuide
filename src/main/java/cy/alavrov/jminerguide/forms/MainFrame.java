@@ -30,7 +30,9 @@ import cy.alavrov.jminerguide.App;
 import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.api.APICharLoader;
 import cy.alavrov.jminerguide.data.api.ship.Hull;
+import cy.alavrov.jminerguide.data.api.ship.MiningCrystalLevel;
 import cy.alavrov.jminerguide.data.api.ship.Ship;
+import cy.alavrov.jminerguide.data.api.ship.Turret;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.implant.Implant;
@@ -51,6 +53,12 @@ public final class MainFrame extends javax.swing.JFrame {
     private DataContainer dCont;
     
     /**
+     * JComboBox and JCheckBox fire off event on setSelectedItem, and we don't need
+     * to react to it when we are the source of the change.
+     */
+    private volatile boolean processEvents = false;
+    
+    /**
      * Creates new form MainFrame
      * @param container data container with data (captain Obvious to the rescue!)
      */
@@ -69,6 +77,8 @@ public final class MainFrame extends javax.swing.JFrame {
         
         loadMinerList(true);
         loadShip();
+        
+        processEvents = true;
     }
     
     public void loadMinerList(boolean loadSelection) {
@@ -165,6 +175,11 @@ public final class MainFrame extends javax.swing.JFrame {
         
         jComboBoxTurrets.setModel(getIntegerModel(hull.getMaxTurrets()));
         jComboBoxTurrets.setSelectedItem(ship.getTurretCount());
+        
+        updateTurretComboBox(hull);
+        jComboBoxTurretType.setSelectedItem(ship.getTurret());
+        updateCrystalComboBox(ship.getTurret());
+        jComboBoxCrystal.setSelectedItem(ship.getTurretCrystal());
     }
     
     public DefaultComboBoxModel<Integer> getIntegerModel(int upto) {
@@ -178,6 +193,35 @@ public final class MainFrame extends javax.swing.JFrame {
         out.addElement(0);
         
         return out;
+    }
+    
+    /**
+     * Updates turret combo box with appropriate turrets based on a hull's 
+     * support for strip miners.
+     * @param hull 
+     */
+    public void updateTurretComboBox(Hull hull) {
+        Turret[] turrets;
+        if (hull.isUsingStripMiners()) {
+            turrets = Turret.bigTurrets;
+        } else {
+            turrets = Turret.smallTurrets;
+        }
+        
+        jComboBoxTurretType.setModel(new DefaultComboBoxModel<>(turrets));
+    }
+    
+    /**
+     * Updates turret crystal combo box enabled state according to turret's
+     * ability to use crystals.
+     * @param turret 
+     */
+    public void updateCrystalComboBox(Turret turret) {
+        if (turret.isUsingCrystals()) {
+            if (!jComboBoxCrystal.isEnabled()) jComboBoxCrystal.setEnabled(true);
+        } else {
+            if (jComboBoxCrystal.isEnabled()) jComboBoxCrystal.setEnabled(false);
+        }
     }
     
     /**
@@ -203,8 +247,8 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxTurrets = new javax.swing.JComboBox<Integer>();
         jLabel14 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
-        jComboBoxTurretType = new javax.swing.JComboBox();
-        jComboBoxCrystal = new javax.swing.JComboBox();
+        jComboBoxTurretType = new javax.swing.JComboBox<Turret>();
+        jComboBoxCrystal = new javax.swing.JComboBox<MiningCrystalLevel>(MiningCrystalLevel.values());
         jLabel16 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
         jComboBoxHUpgradeType = new javax.swing.JComboBox();
@@ -361,6 +405,18 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel14.setText("Turrets");
 
         jLabel15.setText("Turret Type");
+
+        jComboBoxTurretType.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxTurretTypeItemStateChanged(evt);
+            }
+        });
+
+        jComboBoxCrystal.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxCrystalItemStateChanged(evt);
+            }
+        });
 
         jLabel16.setText("Crystal");
 
@@ -965,7 +1021,13 @@ public final class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_JButtonManageAPIActionPerformed
 
     private void jComboBoxMinerItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMinerItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         loadSelectedMiner();
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxMinerItemStateChanged
 
     private void jButtonCharReloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCharReloadActionPerformed
@@ -996,6 +1058,10 @@ public final class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonCharReloadActionPerformed
 
     private void jComboBoxMiningItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMiningItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Integer level = (Integer) jComboBoxMining.getSelectedItem();
                                                        
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
@@ -1020,9 +1086,15 @@ public final class MainFrame extends javax.swing.JFrame {
             curChar.setSkillLevel(EVECharacter.SKILL_MINING_DRONE_OPERATION, 0);
             jComboBoxMiningDrones.setSelectedItem(0);
         }
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxMiningItemStateChanged
 
     private void jComboBoxAstrogeoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxAstrogeoItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Integer level = (Integer) jComboBoxAstrogeo.getSelectedItem();
                                                        
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
@@ -1046,9 +1118,15 @@ public final class MainFrame extends javax.swing.JFrame {
                 jComboBoxMining.setSelectedItem(4);
             }
         }
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxAstrogeoItemStateChanged
 
     private void jComboBoxIceHarItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxIceHarItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Integer level = (Integer) jComboBoxIceHar.getSelectedItem();
                                                        
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
@@ -1062,9 +1140,15 @@ public final class MainFrame extends javax.swing.JFrame {
                 jComboBoxMining.setSelectedItem(4);
             }
         }
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxIceHarItemStateChanged
 
     private void jComboBoxDronesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDronesItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Integer level = (Integer) jComboBoxDrones.getSelectedItem();
                                                        
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
@@ -1081,9 +1165,15 @@ public final class MainFrame extends javax.swing.JFrame {
             curChar.setSkillLevel(EVECharacter.SKILL_MINING_DRONE_OPERATION, 0);
             jComboBoxMiningDrones.setSelectedItem(0);            
         }
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxDronesItemStateChanged
 
     private void jComboBoxMiningDronesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMiningDronesItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Integer level = (Integer) jComboBoxMiningDrones.getSelectedItem();
                                                        
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
@@ -1102,9 +1192,15 @@ public final class MainFrame extends javax.swing.JFrame {
                 jComboBoxDrones.setSelectedItem(1);
             }
         }
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxMiningDronesItemStateChanged
 
     private void jComboBoxGasHarItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxGasHarItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Integer level = (Integer) jComboBoxGasHar.getSelectedItem();
                                                        
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
@@ -1118,9 +1214,15 @@ public final class MainFrame extends javax.swing.JFrame {
                 jComboBoxMining.setSelectedItem(4);
             }
         }
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxGasHarItemStateChanged
 
     private void jComboBoxMiningFrigItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMiningFrigItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Integer level = (Integer) jComboBoxMiningFrig.getSelectedItem();
                                                        
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
@@ -1132,9 +1234,15 @@ public final class MainFrame extends javax.swing.JFrame {
             curChar.setSkillLevel(EVECharacter.SKILL_MINING_BARGE, 0);
             jComboBoxMiningBarge.setSelectedItem(0);           
         }
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxMiningFrigItemStateChanged
 
     private void jComboBoxExpeFrigItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxExpeFrigItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Integer level = (Integer) jComboBoxExpeFrig.getSelectedItem();
                                                        
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
@@ -1142,9 +1250,15 @@ public final class MainFrame extends javax.swing.JFrame {
         
         curChar.setSkillLevel(EVECharacter.SKILL_EXPEDITION_FRIGATES, level);
         // The most independent skill of them all.
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxExpeFrigItemStateChanged
 
     private void jComboBoxMiningBargeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMiningBargeItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Integer level = (Integer) jComboBoxMiningBarge.getSelectedItem();
                                                        
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
@@ -1168,9 +1282,15 @@ public final class MainFrame extends javax.swing.JFrame {
                 jComboBoxMiningFrig.setSelectedItem(3);
             }
         }
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxMiningBargeItemStateChanged
 
     private void jComboBoxExhumersItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxExhumersItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Integer level = (Integer) jComboBoxExhumers.getSelectedItem();
                                                        
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
@@ -1189,9 +1309,15 @@ public final class MainFrame extends javax.swing.JFrame {
                 jComboBoxAstrogeo.setSelectedItem(5);
             }
         }
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxExhumersItemStateChanged
 
     private void jComboBoxDroneIntItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDroneIntItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Integer level = (Integer) jComboBoxDroneInt.getSelectedItem();
                                                        
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
@@ -1205,33 +1331,57 @@ public final class MainFrame extends javax.swing.JFrame {
                 jComboBoxDrones.setSelectedItem(5);
             }
         }
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxDroneIntItemStateChanged
 
     private void jComboBoxImplant8ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxImplant8ItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Implant imp = (Implant) jComboBoxImplant8.getSelectedItem();
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null) return;
         
         curChar.setSlot8Implant(imp);
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxImplant8ItemStateChanged
 
     private void jComboBoxImplant10ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxImplant10ItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Implant imp = (Implant) jComboBoxImplant10.getSelectedItem();
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null) return;
         
         curChar.setSlot10Implant(imp);
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxImplant10ItemStateChanged
 
     private void jCheckBoxMichiItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxMichiItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;     
+        
         boolean checked = jCheckBoxMichi.isSelected();
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null) return;
         
         curChar.setSlot7Implant(checked? Implant.MICHI : Implant.NOTHING);
+        
+        processEvents = true;
     }//GEN-LAST:event_jCheckBoxMichiItemStateChanged
 
     private void jComboBoxHullItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxHullItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Ship ship = dCont.getShip();
         Hull newHull = (Hull) jComboBoxHull.getSelectedItem();
         ship.setHull(newHull);
@@ -1240,13 +1390,57 @@ public final class MainFrame extends javax.swing.JFrame {
         
         jComboBoxTurrets.setModel(getIntegerModel(newHull.getMaxTurrets()));
         jComboBoxTurrets.setSelectedItem(ship.getTurretCount());
+        
+        Turret curTurret = jComboBoxTurretType.getItemAt(0);
+        if (curTurret.getTurretType().isStripMiner() 
+                != ship.getTurret().getTurretType().isStripMiner()) {
+            updateTurretComboBox(newHull);                        
+        }
+        
+        jComboBoxTurretType.setSelectedItem(ship.getTurret());
+        updateCrystalComboBox(ship.getTurret());
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxHullItemStateChanged
 
     private void jComboBoxTurretsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxTurretsItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
         Ship ship = dCont.getShip();
         Integer turretcnt = (Integer) jComboBoxTurrets.getSelectedItem();
-        ship.setTurrentCount(turretcnt);        
+        ship.setTurrentCount(turretcnt);   
+        
+        processEvents = true;
     }//GEN-LAST:event_jComboBoxTurretsItemStateChanged
+
+    private void jComboBoxTurretTypeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxTurretTypeItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
+        Ship ship = dCont.getShip();
+        Turret newTurret = (Turret) (jComboBoxTurretType.getSelectedItem());        
+        ship.setTurret(newTurret);  
+        newTurret = ship.getTurret();
+        
+        updateCrystalComboBox(newTurret);
+        
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxTurretTypeItemStateChanged
+
+    private void jComboBoxCrystalItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxCrystalItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
+        Ship ship = dCont.getShip();
+        MiningCrystalLevel crystal = (MiningCrystalLevel) jComboBoxCrystal.getSelectedItem();
+        ship.setTurretCrystal(crystal);
+        
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxCrystalItemStateChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1260,7 +1454,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JComboBox jComboBox2;
     private javax.swing.JComboBox<Integer> jComboBoxAstrogeo;
-    private javax.swing.JComboBox jComboBoxCrystal;
+    private javax.swing.JComboBox<MiningCrystalLevel> jComboBoxCrystal;
     private javax.swing.JComboBox<Integer> jComboBoxDroneInt;
     private javax.swing.JComboBox<Integer> jComboBoxDrones;
     private javax.swing.JComboBox<Integer> jComboBoxExhumers;
@@ -1280,7 +1474,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox jComboBoxRig1;
     private javax.swing.JComboBox jComboBoxRig2;
     private javax.swing.JComboBox jComboBoxRig3;
-    private javax.swing.JComboBox jComboBoxTurretType;
+    private javax.swing.JComboBox<Turret> jComboBoxTurretType;
     private javax.swing.JComboBox<Integer> jComboBoxTurrets;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

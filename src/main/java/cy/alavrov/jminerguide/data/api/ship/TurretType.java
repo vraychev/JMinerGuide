@@ -30,8 +30,23 @@ package cy.alavrov.jminerguide.data.api.ship;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public enum TurretType {
-    MININGLASER,
-    GASHARVESTER,
-    STRIPMINER,
-    ICEHARVESTER
+    MININGLASER (false),
+    GASHARVESTER (false),
+    STRIPMINER (true),
+    ICEHARVESTER (true);
+    
+    private final boolean isStripMiner;
+
+    private TurretType(boolean isStripMiner) {
+        this.isStripMiner = isStripMiner;
+    }
+    
+    /**
+     * Returns true if this type is of strip miners class.
+     * Strip miners and ice harvesters are.
+     * @return 
+     */
+    public boolean isStripMiner() {
+        return isStripMiner;
+    }
 }
