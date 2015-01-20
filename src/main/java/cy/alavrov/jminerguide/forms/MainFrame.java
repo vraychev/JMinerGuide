@@ -29,6 +29,7 @@ package cy.alavrov.jminerguide.forms;
 import cy.alavrov.jminerguide.App;
 import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.api.APICharLoader;
+import cy.alavrov.jminerguide.data.api.ship.HarvestUpgrade;
 import cy.alavrov.jminerguide.data.api.ship.Hull;
 import cy.alavrov.jminerguide.data.api.ship.MiningCrystalLevel;
 import cy.alavrov.jminerguide.data.api.ship.Ship;
@@ -180,6 +181,10 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxTurretType.setSelectedItem(ship.getTurret());
         updateCrystalComboBox(ship.getTurret());
         jComboBoxCrystal.setSelectedItem(ship.getTurretCrystal());
+        
+        jComboBoxHUpgradeType.setSelectedItem(ship.getHarvestUpgrade());
+        jComboBoxHUpgrades.setModel(getIntegerModel(hull.getMaxUpgrades()));
+        jComboBoxHUpgrades.setSelectedItem(ship.getHarvestUpgradeCount());
     }
     
     public DefaultComboBoxModel<Integer> getIntegerModel(int upto) {
@@ -251,8 +256,8 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxCrystal = new javax.swing.JComboBox<MiningCrystalLevel>(MiningCrystalLevel.values());
         jLabel16 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
-        jComboBoxHUpgradeType = new javax.swing.JComboBox();
-        jComboBoxHUpgrades = new javax.swing.JComboBox();
+        jComboBoxHUpgradeType = new javax.swing.JComboBox<HarvestUpgrade>(HarvestUpgrade.values());
+        jComboBoxHUpgrades = new javax.swing.JComboBox<Integer>();
         jLabel18 = new javax.swing.JLabel();
         jLabel24 = new javax.swing.JLabel();
         jComboBox1 = new javax.swing.JComboBox();
@@ -421,6 +426,18 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel16.setText("Crystal");
 
         jLabel17.setText("Harvesting Upgrade Type");
+
+        jComboBoxHUpgradeType.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxHUpgradeTypeItemStateChanged(evt);
+            }
+        });
+
+        jComboBoxHUpgrades.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxHUpgradesItemStateChanged(evt);
+            }
+        });
 
         jLabel18.setText("Upgrades");
 
@@ -1399,6 +1416,11 @@ public final class MainFrame extends javax.swing.JFrame {
         
         jComboBoxTurretType.setSelectedItem(ship.getTurret());
         updateCrystalComboBox(ship.getTurret());
+              
+        jComboBoxHUpgradeType.setSelectedItem(ship.getHarvestUpgrade());
+        
+        jComboBoxHUpgrades.setModel(getIntegerModel(newHull.getMaxUpgrades()));
+        jComboBoxHUpgrades.setSelectedItem(ship.getHarvestUpgradeCount());
         
         processEvents = true;
     }//GEN-LAST:event_jComboBoxHullItemStateChanged
@@ -1442,6 +1464,30 @@ public final class MainFrame extends javax.swing.JFrame {
         processEvents = true;
     }//GEN-LAST:event_jComboBoxCrystalItemStateChanged
 
+    private void jComboBoxHUpgradeTypeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxHUpgradeTypeItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
+        Ship ship = dCont.getShip();
+        HarvestUpgrade upgrade = (HarvestUpgrade) jComboBoxHUpgradeType.getSelectedItem();
+        ship.setHarvestUpgrade(upgrade);
+        
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxHUpgradeTypeItemStateChanged
+
+    private void jComboBoxHUpgradesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxHUpgradesItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
+        Ship ship = dCont.getShip();
+        Integer upcnt = (Integer) jComboBoxHUpgrades.getSelectedItem();
+        ship.setHarvestUpgradeCount(upcnt);   
+        
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxHUpgradesItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JButtonManageAPI;
@@ -1460,8 +1506,8 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox<Integer> jComboBoxExhumers;
     private javax.swing.JComboBox<Integer> jComboBoxExpeFrig;
     private javax.swing.JComboBox<Integer> jComboBoxGasHar;
-    private javax.swing.JComboBox jComboBoxHUpgradeType;
-    private javax.swing.JComboBox jComboBoxHUpgrades;
+    private javax.swing.JComboBox<HarvestUpgrade> jComboBoxHUpgradeType;
+    private javax.swing.JComboBox<Integer> jComboBoxHUpgrades;
     private javax.swing.JComboBox<Hull> jComboBoxHull;
     private javax.swing.JComboBox<Integer> jComboBoxIceHar;
     private javax.swing.JComboBox<Implant> jComboBoxImplant10;

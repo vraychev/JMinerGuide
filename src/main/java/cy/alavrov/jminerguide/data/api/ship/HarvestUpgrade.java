@@ -63,11 +63,6 @@ public enum HarvestUpgrade {
     private final int oreYieldBonus;
     private final int iceCycleBonus;
 
-    public final static HarvestUpgrade[] upgradesArr = {
-        NOTHING, 
-        MININGI, ELARA, MININGII, AOEDE, CARPO,
-        ICEI, FRIGORIS, ICEII, ANGUIS, INGENII
-    };
     public final static Map<Integer, HarvestUpgrade> upgradesMap;
     
     static {
@@ -118,4 +113,8 @@ public enum HarvestUpgrade {
         return iceCycleBonus;
     }
     
+    @Override
+    public String toString() {
+        return name;
+    }    
 }
