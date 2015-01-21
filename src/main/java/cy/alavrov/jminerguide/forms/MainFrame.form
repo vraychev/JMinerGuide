@@ -39,11 +39,11 @@
           <Component id="jToolBar1" pref="0" max="32767" attributes="0"/>
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Group type="102" attributes="0">
                       <Component id="jPanel3" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="jPanel6" min="-2" max="-2" attributes="0"/>
+                      <Component id="jPanel6" max="32767" attributes="0"/>
                   </Group>
                   <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
               </Group>
@@ -983,8 +983,8 @@
                   <Group type="103" groupAlignment="1" attributes="0">
                       <Group type="102" alignment="1" attributes="0">
                           <Component id="jLabel27" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="23" max="32767" attributes="0"/>
-                          <Component id="jLabelCargoFill" min="-2" pref="64" max="-2" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
+                          <Component id="jLabelOreHoldFill" min="-2" pref="64" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="1" attributes="0">
                           <Component id="jLabel20" min="-2" max="-2" attributes="0"/>
@@ -1019,7 +1019,7 @@
                       <Group type="102" alignment="1" attributes="0">
                           <Component id="jLabel25" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
-                          <Component id="jLabelCargo" min="-2" pref="64" max="-2" attributes="0"/>
+                          <Component id="jLabelOreHold" min="-2" pref="64" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="1" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
@@ -1083,12 +1083,12 @@
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel25" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="jLabelCargo" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabelOreHold" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel27" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="jLabelCargoFill" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabelOreHoldFill" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -1104,6 +1104,7 @@
         <Component class="javax.swing.JLabel" name="jLabelYield">
           <Properties>
             <Property name="text" type="java.lang.String" value="0"/>
+            <Property name="toolTipText" type="java.lang.String" value="0 per turret"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel28">
@@ -1114,6 +1115,7 @@
         <Component class="javax.swing.JLabel" name="jLabelDroneYield">
           <Properties>
             <Property name="text" type="java.lang.String" value="0"/>
+            <Property name="toolTipText" type="java.lang.String" value="0 per drone"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel20">
@@ -1138,10 +1140,10 @@
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel25">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Cargo, m3:"/>
+            <Property name="text" type="java.lang.String" value="Ore Hold, m3:"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="jLabelCargo">
+        <Component class="javax.swing.JLabel" name="jLabelOreHold">
           <Properties>
             <Property name="text" type="java.lang.String" value="0"/>
           </Properties>
@@ -1188,10 +1190,10 @@
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel27">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Cargo Fills In, min:"/>
+            <Property name="text" type="java.lang.String" value="Hold Fills In, min:"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="jLabelCargoFill">
+        <Component class="javax.swing.JLabel" name="jLabelOreHoldFill">
           <Properties>
             <Property name="text" type="java.lang.String" value="0"/>
           </Properties>

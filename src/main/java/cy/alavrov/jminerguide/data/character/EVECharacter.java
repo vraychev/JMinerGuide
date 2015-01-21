@@ -452,10 +452,10 @@ public class EVECharacter {
     }
     
     /**
-     * Returns bonus to mining amount, granted by skills and implants.
+     * Returns bonus to mining yield, granted by skills and implants.
      * @return 
      */
-    public float getMiningAmountModificator () {
+    public float getMiningYieldModificator () {
         float out = 1;
         
         int miningLevel = this.getSkillLevel(SKILL_MINING);
@@ -512,7 +512,7 @@ public class EVECharacter {
         float out = 1;
         
         // gas bonus only in slot 8
-        int slot8CycleBonus = this.slot8.getIceCycleBonus();
+        int slot8CycleBonus = this.slot8.getGasCycleBonus();
         if (slot8CycleBonus > 0) {
             out = out * (1f - 0.01f*slot8CycleBonus);
         }

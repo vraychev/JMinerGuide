@@ -27,6 +27,7 @@
 package cy.alavrov.jminerguide.forms;
 
 import cy.alavrov.jminerguide.App;
+import cy.alavrov.jminerguide.data.CalculatedStats;
 import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.api.APICharLoader;
 import cy.alavrov.jminerguide.data.api.ship.HarvestUpgrade;
@@ -40,14 +41,26 @@ import cy.alavrov.jminerguide.data.implant.Implant;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.awt.Image;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import javax.imageio.ImageIO;
 import javax.swing.DefaultComboBoxModel;
+import org.joda.time.Seconds;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 
 /**
  *
  * @author alavrov
  */
 public final class MainFrame extends javax.swing.JFrame {
+    
+    private final static DecimalFormat fmt = new DecimalFormat("0.##");
+    private final static PeriodFormatter minutesAndSeconds = new PeriodFormatterBuilder()
+     .printZeroAlways()
+     .appendMinutes()
+     .appendSeparator(":")
+     .appendSeconds()
+     .toFormatter();
     
     private Integer[] skillLvls = {0, 1, 2, 3, 4, 5};
     
@@ -79,7 +92,36 @@ public final class MainFrame extends javax.swing.JFrame {
         loadMinerList(true);
         loadShip();
         
+        recalculateStats();
         processEvents = true;
+    }
+    
+    public void recalculateStats() {
+        System.err.println("Recalculated!");
+        EVECharacter sel = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        Ship ship = dCont.getShip();
+        CalculatedStats newStats = new CalculatedStats(sel, ship, false);
+        
+        jLabelYield.setText(String.valueOf(fmt.format(newStats.getCombinedTurretYield())));
+        jLabelYield.setToolTipText(fmt.format(newStats.getTurretYield())+" per turret");
+        
+        jLabelCycle.setText(fmt.format(newStats.getTurretCycle()));
+        jLabelM3S.setText(fmt.format(newStats.getTurretM3S()));
+        
+        jLabelDroneYield.setText(String.valueOf(fmt.format(newStats.getCombinedDroneYield())));
+        jLabelDroneYield.setToolTipText(fmt.format(newStats.getDroneYield())+" per drone");
+        
+        jLabelDroneCycle.setText(fmt.format(newStats.getDroneCycle()));
+        jLabelDroneM3S.setText(fmt.format(newStats.getDroneM3S()));
+        
+        jLabelM3H.setText(fmt.format(newStats.getTotalM3H()));
+        jLabelOptimal.setText(fmt.format(newStats.getOptimal()));
+        
+        jLabelOreHold.setText(fmt.format(newStats.getOreHold()));
+        jLabelOreHoldFill.setText(minutesAndSeconds.print(
+                Seconds.seconds(newStats.getSecsForOreHold())
+                        .toStandardDuration().toPeriod()
+        ));
     }
     
     public void loadMinerList(boolean loadSelection) {
@@ -313,7 +355,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel23 = new javax.swing.JLabel();
         jLabelM3H = new javax.swing.JLabel();
         jLabel25 = new javax.swing.JLabel();
-        jLabelCargo = new javax.swing.JLabel();
+        jLabelOreHold = new javax.swing.JLabel();
         jLabel21 = new javax.swing.JLabel();
         jLabelCycle = new javax.swing.JLabel();
         jLabel29 = new javax.swing.JLabel();
@@ -323,7 +365,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel22 = new javax.swing.JLabel();
         jLabelOptimal = new javax.swing.JLabel();
         jLabel27 = new javax.swing.JLabel();
-        jLabelCargoFill = new javax.swing.JLabel();
+        jLabelOreHoldFill = new javax.swing.JLabel();
 
         jTextField1.setText("jTextField1");
 
@@ -840,10 +882,12 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel19.setText("Yield, m3:");
 
         jLabelYield.setText("0");
+        jLabelYield.setToolTipText("0 per turret");
 
         jLabel28.setText("Drone Yield, m3:");
 
         jLabelDroneYield.setText("0");
+        jLabelDroneYield.setToolTipText("0 per drone");
 
         jLabel20.setText("m3/s");
 
@@ -853,9 +897,9 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jLabelM3H.setText("0");
 
-        jLabel25.setText("Cargo, m3:");
+        jLabel25.setText("Ore Hold, m3:");
 
-        jLabelCargo.setText("0");
+        jLabelOreHold.setText("0");
 
         jLabel21.setText("Cycle, sec:");
 
@@ -873,9 +917,9 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jLabelOptimal.setText("0");
 
-        jLabel27.setText("Cargo Fills In, min:");
+        jLabel27.setText("Hold Fills In, min:");
 
-        jLabelCargoFill.setText("0");
+        jLabelOreHoldFill.setText("0");
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
@@ -886,8 +930,8 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel6Layout.createSequentialGroup()
                         .addComponent(jLabel27)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 23, Short.MAX_VALUE)
-                        .addComponent(jLabelCargoFill, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabelOreHoldFill, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel6Layout.createSequentialGroup()
                         .addComponent(jLabel20)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -915,7 +959,7 @@ public final class MainFrame extends javax.swing.JFrame {
                     .addGroup(jPanel6Layout.createSequentialGroup()
                         .addComponent(jLabel25)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabelCargo, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jLabelOreHold, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel6Layout.createSequentialGroup()
                         .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel21)
@@ -964,11 +1008,11 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel25)
-                    .addComponent(jLabelCargo))
+                    .addComponent(jLabelOreHold))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel27)
-                    .addComponent(jLabelCargoFill))
+                    .addComponent(jLabelOreHoldFill))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -979,11 +1023,11 @@ public final class MainFrame extends javax.swing.JFrame {
             .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -1043,6 +1087,7 @@ public final class MainFrame extends javax.swing.JFrame {
         processEvents = false;
         
         loadSelectedMiner();
+        recalculateStats();
         
         processEvents = true;
     }//GEN-LAST:event_jComboBoxMinerItemStateChanged
@@ -1104,6 +1149,7 @@ public final class MainFrame extends javax.swing.JFrame {
             jComboBoxMiningDrones.setSelectedItem(0);
         }
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxMiningItemStateChanged
 
@@ -1136,6 +1182,7 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxAstrogeoItemStateChanged
 
@@ -1158,6 +1205,7 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxIceHarItemStateChanged
 
@@ -1183,6 +1231,7 @@ public final class MainFrame extends javax.swing.JFrame {
             jComboBoxMiningDrones.setSelectedItem(0);            
         }
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxDronesItemStateChanged
 
@@ -1210,6 +1259,7 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxMiningDronesItemStateChanged
 
@@ -1232,6 +1282,7 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxGasHarItemStateChanged
 
@@ -1252,6 +1303,7 @@ public final class MainFrame extends javax.swing.JFrame {
             jComboBoxMiningBarge.setSelectedItem(0);           
         }
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxMiningFrigItemStateChanged
 
@@ -1268,6 +1320,7 @@ public final class MainFrame extends javax.swing.JFrame {
         curChar.setSkillLevel(EVECharacter.SKILL_EXPEDITION_FRIGATES, level);
         // The most independent skill of them all.
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxExpeFrigItemStateChanged
 
@@ -1300,6 +1353,7 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxMiningBargeItemStateChanged
 
@@ -1327,6 +1381,7 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxExhumersItemStateChanged
 
@@ -1349,6 +1404,7 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxDroneIntItemStateChanged
 
@@ -1363,6 +1419,7 @@ public final class MainFrame extends javax.swing.JFrame {
         
         curChar.setSlot8Implant(imp);
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxImplant8ItemStateChanged
 
@@ -1377,6 +1434,7 @@ public final class MainFrame extends javax.swing.JFrame {
         
         curChar.setSlot10Implant(imp);
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxImplant10ItemStateChanged
 
@@ -1391,6 +1449,7 @@ public final class MainFrame extends javax.swing.JFrame {
         
         curChar.setSlot7Implant(checked? Implant.MICHI : Implant.NOTHING);
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jCheckBoxMichiItemStateChanged
 
@@ -1422,6 +1481,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxHUpgrades.setModel(getIntegerModel(newHull.getMaxUpgrades()));
         jComboBoxHUpgrades.setSelectedItem(ship.getHarvestUpgradeCount());
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxHullItemStateChanged
 
@@ -1434,6 +1494,7 @@ public final class MainFrame extends javax.swing.JFrame {
         Integer turretcnt = (Integer) jComboBoxTurrets.getSelectedItem();
         ship.setTurrentCount(turretcnt);   
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxTurretsItemStateChanged
 
@@ -1449,6 +1510,7 @@ public final class MainFrame extends javax.swing.JFrame {
         
         updateCrystalComboBox(newTurret);
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxTurretTypeItemStateChanged
 
@@ -1461,6 +1523,7 @@ public final class MainFrame extends javax.swing.JFrame {
         MiningCrystalLevel crystal = (MiningCrystalLevel) jComboBoxCrystal.getSelectedItem();
         ship.setTurretCrystal(crystal);
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxCrystalItemStateChanged
 
@@ -1473,6 +1536,7 @@ public final class MainFrame extends javax.swing.JFrame {
         HarvestUpgrade upgrade = (HarvestUpgrade) jComboBoxHUpgradeType.getSelectedItem();
         ship.setHarvestUpgrade(upgrade);
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxHUpgradeTypeItemStateChanged
 
@@ -1485,6 +1549,7 @@ public final class MainFrame extends javax.swing.JFrame {
         Integer upcnt = (Integer) jComboBoxHUpgrades.getSelectedItem();
         ship.setHarvestUpgradeCount(upcnt);   
         
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxHUpgradesItemStateChanged
 
@@ -1556,8 +1621,6 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JLabel jLabelCargo;
-    private javax.swing.JLabel jLabelCargoFill;
     private javax.swing.JLabel jLabelCycle;
     private javax.swing.JLabel jLabelDroneCycle;
     private javax.swing.JLabel jLabelDroneM3S;
@@ -1565,6 +1628,8 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabelM3H;
     private javax.swing.JLabel jLabelM3S;
     private javax.swing.JLabel jLabelOptimal;
+    private javax.swing.JLabel jLabelOreHold;
+    private javax.swing.JLabel jLabelOreHoldFill;
     private javax.swing.JLabel jLabelYield;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
