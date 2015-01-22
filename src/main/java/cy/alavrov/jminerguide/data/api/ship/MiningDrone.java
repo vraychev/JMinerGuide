@@ -34,7 +34,9 @@ import java.util.Map;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public enum MiningDrone {
-    NOTHING ("- nothing -", 0, 0, 0, 0),
+    // NOTHING have bandwidth of 5 no avoid division to null.
+    
+    NOTHING ("- nothing -", 0, 0, 0, 5),
     CIVILIAN ("Civilian Mining Drone", 
             1202, 13, 60, 5),
     MININGI ("Mining Drone I", 

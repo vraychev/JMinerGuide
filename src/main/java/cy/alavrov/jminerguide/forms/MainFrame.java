@@ -33,6 +33,7 @@ import cy.alavrov.jminerguide.data.api.APICharLoader;
 import cy.alavrov.jminerguide.data.api.ship.HarvestUpgrade;
 import cy.alavrov.jminerguide.data.api.ship.Hull;
 import cy.alavrov.jminerguide.data.api.ship.MiningCrystalLevel;
+import cy.alavrov.jminerguide.data.api.ship.MiningDrone;
 import cy.alavrov.jminerguide.data.api.ship.OreType;
 import cy.alavrov.jminerguide.data.api.ship.Ship;
 import cy.alavrov.jminerguide.data.api.ship.Turret;
@@ -237,6 +238,21 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxHUpgradeType.setSelectedItem(ship.getHarvestUpgrade());
         jComboBoxHUpgrades.setModel(getIntegerModel(hull.getMaxUpgrades()));
         jComboBoxHUpgrades.setSelectedItem(ship.getHarvestUpgradeCount());
+        if (ship.getHarvestUpgrade() == HarvestUpgrade.NOTHING) {
+            if (jComboBoxHUpgrades.isEnabled()) jComboBoxHUpgrades.setEnabled(false);
+        } else {
+            if (!jComboBoxHUpgrades.isEnabled()) jComboBoxHUpgrades.setEnabled(true);
+        }
+        
+        jComboBoxDroneType.setSelectedItem(ship.getDrone());
+        jComboBoxDroneCount.setModel(getIntegerModel(ship.getMaxDrones()));
+        jComboBoxDroneCount.setSelectedItem(ship.getDroneCount());
+        
+        if (ship.getDrone() == MiningDrone.NOTHING) {
+            if (jComboBoxDroneCount.isEnabled()) jComboBoxDroneCount.setEnabled(false);
+        } else {
+            if (!jComboBoxDroneCount.isEnabled()) jComboBoxDroneCount.setEnabled(true);
+        }
     }
     
     public DefaultComboBoxModel<Integer> getIntegerModel(int upto) {
@@ -312,9 +328,9 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxHUpgrades = new javax.swing.JComboBox<Integer>();
         jLabel18 = new javax.swing.JLabel();
         jLabel24 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox();
+        jComboBoxDroneType = new javax.swing.JComboBox<MiningDrone>(MiningDrone.values());
         jLabel26 = new javax.swing.JLabel();
-        jComboBox2 = new javax.swing.JComboBox();
+        jComboBoxDroneCount = new javax.swing.JComboBox<Integer>();
         jLabel31 = new javax.swing.JLabel();
         jComboBoxRig1 = new javax.swing.JComboBox();
         jLabel33 = new javax.swing.JLabel();
@@ -496,7 +512,19 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jLabel24.setText("Drone Type");
 
+        jComboBoxDroneType.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxDroneTypeItemStateChanged(evt);
+            }
+        });
+
         jLabel26.setText("Drones");
+
+        jComboBoxDroneCount.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxDroneCountItemStateChanged(evt);
+            }
+        });
 
         jLabel31.setText("Rig 1");
 
@@ -531,7 +559,7 @@ public final class MainFrame extends javax.swing.JFrame {
                             .addComponent(jLabel15)
                             .addComponent(jLabel17)
                             .addComponent(jLabel24)
-                            .addComponent(jComboBox1, 0, 264, Short.MAX_VALUE)
+                            .addComponent(jComboBoxDroneType, 0, 264, Short.MAX_VALUE)
                             .addComponent(jComboBoxHUpgradeType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jComboBoxTurretType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -539,7 +567,7 @@ public final class MainFrame extends javax.swing.JFrame {
                                 .addGap(25, 25, 25)
                                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jComboBoxHUpgrades, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jComboBox2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jComboBoxDroneCount, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addGroup(jPanel4Layout.createSequentialGroup()
                                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addComponent(jLabel26)
@@ -606,8 +634,8 @@ public final class MainFrame extends javax.swing.JFrame {
                     .addComponent(jLabel26))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jComboBoxDroneType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jComboBoxDroneCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel31)
@@ -1505,6 +1533,14 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxHUpgrades.setModel(getIntegerModel(newHull.getMaxUpgrades()));
         jComboBoxHUpgrades.setSelectedItem(ship.getHarvestUpgradeCount());
         
+        jComboBoxDroneCount.setModel(getIntegerModel(ship.getMaxDrones()));
+        jComboBoxDroneCount.setSelectedItem(ship.getDroneCount());
+        if (ship.getDrone() == MiningDrone.NOTHING) {
+            if (jComboBoxDroneCount.isEnabled()) jComboBoxDroneCount.setEnabled(false);
+        } else {
+            if (!jComboBoxDroneCount.isEnabled()) jComboBoxDroneCount.setEnabled(true);
+        }
+        
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxHullItemStateChanged
@@ -1560,6 +1596,12 @@ public final class MainFrame extends javax.swing.JFrame {
         HarvestUpgrade upgrade = (HarvestUpgrade) jComboBoxHUpgradeType.getSelectedItem();
         ship.setHarvestUpgrade(upgrade);
         
+        if (ship.getHarvestUpgrade() == HarvestUpgrade.NOTHING) {
+            if (jComboBoxHUpgrades.isEnabled()) jComboBoxHUpgrades.setEnabled(false);
+        } else {
+            if (!jComboBoxHUpgrades.isEnabled()) jComboBoxHUpgrades.setEnabled(true);
+        }
+        
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxHUpgradeTypeItemStateChanged
@@ -1585,6 +1627,41 @@ public final class MainFrame extends javax.swing.JFrame {
         processEvents = true;
     }//GEN-LAST:event_jCheckBoxStatsMercoItemStateChanged
 
+    private void jComboBoxDroneTypeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDroneTypeItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;                
+        
+        Ship ship = dCont.getShip();
+        MiningDrone drone =  (MiningDrone) jComboBoxDroneType.getSelectedItem();
+        
+        ship.setDrone(drone);
+        
+        jComboBoxDroneCount.setModel(getIntegerModel(ship.getMaxDrones()));
+        jComboBoxDroneCount.setSelectedItem(ship.getDroneCount());
+        if (ship.getDrone() == MiningDrone.NOTHING) {
+            if (jComboBoxDroneCount.isEnabled()) jComboBoxDroneCount.setEnabled(false);
+        } else {
+            if (!jComboBoxDroneCount.isEnabled()) jComboBoxDroneCount.setEnabled(true);
+        }
+        
+        recalculateStats();
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxDroneTypeItemStateChanged
+
+    private void jComboBoxDroneCountItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDroneCountItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
+        Ship ship = dCont.getShip();
+        Integer droneCount = (Integer) jComboBoxDroneCount.getSelectedItem();
+        ship.setDroneCount(droneCount);   
+        
+        recalculateStats();
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxDroneCountItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JButtonManageAPI;
@@ -1595,11 +1672,11 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JCheckBox jCheckBoxHauler;
     private javax.swing.JCheckBox jCheckBoxMichi;
     private javax.swing.JCheckBox jCheckBoxStatsMerco;
-    private javax.swing.JComboBox jComboBox1;
-    private javax.swing.JComboBox jComboBox2;
     private javax.swing.JComboBox<Integer> jComboBoxAstrogeo;
     private javax.swing.JComboBox<MiningCrystalLevel> jComboBoxCrystal;
+    private javax.swing.JComboBox<Integer> jComboBoxDroneCount;
     private javax.swing.JComboBox<Integer> jComboBoxDroneInt;
+    private javax.swing.JComboBox<MiningDrone> jComboBoxDroneType;
     private javax.swing.JComboBox<Integer> jComboBoxDrones;
     private javax.swing.JComboBox<Integer> jComboBoxExhumers;
     private javax.swing.JComboBox<Integer> jComboBoxExpeFrig;

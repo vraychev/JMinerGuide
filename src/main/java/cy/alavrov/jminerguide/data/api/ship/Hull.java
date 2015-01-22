@@ -36,7 +36,7 @@ import java.util.Map;
  */
 public enum Hull {
     VENTURE("Venture", 
-            32880, 2, false, 1, 3, false, 5000, 100, 100, 0, new BonusCalculator() {
+            32880, 2, false, 1, 3, false, 5000, 100, 100, 0, 10, new BonusCalculator() {
         @Override
         public BonusCalculationResult calculate(EVECharacter pilot) {
             float yieldmod = 1f + 0.05f * pilot.getSkillLevel(EVECharacter.SKILL_MINING_FRIGATE);
@@ -45,7 +45,7 @@ public enum Hull {
         }
     }),
     PROSPECT("Prospect", 
-            33697, 2, false, 4, 2, false, 10000, 100, 100, 0, new BonusCalculator() {
+            33697, 2, false, 4, 2, false, 10000, 100, 100, 0, 0, new BonusCalculator() {
         @Override
         public BonusCalculationResult calculate(EVECharacter pilot) {
             float yieldmod = (1f + 0.05f * pilot.getSkillLevel(EVECharacter.SKILL_MINING_FRIGATE))
@@ -55,7 +55,7 @@ public enum Hull {
         }
     }),
     PROCURER("Procurer", 
-            17480, 1, true, 2, 3, true, 12000, 150, 0, 60, new BonusCalculator() {
+            17480, 1, true, 2, 3, true, 12000, 150, 0, 60, 25, new BonusCalculator() {
         @Override
         public BonusCalculationResult calculate(EVECharacter pilot) {
             float durmod = 1f - 0.02f * pilot.getSkillLevel(EVECharacter.SKILL_MINING_BARGE);
@@ -63,7 +63,7 @@ public enum Hull {
         }
     }),
     RETRIEVER("Retriever", 
-            17478, 2, true, 3, 3, true, 22000, 25, 0, 20, new BonusCalculator() {
+            17478, 2, true, 3, 3, true, 22000, 25, 0, 20, 25, new BonusCalculator() {
         @Override
         public BonusCalculationResult calculate(EVECharacter pilot) {
             float durmod = 1f - 0.02f * pilot.getSkillLevel(EVECharacter.SKILL_MINING_BARGE);
@@ -72,7 +72,7 @@ public enum Hull {
         }
     }),
     COVETOR("Covetor", 
-            17476, 3, true, 2, 3, true, 7000, 0, 0, 0, new BonusCalculator() {
+            17476, 3, true, 2, 3, true, 7000, 0, 0, 0, 50, new BonusCalculator() {
         @Override
         public BonusCalculationResult calculate(EVECharacter pilot) {
             float durmod = 1f - 0.04f * pilot.getSkillLevel(EVECharacter.SKILL_MINING_BARGE);
@@ -81,7 +81,7 @@ public enum Hull {
         }
     }),
     SKIFF("Skiff", 
-            22546, 1, true, 3, 2, true, 15000, 150, 0, 60, new BonusCalculator() {
+            22546, 1, true, 3, 2, true, 15000, 150, 0, 60, 50, new BonusCalculator() {
         @Override
         public BonusCalculationResult calculate(EVECharacter pilot) {
             float durmod = (1f - 0.02f * pilot.getSkillLevel(EVECharacter.SKILL_MINING_BARGE))*
@@ -90,7 +90,7 @@ public enum Hull {
         }
     }),
     MACKINAW("Mackinaw", 
-            22548, 2, true, 3, 2, true, 28000, 25, 0, 20, new BonusCalculator() {
+            22548, 2, true, 3, 2, true, 28000, 25, 0, 20, 50, new BonusCalculator() {
         @Override
         public BonusCalculationResult calculate(EVECharacter pilot) {
             float durmod = (1f - 0.02f * pilot.getSkillLevel(EVECharacter.SKILL_MINING_BARGE))*
@@ -100,7 +100,7 @@ public enum Hull {
         }
     }),
     HULK("Hulk", 
-            22544, 3, true, 2, 2, true, 8500, 0, 0, 0, new BonusCalculator() {
+            22544, 3, true, 2, 2, true, 8500, 0, 0, 0, 50, new BonusCalculator() {
         @Override
         public BonusCalculationResult calculate(EVECharacter pilot) {
             float durmod = (1f - 0.04f * pilot.getSkillLevel(EVECharacter.SKILL_MINING_BARGE))*
@@ -110,14 +110,14 @@ public enum Hull {
         }
     }),
     GENERIC("Generic hull", 
-            1, 8, false, 8, 3, false, 500, 0, 0, 0, new BonusCalculator() {
+            1, 8, false, 8, 3, false, 500, 0, 0, 0, 50, new BonusCalculator() {
         @Override
         public BonusCalculationResult calculate(EVECharacter pilot) {
             return new BonusCalculationResult(1, 1, 1, 1, 1);
         }
     }),
     GENERICMEDIUM("Generic medium hull", 
-            2, 8, false, 8, 3, true, 500, 0, 0, 0, new BonusCalculator() {
+            2, 8, false, 8, 3, true, 500, 0, 0, 0, 50, new BonusCalculator() {
         @Override
         public BonusCalculationResult calculate(EVECharacter pilot) {
             return new BonusCalculationResult(1, 1, 1, 1, 1);
@@ -145,12 +145,13 @@ public enum Hull {
     private final int roleMiningYieldBonus;
     private final int roleGasYieldBonus;
     private final int roleIceCycleBonus;
+    private final int droneBandwidth;
     private final BonusCalculator calculator;
 
     private Hull(String name, int id, int maxTurrets, boolean stripMiners, 
             int maxUpgrades, int rigSlots, boolean mediumHull, int oreHold, 
             int roleMiningYieldBonus, int roleGasYieldBonus, int roleIceCycleBonus, 
-            BonusCalculator calculator) {
+            int droneBandwidth, BonusCalculator calculator) {
         this.name = name;
         this.id = id;
         this.maxTurrets = maxTurrets;
@@ -162,6 +163,7 @@ public enum Hull {
         this.roleMiningYieldBonus = roleMiningYieldBonus;
         this.roleGasYieldBonus = roleGasYieldBonus;
         this.roleIceCycleBonus = roleIceCycleBonus;
+        this.droneBandwidth = droneBandwidth;
         this.calculator = calculator;
     }
     
@@ -261,6 +263,14 @@ public enum Hull {
      */
     public int getRoleIceCycleBonus() {
         return roleIceCycleBonus;
+    }
+    
+    /**
+     * Returns ice harvester cycle bonus, granted by hull's role, in percents.
+     * @return 
+     */
+    public int getDroneBandwidth() {
+        return droneBandwidth;
     }
     
     @Override

@@ -36,11 +36,16 @@ public class Ship {
     private final Object blocker = new Object();
     
     private Hull hull;
+    
     private Turret turret;
     private int turretCount;
     private MiningCrystalLevel miningCrystal;
+    
     private HarvestUpgrade harvestUpgrade;
     private int harvestUpgradeCount;
+    
+    private MiningDrone drone;
+    private int droneCount;
     
     /**
      * Last selected mining turret. 
@@ -60,13 +65,15 @@ public class Ship {
         turretCount = hull.getMaxTurrets();
         miningCrystal = MiningCrystalLevel.NOTHING;
         harvestUpgrade = HarvestUpgrade.MININGI;
-        harvestUpgradeCount = hull.getMaxUpgrades();        
+        harvestUpgradeCount = hull.getMaxUpgrades();      
+        drone = MiningDrone.NOTHING;
+        droneCount = 0;
     }
     
     public Ship(Element root) throws Exception {
         try {
-            int hullid = root.getChild("hull").getAttribute("id").getIntValue();
-            Hull newHull = Hull.hullsMap.get(hullid);
+            int hullID = root.getChild("hull").getAttribute("id").getIntValue();
+            Hull newHull = Hull.hullsMap.get(hullID);
             hull = (newHull == null) ? Hull.VENTURE : newHull;
         } catch (NullPointerException e) {
             JMGLogger.logWarning("Unable to load hull", e);
@@ -78,8 +85,8 @@ public class Ship {
         // catch-alls. While it's not that beautiful, we'll have less code that way.
         
         try {            
-            int turrid = turretElem.getAttribute("id").getIntValue();
-            Turret newTurret = Turret.turretsMap.get(turrid);
+            int turrID = turretElem.getAttribute("id").getIntValue();
+            Turret newTurret = Turret.turretsMap.get(turrID);
             if (hull.isUsingStripMiners()) {
                 if (newTurret == null || 
                         newTurret.getTurretType() == TurretType.GASHARVESTER || 
@@ -119,8 +126,8 @@ public class Ship {
         // selection.
         
         try {
-            int crysid = turretElem.getAttribute("crystal").getIntValue();    
-            MiningCrystalLevel newCrystal = MiningCrystalLevel.crystalLevelsMap.get(crysid);
+            int crysID = turretElem.getAttribute("crystal").getIntValue();    
+            MiningCrystalLevel newCrystal = MiningCrystalLevel.crystalLevelsMap.get(crysID);
             miningCrystal = (newCrystal == null) ? MiningCrystalLevel.NOTHING : newCrystal;
         } catch (NullPointerException e) {
             JMGLogger.logWarning("Unable to load turret crystal", e);
@@ -131,8 +138,8 @@ public class Ship {
         // same catch-all logic here.
         
         try {
-            int upgid = upgradeElem.getAttribute("id").getIntValue();    
-            HarvestUpgrade newUpg = HarvestUpgrade.upgradesMap.get(upgid);
+            int upgID = upgradeElem.getAttribute("id").getIntValue();    
+            HarvestUpgrade newUpg = HarvestUpgrade.upgradesMap.get(upgID);
             harvestUpgrade = (newUpg == null) ? HarvestUpgrade.NOTHING : newUpg;
         } catch (NullPointerException e) {
             JMGLogger.logWarning("Unable to load harvest upgrade", e);
@@ -141,12 +148,50 @@ public class Ship {
         
         try {
             int newUpgCount = upgradeElem.getAttribute("count").getIntValue();
-            if (newUpgCount < 0 ) newUpgCount = 0;
+            if (newUpgCount < 0 ||  harvestUpgrade == HarvestUpgrade.NOTHING) newUpgCount = 0;
             if (newUpgCount > hull.getMaxUpgrades()) newUpgCount = hull.getMaxUpgrades();
             harvestUpgradeCount = newUpgCount;
         } catch (NullPointerException e) {
             JMGLogger.logWarning("Unable to load upgrade count", e);
-            harvestUpgradeCount = hull.getMaxUpgrades();
+            harvestUpgradeCount = (harvestUpgrade == HarvestUpgrade.NOTHING) ? 0 : hull.getMaxUpgrades();
+        }
+        
+        Element droneElem = root.getChild("drone");
+        // same catch-all logic here.
+        
+        int droneBandwidth = hull.getDroneBandwidth();
+        
+        if (droneBandwidth > 0) {
+            try {
+                int droneID = droneElem.getAttribute("id").getIntValue();    
+                MiningDrone newDrone = MiningDrone.dronesMap.get(droneID);
+                drone = (newDrone == null) ? MiningDrone.NOTHING : newDrone;
+            } catch (NullPointerException e) {
+                JMGLogger.logWarning("Unable to load drone", e);
+                drone = MiningDrone.NOTHING;
+            }
+
+            int maxDroneCount;
+            
+            if (drone == MiningDrone.NOTHING) {
+                maxDroneCount = 0;
+            } else {
+                maxDroneCount = droneBandwidth / drone.getBandwidth();
+                if (maxDroneCount > 5) maxDroneCount = 5;
+            }
+
+            try {
+                int newDroneCount = droneElem.getAttribute("count").getIntValue();
+                if (newDroneCount < 0 ) newDroneCount = 0;
+                if (newDroneCount > maxDroneCount) newDroneCount = maxDroneCount;
+                droneCount = newDroneCount;
+            } catch (NullPointerException e) {
+                JMGLogger.logWarning("Unable to load drone count", e);
+                harvestUpgradeCount = maxDroneCount;
+            }
+        } else {
+            drone = MiningDrone.NOTHING;
+            droneCount = 0;
         }
     }
     
@@ -165,10 +210,21 @@ public class Ship {
                     .setAttribute("id", String.valueOf(harvestUpgrade.getID()))
                     .setAttribute("count", String.valueOf(harvestUpgradeCount))
             );
+            
+            root.addContent(new Element("drone")
+                    .setAttribute("id", String.valueOf(drone.getID()))
+                    .setAttribute("count", String.valueOf(droneCount))
+            );
+            
             return root;
         }        
     }
     
+    /**
+     * Sets a ship's hull. As a new hull can have different stats, this can
+     * change maximum number of turrets, upgrades, drones and/or rig composition.
+     * @param newHull 
+     */
     public void setHull(Hull newHull) {
         if (newHull == null) return;
         
@@ -198,6 +254,11 @@ public class Ship {
             }
             
             // upgrade type won't change.
+            
+            int maxDroneCount  = hull.getDroneBandwidth() / drone.getBandwidth();   
+            if (maxDroneCount > 5) maxDroneCount = 5;
+            
+            if (droneCount > maxDroneCount) droneCount = maxDroneCount;
         }
     }
     
@@ -207,6 +268,10 @@ public class Ship {
         }
     }
     
+    /**
+     * Sets type of a turret.
+     * @param newTurret 
+     */
     public void setTurret(Turret newTurret) {
         if (turret == null) return;
         
@@ -233,6 +298,11 @@ public class Ship {
         }
     }
     
+    /**
+     * Sets, how much turrets we have installed on a ship.
+     * Can't exceed max turrets on a hull.
+     * @param count 
+     */
     public void setTurrentCount(int count) {
         synchronized(blocker) {
             if (count < 0) count = 0;
@@ -247,6 +317,11 @@ public class Ship {
         }
     }
     
+    /**
+     * Sets turret's crystal. Can set crystals on turrets that doesn't use
+     * them, this is intentional (calculations ignore them anyway in that case).
+     * @param lvl 
+     */
     public void setTurretCrystal(MiningCrystalLevel lvl) {
         if (lvl == null) return;
         synchronized(blocker) {
@@ -260,6 +335,10 @@ public class Ship {
         }
     }
     
+    /**
+     * Sets harvest upgrade type.
+     * @param newUpg 
+     */
     public void setHarvestUpgrade(HarvestUpgrade newUpg) {
         if (newUpg == null) return;
         synchronized(blocker) {
@@ -273,6 +352,11 @@ public class Ship {
         }
     }
     
+    /**
+     * Sets how much harvest upgrades we have installed on a ship.
+     * Can't exceed max upgrades (i.e. lowslots) on a ship.
+     * @param count 
+     */
     public void setHarvestUpgradeCount(int count) {
         synchronized(blocker) {
             if (count < 0) count = 0;
@@ -284,6 +368,45 @@ public class Ship {
     public int getHarvestUpgradeCount() {
         synchronized(blocker) { 
             return harvestUpgradeCount;
+        }
+    }
+    
+    public void setDrone(MiningDrone newDrone) {
+        if (newDrone == null) return;
+        synchronized(blocker) {            
+            drone = newDrone;
+            int maxDroneCount = hull.getDroneBandwidth() / drone.getBandwidth();
+            if (maxDroneCount > 5) maxDroneCount = 5;
+            if (droneCount > maxDroneCount) droneCount = maxDroneCount;
+        }
+    }
+    
+    public MiningDrone getDrone() {
+        synchronized(blocker) {
+            return drone;
+        }
+    }
+    
+    public void setDroneCount(int count) {
+        synchronized(blocker) {            
+            int maxDroneCount = hull.getDroneBandwidth() / drone.getBandwidth();
+            if (maxDroneCount > 5) maxDroneCount = 5;
+            if (count > maxDroneCount) count = maxDroneCount;
+            droneCount = count;
+        }
+    }
+    
+    public int getDroneCount() {
+        synchronized(blocker) {
+            return droneCount;
+        }
+    }
+    
+    public int getMaxDrones() {
+        synchronized(blocker) {
+            int maxDroneCount = hull.getDroneBandwidth() / drone.getBandwidth();
+            if (maxDroneCount > 5) maxDroneCount = 5;
+            return maxDroneCount;
         }
     }
 }
