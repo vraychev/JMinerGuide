@@ -27,6 +27,7 @@ package cy.alavrov.jminerguide.data;
 
 import cy.alavrov.jminerguide.data.api.ship.HarvestUpgrade;
 import cy.alavrov.jminerguide.data.api.ship.Hull;
+import cy.alavrov.jminerguide.data.api.ship.MiningDrone;
 import cy.alavrov.jminerguide.data.api.ship.OreType;
 import cy.alavrov.jminerguide.data.api.ship.Ship;
 import cy.alavrov.jminerguide.data.api.ship.Turret;
@@ -99,7 +100,7 @@ public class CalculatedStats {
      */
     private final int secsForOreHold;
     
-    public CalculatedStats(EVECharacter miner, Ship ship, boolean mercoxite) {
+    public CalculatedStats(EVECharacter miner, Ship ship, boolean mercoxit) {
 
         
         Turret turret = ship.getTurret();
@@ -117,7 +118,7 @@ public class CalculatedStats {
             case STRIPMINER:
                 actualTurretYield = baseTurretYield * 
                     (1 + hull.getRoleMiningYieldBonus()/100f) * 
-                    bonus.miningYieldMod * miner.getMiningYieldModificator();
+                    bonus.miningYieldMod * miner.getMiningYieldbonus();
                 
                 if (upgrades > 0 ) {
                     for (int i = 0; i < upgrades; i++) {
@@ -127,7 +128,7 @@ public class CalculatedStats {
                 }
                 
                 if (turret.isUsingCrystals()) {
-                    if (turret.getOreType() == OreType.MERCOXIT && mercoxite) {
+                    if (turret.getOreType() == OreType.MERCOXIT && mercoxit) {
                         actualTurretYield = actualTurretYield * ship.getTurretCrystal().getMercMod();
                     } else {
                         actualTurretYield = actualTurretYield * ship.getTurretCrystal().getOreMod();
@@ -188,15 +189,23 @@ public class CalculatedStats {
         turretCycle = actualTurretCycle;
         
         turretM3S = combinedTurretYield/turretCycle;
-                
         
-        // tba
-        droneYield = 0; 
-        combinedDroneYield = 0;
-        droneCycle = 1;        
-        
-        droneM3S = combinedDroneYield / droneCycle;
-        
+        MiningDrone drone = ship.getDrone();
+        if (turret.getOreType() == OreType.GAS || 
+                turret.getOreType() == OreType.ICE ||
+                (turret.getOreType() == OreType.MERCOXIT && mercoxit) ||
+                drone == MiningDrone.NOTHING) {
+            droneYield = 0; 
+            combinedDroneYield = 0;
+            droneCycle = 0;  
+            droneM3S = 0;
+        } else {                        
+            droneYield = drone.getBaseYield() * miner.getDroneYieldBonus();
+            combinedDroneYield = droneYield * ship.getDroneCount();
+            droneCycle = drone.getCycleDuration(); // no bonus to this.
+            droneM3S = combinedDroneYield / droneCycle;
+        }
+                                      
         float totalM3S = turretM3S + droneM3S;
         totalM3H = totalM3S * 60 * 60;
         

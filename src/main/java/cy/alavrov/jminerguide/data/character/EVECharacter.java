@@ -455,7 +455,7 @@ public class EVECharacter {
      * Returns bonus to mining yield, granted by skills and implants.
      * @return 
      */
-    public float getMiningYieldModificator () {
+    public float getMiningYieldbonus () {
         float out = 1;
         
         int miningLevel = this.getSkillLevel(SKILL_MINING);
@@ -515,6 +515,28 @@ public class EVECharacter {
         int slot8CycleBonus = this.slot8.getGasCycleBonus();
         if (slot8CycleBonus > 0) {
             out = out * (1f - 0.01f*slot8CycleBonus);
+        }
+        
+        return out;
+    }
+    
+    
+    
+    /**
+     * Returns bonus to drone yield, granted by skills.
+     * @return 
+     */
+    public float getDroneYieldBonus() {
+        float out = 1;
+        
+        int droneOperBonus = this.getSkillLevel(SKILL_MINING_DRONE_OPERATION);
+        if (droneOperBonus > 0) {
+            out = out * (1f + 0.05f*droneOperBonus);
+        }
+        
+        int droneIntBonus = this.getSkillLevel(SKILL_DRONE_INTERFACING);
+        if (droneIntBonus > 0) {
+            out = out * (1f + 0.1f*droneIntBonus);
         }
         
         return out;
