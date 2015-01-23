@@ -34,22 +34,27 @@ import java.util.Map;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public enum Rig {
-    NOTHING ("- nothing -", 0, 0, 0, 0, 0),
+    NOTHING ("- nothing -", 0, 0, 0, 0, 0, false),
     DRONEAUGMENTORI ("Drone Mining Augmentor I", 
-            32043, 10, 0, 0, 100),
+            32043, 10, 0, 0, 100, false),
     DRONEAUGMENTORII ("Drone Mining Augmentor II", 
-            32047, 15, 0, 0, 150),
+            32047, 15, 0, 0, 150, false),
     ICEACCELERATOR ("Medium Ice Harvester Accelerator I", 
-            32819, 0, 0, 12, 250),
+            32819, 0, 0, 12, 250, true),
     MERCOXITOPTIMIZATOR ("Medium Mercoxit Mining Crystal Optimization I", 
-            32817, 0, 16, 0, 250);
+            32817, 0, 16, 0, 250, true);
     
     private final String name; 
-    private final int id;
+    private final int id;   
     private final int droneYieldBonus;
     private final int mercoxitYieldBonus;
     private final int iceCycleBonus;
     private final int calibrationCost;
+    private final boolean strictlyMedium;
+    
+    public final static Rig[] nonMediumRigArr = {
+        NOTHING, DRONEAUGMENTORI, DRONEAUGMENTORII
+    };
     
     public final static Map<Integer, Rig> rigsMap;
     
@@ -62,13 +67,14 @@ public enum Rig {
     }
 
     private Rig(String name, int id, int droneYieldBonus, int mercoxitYieldBonus, 
-            int iceCycleBonus, int calibrationCost) {
+            int iceCycleBonus, int calibrationCost, boolean strictlyMedium) {
         this.name = name;
         this.id = id;
         this.droneYieldBonus = droneYieldBonus;
         this.mercoxitYieldBonus = mercoxitYieldBonus;
         this.iceCycleBonus = iceCycleBonus;
         this.calibrationCost = calibrationCost;
+        this.strictlyMedium = strictlyMedium;
     }
     
      /**
@@ -119,9 +125,17 @@ public enum Rig {
         return calibrationCost;
     }
     
+    /**
+     * True, if the rig have only medium-sized version.
+     * @return 
+     */
+    public boolean isStrictlyMedium() {
+        return strictlyMedium;
+    }
+    
     @Override
     public String toString() {
-        return name;
+        return name + ((calibrationCost > 0) ? " ("+calibrationCost+")" : "");
     }
 }
 

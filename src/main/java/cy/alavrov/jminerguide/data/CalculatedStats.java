@@ -29,9 +29,12 @@ import cy.alavrov.jminerguide.data.api.ship.HarvestUpgrade;
 import cy.alavrov.jminerguide.data.api.ship.Hull;
 import cy.alavrov.jminerguide.data.api.ship.MiningDrone;
 import cy.alavrov.jminerguide.data.api.ship.OreType;
+import cy.alavrov.jminerguide.data.api.ship.Rig;
 import cy.alavrov.jminerguide.data.api.ship.Ship;
 import cy.alavrov.jminerguide.data.api.ship.Turret;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Stats, calculated for a ship, based on it's hull, modules, pilot and 
@@ -130,6 +133,11 @@ public class CalculatedStats {
                 if (turret.isUsingCrystals()) {
                     if (turret.getOreType() == OreType.MERCOXIT && mercoxit) {
                         actualTurretYield = actualTurretYield * ship.getTurretCrystal().getMercMod();
+                        actualTurretYield = actualTurretYield * (1 + 0.01f*ship.getRig1().getMercoxitYieldBonus());
+                        actualTurretYield = actualTurretYield * (1 + 0.01f*ship.getRig2().getMercoxitYieldBonus());
+                        if (hull.getRigSlots() > 2) {
+                            actualTurretYield = actualTurretYield * (1 + 0.01f*ship.getRig3().getMercoxitYieldBonus());
+                        }
                     } else {
                         actualTurretYield = actualTurretYield * ship.getTurretCrystal().getOreMod();
                     }
@@ -183,6 +191,12 @@ public class CalculatedStats {
                     }
                 }
                 
+                actualTurretCycle = actualTurretCycle * (1 - 0.01f*ship.getRig1().getIceCycleBonus());
+                actualTurretCycle = actualTurretCycle * (1 - 0.01f*ship.getRig2().getIceCycleBonus());
+                if (hull.getRigSlots() > 2) {
+                    actualTurretCycle = actualTurretCycle * (1 - 0.01f*ship.getRig3().getIceCycleBonus());
+                }
+                
                 break;
         }
         
@@ -200,7 +214,33 @@ public class CalculatedStats {
             droneCycle = 0;  
             droneM3S = 0;
         } else {                        
-            droneYield = drone.getBaseYield() * miner.getDroneYieldBonus();
+            float droneEffectiveYield = drone.getBaseYield() * miner.getDroneYieldBonus();
+                        
+            // ok, here it is harder, due to diminishing returns on rigs.
+            // we'll have to apply rigs with greater bonus first, so it's 
+            // rig sorting time!            
+            Rig[] rigs;
+            if (hull.getRigSlots() > 2) {
+                rigs = new Rig[] {ship.getRig1(), ship.getRig2(), ship.getRig3()};
+            } else {
+                rigs = new Rig[] {ship.getRig1(), ship.getRig2()};
+            }
+            
+            Arrays.sort(rigs, new Comparator<Rig>() {
+                @Override
+                public int compare(Rig o1, Rig o2) {
+                    return Integer.valueOf(o2.getDroneYieldBonus()).compareTo(o1.getDroneYieldBonus());
+                }
+            });
+            
+            droneEffectiveYield = droneEffectiveYield * (1 + 0.01f * rigs[0].getDroneYieldBonus());
+            droneEffectiveYield = droneEffectiveYield * (1 + 0.01f * 0.87f * rigs[1].getDroneYieldBonus());
+            if (hull.getRigSlots() > 2) {
+                droneEffectiveYield = droneEffectiveYield * (1 + 0.01f * 0.57f * rigs[2].getDroneYieldBonus());
+            }
+            
+            droneYield = droneEffectiveYield;
+            
             combinedDroneYield = droneYield * ship.getDroneCount();
             droneCycle = drone.getCycleDuration(); // no bonus to this.
             droneM3S = combinedDroneYield / droneCycle;

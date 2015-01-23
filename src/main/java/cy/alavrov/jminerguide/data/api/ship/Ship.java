@@ -47,6 +47,10 @@ public class Ship {
     private MiningDrone drone;
     private int droneCount;
     
+    private Rig rig1;
+    private Rig rig2;
+    private Rig rig3;
+    
     /**
      * Last selected mining turret. 
      * Used to preserve turret selection between turret types.
@@ -68,6 +72,9 @@ public class Ship {
         harvestUpgradeCount = hull.getMaxUpgrades();      
         drone = MiningDrone.NOTHING;
         droneCount = 0;
+        rig1 = Rig.NOTHING;
+        rig2 = Rig.NOTHING;
+        rig3 = Rig.NOTHING;        
     }
     
     public Ship(Element root) throws Exception {
@@ -193,6 +200,43 @@ public class Ship {
             drone = MiningDrone.NOTHING;
             droneCount = 0;
         }
+        
+        Element rigsElem = root.getChild("rigs");
+        // same catch-all logic here.
+        
+        try {
+            int rig1ID = rigsElem.getAttribute("rig1id").getIntValue();    
+            Rig newRig = Rig.rigsMap.get(rig1ID);
+            if (newRig == null) newRig = Rig.NOTHING;
+            if (!hull.isMediumHull() && newRig.isStrictlyMedium()) newRig = Rig.NOTHING;
+            rig1 = newRig;
+            
+            int rig2ID = rigsElem.getAttribute("rig2id").getIntValue();    
+            newRig = Rig.rigsMap.get(rig2ID);
+            if (newRig == null) newRig = Rig.NOTHING;
+            if (rig1.getCalibrationCost() + newRig.getCalibrationCost() > 400) newRig = Rig.NOTHING;
+            if (!hull.isMediumHull() && newRig.isStrictlyMedium()) newRig = Rig.NOTHING;
+            rig2 = newRig;
+            
+            if (hull.getRigSlots() > 2) {
+                int rig3ID = rigsElem.getAttribute("rig2id").getIntValue();    
+                newRig = Rig.rigsMap.get(rig3ID);
+                if (newRig == null) newRig = Rig.NOTHING;
+                if (rig1.getCalibrationCost() + rig2.getCalibrationCost() + 
+                        newRig.getCalibrationCost() > 400) newRig = Rig.NOTHING;
+                if (!hull.isMediumHull() && newRig.isStrictlyMedium()) newRig = Rig.NOTHING;
+                rig3 = newRig;
+            } else {
+                rig3 = Rig.NOTHING;
+            }
+            
+        } catch (NullPointerException e) {
+            JMGLogger.logWarning("Unable to load rigs", e);
+            
+            rig1 = Rig.NOTHING;
+            rig2 = Rig.NOTHING;
+            rig3 = Rig.NOTHING;
+        }        
     }
     
     public Element getXMLElement() {     
@@ -216,6 +260,12 @@ public class Ship {
                     .setAttribute("count", String.valueOf(droneCount))
             );
             
+            root.addContent(new Element("rigs")
+                    .setAttribute("rig1id", String.valueOf(rig1.getID()))
+                    .setAttribute("rig2id", String.valueOf(rig2.getID()))
+                    .setAttribute("rig3id", String.valueOf(rig3.getID()))
+            );
+            
             return root;
         }        
     }
@@ -229,6 +279,7 @@ public class Ship {
         if (newHull == null) return;
         
         synchronized(blocker) {
+            Hull oldhull = hull;
             hull = newHull;
             if (turretCount > hull.getMaxTurrets()) {
                 turretCount = hull.getMaxTurrets();
@@ -259,6 +310,12 @@ public class Ship {
             if (maxDroneCount > 5) maxDroneCount = 5;
             
             if (droneCount > maxDroneCount) droneCount = maxDroneCount;
+            
+            if (!hull.isMediumHull()) {
+                if (rig1.isStrictlyMedium()) rig1 = Rig.NOTHING;
+                if (rig2.isStrictlyMedium()) rig2 = Rig.NOTHING;
+                if (rig3.isStrictlyMedium()) rig3 = Rig.NOTHING;
+            }
         }
     }
     
@@ -407,6 +464,75 @@ public class Ship {
             int maxDroneCount = hull.getDroneBandwidth() / drone.getBandwidth();
             if (maxDroneCount > 5) maxDroneCount = 5;
             return maxDroneCount;
+        }
+    }
+    
+    public Rig getRig1() {
+        synchronized(blocker) {
+            return rig1;
+        }
+    }
+    
+    public Rig getRig2() {
+        synchronized(blocker) {
+            return rig2;
+        }
+    }
+    
+    public Rig getRig3() {
+        synchronized(blocker) {
+            return rig3;
+        }
+    }
+    
+    /**
+     * Sets rig in the slot 1. Can fail due to bad rig size or calibration overuse.
+     * @param newRig
+     * @return false if failed.
+     */
+    public boolean setRig1(Rig newRig) {
+        if (newRig == null) return false;
+        
+        synchronized(blocker) {
+            if (!hull.isMediumHull() && newRig.isStrictlyMedium()) return false;
+            if (rig2.getCalibrationCost() + rig3.getCalibrationCost() + 
+                    newRig.getCalibrationCost() > 400) return false;
+            rig1 = newRig;
+            return true;
+        }
+    }
+    
+    /**
+     * Sets rig in the slot 2. Can fail due to bad rig size or calibration overuse.
+     * @param newRig
+     * @return false if failed.
+     */
+    public boolean setRig2(Rig newRig) {
+        if (newRig == null) return false;
+        
+        synchronized(blocker) {
+            if (!hull.isMediumHull() && newRig.isStrictlyMedium()) return false;
+            if (rig1.getCalibrationCost() + rig3.getCalibrationCost() + 
+                    newRig.getCalibrationCost() > 400) return false;
+            rig2 = newRig;
+            return true;
+        }
+    }
+    
+    /**
+     * Sets rig in the slot 3. Can fail due to bad rig size or calibration overuse.
+     * @param newRig
+     * @return false if failed.
+     */
+    public boolean setRig3(Rig newRig) {
+        if (newRig == null) return false;
+        
+        synchronized(blocker) {
+            if (!hull.isMediumHull() && newRig.isStrictlyMedium()) return false;
+            if (rig1.getCalibrationCost() + rig2.getCalibrationCost() + 
+                    newRig.getCalibrationCost() > 400) return false;
+            rig3 = newRig;
+            return true;
         }
     }
 }
