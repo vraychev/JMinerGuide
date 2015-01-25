@@ -43,6 +43,17 @@ import java.util.Comparator;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class CalculatedStats {
+    
+    /**
+     * Used to sort rigs by their drone yield bonus, descending.
+     */
+    private final static Comparator<Rig> rigComparator = new Comparator<Rig>() {
+        @Override
+        public int compare(Rig o1, Rig o2) {
+            return Integer.valueOf(o2.getDroneYieldBonus()).compareTo(o1.getDroneYieldBonus());
+        }
+    };
+    
     /**
      * Yield of a turret, in m3.
      */
@@ -226,12 +237,7 @@ public class CalculatedStats {
                 rigs = new Rig[] {ship.getRig1(), ship.getRig2()};
             }
             
-            Arrays.sort(rigs, new Comparator<Rig>() {
-                @Override
-                public int compare(Rig o1, Rig o2) {
-                    return Integer.valueOf(o2.getDroneYieldBonus()).compareTo(o1.getDroneYieldBonus());
-                }
-            });
+            Arrays.sort(rigs, rigComparator);
             
             droneEffectiveYield = droneEffectiveYield * (1 + 0.01f * rigs[0].getDroneYieldBonus());
             droneEffectiveYield = droneEffectiveYield * (1 + 0.01f * 0.87f * rigs[1].getDroneYieldBonus());
