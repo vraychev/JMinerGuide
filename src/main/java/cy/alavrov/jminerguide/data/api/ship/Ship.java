@@ -35,6 +35,8 @@ import org.jdom2.Element;
 public class Ship {
     private final Object blocker = new Object();
     
+    private String name;
+    
     private Hull hull;
     
     private Turret turret;
@@ -63,7 +65,8 @@ public class Ship {
      */
     private Turret lastStripTurret = Turret.STRIPMINERI;
     
-    public Ship() {
+    public Ship(String name) {
+        this.name = name;
         hull = Hull.VENTURE;
         turret = Turret.MINERI;
         turretCount = hull.getMaxTurrets();
@@ -78,6 +81,10 @@ public class Ship {
     }
     
     public Ship(Element root) throws Exception {
+        String newName = root.getChildText("name");
+        if (newName == null) newName = "Unnamed Ship "+System.nanoTime();
+        name = newName;
+        
         try {
             int hullID = root.getChild("hull").getAttribute("id").getIntValue();
             Hull newHull = Hull.hullsMap.get(hullID);
@@ -86,7 +93,7 @@ public class Ship {
             JMGLogger.logWarning("Unable to load hull", e);
             hull = Hull.VENTURE;
         }
-        
+                        
         Element turretElem = root.getChild("turret");
         // instead of multiple checks for null, we'll make few NullPointerException
         // catch-alls. While it's not that beautiful, we'll have less code that way.
@@ -242,8 +249,11 @@ public class Ship {
     public Element getXMLElement() {     
         synchronized(blocker) {
             Element root = new Element("ship");        
+            
+            root.addContent(new Element("name").setText(name));
+            
             root.addContent(new Element("hull").setAttribute("id", String.valueOf(hull.getID())));
-
+                        
             root.addContent(new Element("turret")
                     .setAttribute("id", String.valueOf(turret.getID()))
                     .setAttribute("count", String.valueOf(turretCount))
@@ -533,6 +543,26 @@ public class Ship {
                     newRig.getCalibrationCost() > 400) return false;
             rig3 = newRig;
             return true;
+        }
+    }
+    
+    public String getName() {
+        synchronized(blocker) {
+            return name;
+        }
+    }
+    
+    public void setName(String name) {
+        if (name == null) return;
+        synchronized(blocker) {
+            this.name = name;
+        }
+    }
+    
+    @Override
+    public String toString() {
+        synchronized(blocker) {
+            return name;
         }
     }
 }
