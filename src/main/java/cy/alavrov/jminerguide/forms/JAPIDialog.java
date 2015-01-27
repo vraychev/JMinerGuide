@@ -440,7 +440,6 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         int pos = jListAPIKey.getSelectedIndex();
         
         dCont.getCharacterContainer().removeAPIKey(key);
-        dCont.save();
         loadKeys(false);
         
         int keysTotal = jListAPIKey.getModel().getSize();
@@ -545,7 +544,6 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         enableAll();
         if (success) {
             cCont.updateAPIKey(processedKey);
-            dCont.save();
             loadKeys(false);
 
             int keysTotal = jListAPIKey.getModel().getSize();

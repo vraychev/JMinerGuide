@@ -170,8 +170,6 @@ public class JNewShipDialog extends javax.swing.JDialog {
         
         Ship ship = sCont.createNewShip(name); // nulls are container's problem.
         if (ship != null) {
-            sCont.save();
-            
             parent.loadShipList(false);
             parent.setSelectedShip(ship);
             parent.loadSelectedShip();

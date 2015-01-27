@@ -1271,15 +1271,13 @@ public final class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JButtonQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JButtonQuitActionPerformed
-        dCont.save();
-        JQuitDialog dlg = new JQuitDialog(this, true);
+        JQuitDialog dlg = new JQuitDialog(this, true, dCont);
         dlg.setLocationRelativeTo(this);
         dlg.setVisible(true);
     }//GEN-LAST:event_JButtonQuitActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-        dCont.save();
-        JQuitDialog dlg = new JQuitDialog(this, true);
+        JQuitDialog dlg = new JQuitDialog(this, true, dCont);
         dlg.setLocationRelativeTo(this);
         dlg.setVisible(true);
     }//GEN-LAST:event_formWindowClosing

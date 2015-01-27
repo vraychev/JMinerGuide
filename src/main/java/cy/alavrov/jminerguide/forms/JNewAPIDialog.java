@@ -271,7 +271,6 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
         }
         
         dCont.getCharacterContainer().addAPIKey(tempKey);
-        dCont.save();
         parent.loadKeys(false);
         parent.selectKey(tempKey);
         parent.loadSelectedKey();

@@ -26,6 +26,7 @@
 
 package cy.alavrov.jminerguide.forms;
 
+import cy.alavrov.jminerguide.data.DataContainer;
 import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 
@@ -34,14 +35,15 @@ import javax.swing.JFrame;
  * @author alavrov
  */
 public class JQuitDialog extends javax.swing.JDialog {
-
+    private final DataContainer dCont;
     /**
      * Creates new form JQuidDialog
      */
-    public JQuitDialog(java.awt.Frame parent, boolean modal) {
+    public JQuitDialog(java.awt.Frame parent, boolean modal, DataContainer dCont) {
         super(parent, modal);
         initComponents();
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        this.dCont = dCont;
     }
 
     /**
@@ -55,8 +57,9 @@ public class JQuitDialog extends javax.swing.JDialog {
 
         jLabel2 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
-        JQuitButtonCancel = new javax.swing.JButton();
-        JQuitButtonYes = new javax.swing.JButton();
+        JButtonCancel = new javax.swing.JButton();
+        JButtonQuit = new javax.swing.JButton();
+        JButtonSaveAndQuit = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setAlwaysOnTop(true);
@@ -69,17 +72,24 @@ public class JQuitDialog extends javax.swing.JDialog {
 
         jLabel1.setText("Do you really want to quit?");
 
-        JQuitButtonCancel.setText("Cancel");
-        JQuitButtonCancel.addActionListener(new java.awt.event.ActionListener() {
+        JButtonCancel.setText("Cancel");
+        JButtonCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                JQuitButtonCancelActionPerformed(evt);
+                JButtonCancelActionPerformed(evt);
             }
         });
 
-        JQuitButtonYes.setText("Yes");
-        JQuitButtonYes.addActionListener(new java.awt.event.ActionListener() {
+        JButtonQuit.setText("Quit Without Saving");
+        JButtonQuit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                JQuitButtonYesActionPerformed(evt);
+                JButtonQuitActionPerformed(evt);
+            }
+        });
+
+        JButtonSaveAndQuit.setText("Save and Quit");
+        JButtonSaveAndQuit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JButtonSaveAndQuitActionPerformed(evt);
             }
         });
 
@@ -92,11 +102,13 @@ public class JQuitDialog extends javax.swing.JDialog {
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(JQuitButtonYes)
+                        .addComponent(JButtonSaveAndQuit)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(JQuitButtonCancel))
-                    .addComponent(jLabel1))
+                        .addComponent(JButtonQuit)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(JButtonCancel)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -108,30 +120,39 @@ public class JQuitDialog extends javax.swing.JDialog {
                         .addComponent(jLabel1)
                         .addGap(15, 15, 15)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(JQuitButtonYes)
-                            .addComponent(JQuitButtonCancel)))
+                            .addComponent(JButtonCancel)
+                            .addComponent(JButtonSaveAndQuit)
+                            .addComponent(JButtonQuit)))
                     .addComponent(jLabel2))
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void JQuitButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JQuitButtonCancelActionPerformed
+    private void JButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JButtonCancelActionPerformed
         this.setVisible(false);
         this.dispose();
-    }//GEN-LAST:event_JQuitButtonCancelActionPerformed
+    }//GEN-LAST:event_JButtonCancelActionPerformed
 
-    private void JQuitButtonYesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JQuitButtonYesActionPerformed
+    private void JButtonQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JButtonQuitActionPerformed
         this.setVisible(false);
         this.dispose();
         System.exit(0);
-    }//GEN-LAST:event_JQuitButtonYesActionPerformed
+    }//GEN-LAST:event_JButtonQuitActionPerformed
+
+    private void JButtonSaveAndQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JButtonSaveAndQuitActionPerformed
+        dCont.save();
+        this.setVisible(false);
+        this.dispose();
+        System.exit(0);
+    }//GEN-LAST:event_JButtonSaveAndQuitActionPerformed
   
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton JQuitButtonCancel;
-    private javax.swing.JButton JQuitButtonYes;
+    private javax.swing.JButton JButtonCancel;
+    private javax.swing.JButton JButtonQuit;
+    private javax.swing.JButton JButtonSaveAndQuit;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     // End of variables declaration//GEN-END:variables

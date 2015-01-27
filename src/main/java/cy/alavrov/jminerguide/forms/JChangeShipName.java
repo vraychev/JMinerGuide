@@ -174,8 +174,6 @@ public class JChangeShipName extends javax.swing.JDialog {
         String name = jTextFieldShipName.getText();
         
         if (sCont.renameShip(ship.getName(), name)) {
-            sCont.save();
-            
             parent.loadShipList(true);
             parent.loadSelectedShip();
             parent.recalculateStats();
