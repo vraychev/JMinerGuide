@@ -29,11 +29,9 @@ import cy.alavrov.jminerguide.log.JMGLogger;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
@@ -140,5 +138,91 @@ public class ShipContainer {
         }
         
         return out;
+    }
+    
+    /**
+     * Returns a ship under that name or null, if there isn't one. Null name
+     * results in null.
+     * @param name
+     * @return 
+     */
+    public Ship getShip(String name) {
+        if (name == null) return null;
+        
+        synchronized(blocker) {
+            return ships.get(name);
+        }
+    }
+    
+    /**
+     * Creates new ship with a given name. If the name is used already,
+     * null returned. Same with null and whitespace-only names.
+     * @param name
+     * @return 
+     */
+    public Ship createNewShip(String name) {
+        if (name == null || name.trim().isEmpty()) return null;
+        
+        synchronized(blocker) {
+            if (getShip(name) != null) return null;
+            
+            Ship newShip = new Ship(name);
+            ships.put(name, newShip);
+            
+            return newShip;
+        }
+    }
+    
+    /**
+     * How many ships are there?
+     * @return 
+     */
+    public int getShipCount() {
+        synchronized(blocker) {
+            return ships.size();
+        }
+    }
+    
+    /**
+     * Deletes the ship from container. Can't delete last ship!
+     * @param ship
+     * @return true, if successfully deleted.
+     */
+    public boolean deleteShip(Ship ship) {
+        if (ship == null) return false;
+        
+        synchronized(blocker) {
+            if (getShipCount() < 2) return false;
+            
+            Ship res = ships.remove(ship.getName());
+            return (res != null);
+        }
+    }
+    
+    /**
+     * Changes ship's name and moves it to the appropriate key.
+     * New ship name shouldn't be used by another ship.
+     * New ship name shouldn't be empty or whitespace-only.
+     * New ship name should be different from the current one.
+     * Null parameters lead to false.
+     * @param oldName name of existing ship.
+     * @param newName desired new name.
+     * @return true, if renamed successfully, false otherwise.
+     */
+    public boolean renameShip(String oldName, String newName) {
+        if (oldName == null || newName == null) return false;
+        if (newName.trim().isEmpty()) return false;
+        if (oldName.equals(newName)) return false;
+        
+        synchronized(blocker) {
+            if (ships.containsKey(newName)) return false;
+            
+            Ship oldship = ships.remove(oldName);
+            if (oldship == null) return false;
+            oldship.setName(newName);
+            ships.put(newName, oldship);
+            
+            return true;
+        }
     }
 }

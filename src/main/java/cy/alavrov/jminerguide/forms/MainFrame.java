@@ -47,6 +47,7 @@ import java.awt.Image;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import javax.imageio.ImageIO;
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import org.joda.time.Seconds;
 import org.joda.time.format.PeriodFormatter;
@@ -232,6 +233,12 @@ public final class MainFrame extends javax.swing.JFrame {
         DefaultComboBoxModel<Ship> model = sCont.getShipModel();
         jComboBoxShip.setModel(model);
         
+        if (sCont.getShipCount() < 2) {
+            jButtonShipRemove.setEnabled(false);
+        } else {
+            jButtonShipRemove.setEnabled(true);
+        }
+        
         // we're assuming here that there is always something in the combobox
         
         if (loadSelection) {
@@ -244,6 +251,10 @@ public final class MainFrame extends javax.swing.JFrame {
             loadSelectedShip();
         }
         
+    }
+    
+    public void setSelectedShip(Ship ship) {
+        jComboBoxShip.setSelectedItem(ship);
     }
     
     public void loadSelectedShip() {
@@ -283,7 +294,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxRig1.setSelectedItem(ship.getRig1());
         jComboBoxRig2.setSelectedItem(ship.getRig2());
         jComboBoxRig3.setSelectedItem(ship.getRig3());
-        updateCalibration(ship);
+        updateCalibrationLabel(ship);
     }
     
     public DefaultComboBoxModel<Integer> getIntegerModel(int upto) {
@@ -351,7 +362,7 @@ public final class MainFrame extends javax.swing.JFrame {
         }
     }
     
-    public void updateCalibration(Ship ship) {
+    public void updateCalibrationLabel(Ship ship) {
         int calibration = 0;
         calibration += ship.getRig1().getCalibrationCost();
         calibration += ship.getRig2().getCalibrationCost();
@@ -375,6 +386,7 @@ public final class MainFrame extends javax.swing.JFrame {
         JButtonManageAPI = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
+        jButtonSave = new javax.swing.JButton();
         JButtonQuit = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
@@ -496,7 +508,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 997, Short.MAX_VALUE)
+            .addGap(0, 966, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -505,7 +517,19 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jToolBar1.add(jPanel1);
 
+        jButtonSave.setText("Save");
+        jButtonSave.setFocusable(false);
+        jButtonSave.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonSave.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButtonSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonSaveActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(jButtonSave);
+
         JButtonQuit.setText("Quit");
+        JButtonQuit.setToolTipText("");
         JButtonQuit.setFocusable(false);
         JButtonQuit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         JButtonQuit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -627,11 +651,32 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jLabel32.setText("Calibration:");
 
+        jComboBoxShip.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxShipItemStateChanged(evt);
+            }
+        });
+
         jButtonShipAdd.setText("Add");
+        jButtonShipAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonShipAddActionPerformed(evt);
+            }
+        });
 
         jButtonShipRemove.setText("Remove");
+        jButtonShipRemove.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonShipRemoveActionPerformed(evt);
+            }
+        });
 
         jButtonShipRename.setText("Rename");
+        jButtonShipRename.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonShipRenameActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -1661,7 +1706,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxRig1.setSelectedItem(ship.getRig1());
         jComboBoxRig2.setSelectedItem(ship.getRig2());
         jComboBoxRig3.setSelectedItem(ship.getRig3());
-        updateCalibration(ship);
+        updateCalibrationLabel(ship);
         
         recalculateStats();
         processEvents = true;
@@ -1794,7 +1839,7 @@ public final class MainFrame extends javax.swing.JFrame {
         if (!ship.setRig1(rig)) {
             jComboBoxRig1.setSelectedItem(ship.getRig1());
         }
-        updateCalibration(ship);
+        updateCalibrationLabel(ship);
         
         recalculateStats();
         processEvents = true;
@@ -1810,7 +1855,7 @@ public final class MainFrame extends javax.swing.JFrame {
         if (!ship.setRig2(rig)) {
             jComboBoxRig2.setSelectedItem(ship.getRig2());
         }
-        updateCalibration(ship);
+        updateCalibrationLabel(ship);
         
         recalculateStats();
         processEvents = true;
@@ -1826,11 +1871,56 @@ public final class MainFrame extends javax.swing.JFrame {
         if (!ship.setRig3(rig)) {
             jComboBoxRig3.setSelectedItem(ship.getRig3());
         }
-        updateCalibration(ship);
+        updateCalibrationLabel(ship);
         
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxRig3ItemStateChanged
+
+    private void jComboBoxShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxShipItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
+        loadSelectedShip();
+        
+        recalculateStats();
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxShipItemStateChanged
+
+    private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
+        dCont.save();
+        processEvents = true;
+    }//GEN-LAST:event_jButtonSaveActionPerformed
+
+    private void jButtonShipAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonShipAddActionPerformed
+        JNewShipDialog dlg = new JNewShipDialog(this, true, dCont.getShipContainer());
+        
+        dlg.setLocationRelativeTo(MainFrame.this);
+        dlg.setVisible(true);
+    }//GEN-LAST:event_jButtonShipAddActionPerformed
+
+    private void jButtonShipRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonShipRemoveActionPerformed
+        Ship ship = (Ship) jComboBoxShip.getSelectedItem();
+        if (ship == null || dCont.getShipContainer().getShipCount() < 2) return;
+        JRemoveShip dlg = new JRemoveShip(this, true, ship, dCont.getShipContainer());
+        
+        dlg.setLocationRelativeTo(MainFrame.this);
+        dlg.setVisible(true);
+    }//GEN-LAST:event_jButtonShipRemoveActionPerformed
+
+    private void jButtonShipRenameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonShipRenameActionPerformed
+        Ship ship = (Ship) jComboBoxShip.getSelectedItem();
+        if (ship == null) return;
+        JChangeShipName dlg = new JChangeShipName(this, true, ship, dCont.getShipContainer());
+        
+        dlg.setLocationRelativeTo(MainFrame.this);
+        dlg.setVisible(true);
+    }//GEN-LAST:event_jButtonShipRenameActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1839,6 +1929,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel JLabel14;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButtonCharReload;
+    private javax.swing.JButton jButtonSave;
     private javax.swing.JButton jButtonShipAdd;
     private javax.swing.JButton jButtonShipRemove;
     private javax.swing.JButton jButtonShipRename;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Andrey Lavrov <lavroff@gmail.com>
+ * Copyright (c) 2015, Andrey Lavrov <lavroff@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,25 +23,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 package cy.alavrov.jminerguide.forms;
 
-import java.awt.event.WindowEvent;
-import javax.swing.JFrame;
+import cy.alavrov.jminerguide.data.api.ship.Ship;
+import cy.alavrov.jminerguide.data.api.ship.ShipContainer;
 
 /**
  *
- * @author alavrov
+ * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class JQuitDialog extends javax.swing.JDialog {
+public class JRemoveShip extends javax.swing.JDialog {
 
+    private final MainFrame parent;
+    private final Ship ship;
+    private final ShipContainer sCont;
+    
     /**
-     * Creates new form JQuidDialog
+     * Creates new form JRemoveShip
      */
-    public JQuitDialog(java.awt.Frame parent, boolean modal) {
+    public JRemoveShip(MainFrame parent, boolean modal, Ship ship, ShipContainer sCont) {
         super(parent, modal);
         initComponents();
-        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        
+        this.parent = parent;
+        this.ship = ship;
+        this.sCont = sCont;
+        
+        jLabelQuestion.setText(jLabelQuestion.getText().replace("%name%", ship.getName()));
+        this.pack();
+        this.setResizable(false);
     }
 
     /**
@@ -54,32 +64,33 @@ public class JQuitDialog extends javax.swing.JDialog {
     private void initComponents() {
 
         jLabel2 = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
-        JQuitButtonCancel = new javax.swing.JButton();
-        JQuitButtonYes = new javax.swing.JButton();
+        jLabelQuestion = new javax.swing.JLabel();
+        jButtonDelete = new javax.swing.JButton();
+        jButtonCancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setAlwaysOnTop(true);
-        setModalityType(java.awt.Dialog.ModalityType.APPLICATION_MODAL);
-        setResizable(false);
+        setTitle("Delete Ship");
+        setMaximumSize(new java.awt.Dimension(2147483647, 86));
+        setMinimumSize(new java.awt.Dimension(290, 86));
+        setModal(true);
         setType(java.awt.Window.Type.UTILITY);
 
         jLabel2.setBackground(new java.awt.Color(255, 204, 204));
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/warning.png"))); // NOI18N
 
-        jLabel1.setText("Do you really want to quit?");
+        jLabelQuestion.setText("Do you really want to delete \"%name%\"?");
 
-        JQuitButtonCancel.setText("Cancel");
-        JQuitButtonCancel.addActionListener(new java.awt.event.ActionListener() {
+        jButtonDelete.setText("Delete");
+        jButtonDelete.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                JQuitButtonCancelActionPerformed(evt);
+                jButtonDeleteActionPerformed(evt);
             }
         });
 
-        JQuitButtonYes.setText("Yes");
-        JQuitButtonYes.addActionListener(new java.awt.event.ActionListener() {
+        jButtonCancel.setText("Cancel");
+        jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                JQuitButtonYesActionPerformed(evt);
+                jButtonCancelActionPerformed(evt);
             }
         });
 
@@ -92,47 +103,54 @@ public class JQuitDialog extends javax.swing.JDialog {
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabelQuestion)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(JQuitButtonYes)
+                        .addComponent(jButtonDelete)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(JQuitButtonCancel))
-                    .addComponent(jLabel1))
+                        .addComponent(jButtonCancel)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(15, 15, 15)
+                        .addContainerGap()
+                        .addComponent(jLabel2))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(23, 23, 23)
+                        .addComponent(jLabelQuestion)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(JQuitButtonYes)
-                            .addComponent(JQuitButtonCancel)))
-                    .addComponent(jLabel2))
-                .addContainerGap(14, Short.MAX_VALUE))
+                            .addComponent(jButtonDelete)
+                            .addComponent(jButtonCancel))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void JQuitButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JQuitButtonCancelActionPerformed
+    private void jButtonDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteActionPerformed
+        if (sCont.deleteShip(ship)) {
+            parent.loadShipList(true);
+            parent.loadSelectedShip();
+            parent.recalculateStats();
+        }
+        
         this.setVisible(false);
         this.dispose();
-    }//GEN-LAST:event_JQuitButtonCancelActionPerformed
+    }//GEN-LAST:event_jButtonDeleteActionPerformed
 
-    private void JQuitButtonYesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JQuitButtonYesActionPerformed
+    private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
         this.setVisible(false);
         this.dispose();
-        System.exit(0);
-    }//GEN-LAST:event_JQuitButtonYesActionPerformed
-  
+    }//GEN-LAST:event_jButtonCancelActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton JQuitButtonCancel;
-    private javax.swing.JButton JQuitButtonYes;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JButton jButtonCancel;
+    private javax.swing.JButton jButtonDelete;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabelQuestion;
     // End of variables declaration//GEN-END:variables
 }
