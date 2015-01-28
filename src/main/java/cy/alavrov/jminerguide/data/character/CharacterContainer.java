@@ -30,6 +30,7 @@ import cy.alavrov.jminerguide.log.JMGLogger;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
@@ -52,8 +53,11 @@ public class CharacterContainer {
     private final String path;
     
     private LinkedHashMap<Integer, APIKey> keys;
+    private HashMap<String, EVECharacter> charMap;
     
     private final Object blocker = new Object();
+    
+    private String selectedMiner;
     
     /**
      * Constructor.
@@ -62,6 +66,8 @@ public class CharacterContainer {
     public CharacterContainer(String path) {
         this.path = path;
         keys = new LinkedHashMap<>();
+        selectedMiner = all5.getName();
+        reloadCharMap();
     }
     
     /**
@@ -77,11 +83,15 @@ public class CharacterContainer {
         }
         
         LinkedHashMap<Integer, APIKey> newkeys = new LinkedHashMap<>();
+        String lastSelected = null;
         
         SAXBuilder builder = new SAXBuilder();
         try {
             Document doc = builder.build(src);
             Element rootNode = doc.getRootElement();
+            
+            lastSelected = rootNode.getChildText("lastselectedminer");
+            
             List<Element> keyList = rootNode.getChildren("apikey");
             for (Element keyEl : keyList) {
                 APIKey key = new APIKey(keyEl);
@@ -91,7 +101,11 @@ public class CharacterContainer {
             JMGLogger.logSevere("Unable to load a configuration file for characters", e);
         } 
         
+        if (lastSelected == null) lastSelected = all5.getName();
+        
+        selectedMiner = lastSelected;
         keys = newkeys;
+        reloadCharMap();
     }
     
     /**
@@ -114,6 +128,10 @@ public class CharacterContainer {
         
         Element root = new Element("apikeys");
         Document doc = new Document(root);
+                
+        String lastMiner = selectedMiner;
+        if (lastMiner == null) lastMiner = all5.getName();
+        root.addContent(new Element("lastselectedminer").setText(lastMiner));
         
         synchronized(blocker) {
             for (APIKey key : keys.values()) {
@@ -147,6 +165,38 @@ public class CharacterContainer {
         }
         
         return out;
+    }
+    
+    /**
+     * Reloads character name to character map. Stores only one character per name.
+     */
+    public void reloadCharMap() {
+        synchronized(blocker) {
+            HashMap<String, EVECharacter> newCharMap = new HashMap<>();
+            
+            newCharMap.put(all5.getName(), all5);
+            newCharMap.put(all0.getName(), all0);
+            for (APIKey key : keys.values()) {
+                for (EVECharacter eveChar : key.getCharacters()) {
+                    newCharMap.put(eveChar.getName(), eveChar);
+                }
+            }
+            
+            charMap = newCharMap;
+        }
+    }
+    
+    /**
+     * Returns an EVE character by a name. If there is more than one character
+     * in a storage, returns only one.
+     * @param name
+     * @return 
+     */
+    public EVECharacter getCharacterByName(String name) {
+        if (name == null) return null;
+        synchronized(blocker) {
+            return charMap.get(name);
+        }
     }
     
     /**
@@ -229,5 +279,28 @@ public class CharacterContainer {
         }
         
         return out;
+    }
+    
+    /**
+     * Sets name of selected miner.
+     * @param name 
+     */
+    public void setSelectedMiner(String name) {
+        synchronized(blocker) {
+            selectedMiner = name;
+        }
+    }
+    
+    /**
+     * Returns last selected miner (all5, if there were none).
+     * @return 
+     */
+    public EVECharacter getLastSelectedMiner() {
+        synchronized(blocker) {
+            EVECharacter ret = charMap.get(selectedMiner);
+            if (ret == null) ret = all5;
+            
+            return ret;
+        }
     }
 }

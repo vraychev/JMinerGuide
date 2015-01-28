@@ -27,7 +27,6 @@
 package cy.alavrov.jminerguide.forms;
 
 import cy.alavrov.jminerguide.data.DataContainer;
-import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 
 /**
@@ -39,8 +38,8 @@ public class JQuitDialog extends javax.swing.JDialog {
     /**
      * Creates new form JQuidDialog
      */
-    public JQuitDialog(java.awt.Frame parent, boolean modal, DataContainer dCont) {
-        super(parent, modal);
+    public JQuitDialog(java.awt.Frame parent, DataContainer dCont) {
+        super(parent, true);
         initComponents();
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.dCont = dCont;

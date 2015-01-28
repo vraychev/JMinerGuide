@@ -48,10 +48,14 @@ public class ShipContainer {
     private final String path;
     
     private final Object blocker = new Object();
+    private String selectedShip;
     
     public ShipContainer(String path) {
         this.path = path;
         ships = new LinkedHashMap<>();
+        Ship ship = new Ship("T1 Venture");
+        ships.put(ship.getName(), ship);
+        selectedShip = ship.getName();
     }
         
     
@@ -68,11 +72,13 @@ public class ShipContainer {
         }
         
         LinkedHashMap<String, Ship> newShips = new LinkedHashMap<>();
+        String lastSelectedShip = null;
         
         SAXBuilder builder = new SAXBuilder();
         try {
             Document doc = builder.build(src);
             Element rootNode = doc.getRootElement();
+            lastSelectedShip = rootNode.getChildText("lastselectedship");
             List<Element> shipList = rootNode.getChildren("ship");
             for (Element shipEl : shipList) {
                 Ship ship = new Ship(shipEl);
@@ -83,6 +89,13 @@ public class ShipContainer {
         } 
         
         ships = newShips;
+        if (ships.isEmpty()) {
+            Ship ship = new Ship("T1 Venture");
+            ships.put(ship.getName(), ship);
+        }
+        // ships is never empty, so it's ok.
+        if (lastSelectedShip == null) lastSelectedShip = ships.values().iterator().next().getName();
+        selectedShip = lastSelectedShip;
     }
     
     /**
@@ -105,8 +118,12 @@ public class ShipContainer {
         
         Element root = new Element("ships");
         Document doc = new Document(root);
-        
+                
         synchronized(blocker) {
+            String lastShip = selectedShip;
+            if (lastShip == null) lastShip = ships.values().iterator().next().getName();            
+            root.addContent(new Element("lastselectedship").setText(lastShip));
+            
             for (Ship ship : ships.values()) {
                 Element elem = ship.getXMLElement();
                 root.addContent(elem);
@@ -223,6 +240,29 @@ public class ShipContainer {
             ships.put(newName, oldship);
             
             return true;
+        }
+    }
+    
+    /**
+     * Sets the name of a last selected ship.
+     * @param name 
+     */
+    public void setSelectedShip(String name) {
+        synchronized(blocker) {
+            selectedShip = name;
+        }
+    }
+    
+    /**
+     * Returns last selected ship.
+     * @return 
+     */
+    public Ship getLastSelectedShip() {
+        synchronized(blocker) {
+            Ship ret = ships.get(selectedShip);
+            // ships is never empty, so it's safe
+            if (ret == null) ret = ships.values().iterator().next();
+            return ret;
         }
     }
 }

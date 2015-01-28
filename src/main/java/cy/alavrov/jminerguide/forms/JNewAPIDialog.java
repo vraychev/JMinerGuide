@@ -53,8 +53,8 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
     /**
      * Creates new form JNewAPIDialog
      */
-    public JNewAPIDialog(JAPIDialog parent, boolean modal, DataContainer cont) {
-        super(parent, modal);
+    public JNewAPIDialog(JAPIDialog parent, DataContainer cont) {
+        super(parent, true);
         initComponents();
         dCont = cont;
         this.parent = parent;
@@ -394,6 +394,7 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
         loading = false;
         
         if (success) {
+            dCont.getCharacterContainer().reloadCharMap();
             tempKey = processed;;
             jTextFieldKeyID.setEnabled(false);
             jTextFieldVerification.setEnabled(false);

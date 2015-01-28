@@ -32,7 +32,7 @@ import cy.alavrov.jminerguide.data.api.ship.ShipContainer;
  *
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class JRemoveShip extends javax.swing.JDialog {
+public class JRemoveShipDialog extends javax.swing.JDialog {
 
     private final MainFrame parent;
     private final Ship ship;
@@ -41,8 +41,8 @@ public class JRemoveShip extends javax.swing.JDialog {
     /**
      * Creates new form JRemoveShip
      */
-    public JRemoveShip(MainFrame parent, boolean modal, Ship ship, ShipContainer sCont) {
-        super(parent, modal);
+    public JRemoveShipDialog(MainFrame parent, Ship ship, ShipContainer sCont) {
+        super(parent, true);
         initComponents();
         
         this.parent = parent;

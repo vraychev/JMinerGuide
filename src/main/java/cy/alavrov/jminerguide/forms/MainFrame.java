@@ -94,8 +94,13 @@ public final class MainFrame extends javax.swing.JFrame {
         initComponents();                    
         this.setLocationRelativeTo(null);
         
-        loadMinerList(true);
-        loadShipList(true);
+        loadMinerList(false);
+        jComboBoxMiner.setSelectedItem(dCont.getCharacterContainer().getLastSelectedMiner());
+        loadSelectedMiner();
+        
+        loadShipList(false);
+        jComboBoxShip.setSelectedItem(dCont.getShipContainer().getLastSelectedShip());
+        loadSelectedShip();
         
         recalculateStats();
         processEvents = true;
@@ -164,6 +169,7 @@ public final class MainFrame extends javax.swing.JFrame {
     public void loadSelectedMiner() {
         // if we got there, selection is not null.
         EVECharacter sel = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        dCont.getCharacterContainer().setSelectedMiner(sel.getName());
         
         if (sel.isPreset()) {
             jButtonCharReload.setEnabled(false);
@@ -259,6 +265,8 @@ public final class MainFrame extends javax.swing.JFrame {
     
     public void loadSelectedShip() {
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
+        
+        dCont.getShipContainer().setSelectedShip(ship.getName());
         Hull hull = ship.getHull();
         
         jComboBoxHull.setSelectedItem(hull);
@@ -1271,13 +1279,13 @@ public final class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JButtonQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JButtonQuitActionPerformed
-        JQuitDialog dlg = new JQuitDialog(this, true, dCont);
+        JQuitDialog dlg = new JQuitDialog(this, dCont);
         dlg.setLocationRelativeTo(this);
         dlg.setVisible(true);
     }//GEN-LAST:event_JButtonQuitActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-        JQuitDialog dlg = new JQuitDialog(this, true, dCont);
+        JQuitDialog dlg = new JQuitDialog(this, dCont);
         dlg.setLocationRelativeTo(this);
         dlg.setVisible(true);
     }//GEN-LAST:event_formWindowClosing
@@ -1307,7 +1315,7 @@ public final class MainFrame extends javax.swing.JFrame {
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
                 
-        final JWaitDialog dlg = new JWaitDialog(MainFrame.this, true, "Character Data");
+        final JWaitDialog dlg = new JWaitDialog(this, "Character Data", dCont);
         
         // As setVisible blocks until the dialog is closed,
         // we'll have to run it in a different thread.        
@@ -1896,7 +1904,7 @@ public final class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonSaveActionPerformed
 
     private void jButtonShipAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonShipAddActionPerformed
-        JNewShipDialog dlg = new JNewShipDialog(this, true, dCont.getShipContainer());
+        JNewShipDialog dlg = new JNewShipDialog(this, dCont.getShipContainer());
         
         dlg.setLocationRelativeTo(MainFrame.this);
         dlg.setVisible(true);
@@ -1905,7 +1913,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private void jButtonShipRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonShipRemoveActionPerformed
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         if (ship == null || dCont.getShipContainer().getShipCount() < 2) return;
-        JRemoveShip dlg = new JRemoveShip(this, true, ship, dCont.getShipContainer());
+        JRemoveShipDialog dlg = new JRemoveShipDialog(this, ship, dCont.getShipContainer());
         
         dlg.setLocationRelativeTo(MainFrame.this);
         dlg.setVisible(true);
@@ -1914,7 +1922,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private void jButtonShipRenameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonShipRenameActionPerformed
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         if (ship == null) return;
-        JChangeShipName dlg = new JChangeShipName(this, true, ship, dCont.getShipContainer());
+        JChangeShipNameDialog dlg = new JChangeShipNameDialog(this, ship, dCont.getShipContainer());
         
         dlg.setLocationRelativeTo(MainFrame.this);
         dlg.setVisible(true);

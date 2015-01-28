@@ -30,16 +30,8 @@ import cy.alavrov.jminerguide.data.api.ship.Ship;
 import cy.alavrov.jminerguide.data.api.ship.ShipContainer;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.log.JMGLogger;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.input.SAXBuilder;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 
 /**
  * A container for all the data.

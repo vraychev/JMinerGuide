@@ -25,6 +25,7 @@
  */
 package cy.alavrov.jminerguide.forms;
 
+import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.api.ICharLoadingResultReceiver;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
 
@@ -34,16 +35,19 @@ import cy.alavrov.jminerguide.data.character.EVECharacter;
  */
 public class JWaitDialog extends javax.swing.JDialog implements ICharLoadingResultReceiver{
     private MainFrame parent;
+    private DataContainer dCont;
     private volatile boolean finished = false;
+    
     
     /**
      * Creates new form JWaitDialog
      */
-    public JWaitDialog(MainFrame parent, boolean modal, String title) {
-        super(parent, modal);
+    public JWaitDialog(MainFrame parent, String title, DataContainer dCont) {
+        super(parent, true);
         initComponents();
         this.parent = parent;
         this.setTitle(title);
+        this.dCont = dCont;
     }
 
     /**
@@ -92,6 +96,7 @@ public class JWaitDialog extends javax.swing.JDialog implements ICharLoadingResu
     @Override
     public synchronized void loadingDone(boolean success, String result, EVECharacter processedChar) {
         finished = true;
+        dCont.getCharacterContainer().reloadCharMap();
         parent.loadMinerList(true);
         parent.recalculateStats();
         this.setVisible(false);

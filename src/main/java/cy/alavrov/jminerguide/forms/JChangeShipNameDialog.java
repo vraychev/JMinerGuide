@@ -35,7 +35,7 @@ import javax.swing.text.AbstractDocument;
  *
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class JChangeShipName extends javax.swing.JDialog {
+public class JChangeShipNameDialog extends javax.swing.JDialog {
     
     private final ShipContainer sCont;
     private final Ship ship;
@@ -44,8 +44,8 @@ public class JChangeShipName extends javax.swing.JDialog {
     /**
      * Creates new form JChangeShipName
      */
-    public JChangeShipName(MainFrame parent, boolean modal, Ship ship, ShipContainer sCont) {
-        super(parent, modal);
+    public JChangeShipNameDialog(MainFrame parent, Ship ship, ShipContainer sCont) {
+        super(parent, true);
         initComponents();
         
         this.parent = parent;
@@ -80,7 +80,7 @@ public class JChangeShipName extends javax.swing.JDialog {
             return;
         }
         
-        jLabelStatus.setText("OK");
+        jLabelStatus.setText("");
         jButtonRename.setEnabled(true);
     }
 

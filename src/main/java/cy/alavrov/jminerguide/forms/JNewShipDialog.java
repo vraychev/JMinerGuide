@@ -43,8 +43,8 @@ public class JNewShipDialog extends javax.swing.JDialog {
     /**
      * Creates new form JNewShipDialog
      */
-    public JNewShipDialog(MainFrame parent, boolean modal, ShipContainer sCont) {
-        super(parent, modal);
+    public JNewShipDialog(MainFrame parent, ShipContainer sCont) {
+        super(parent, true);
         initComponents();
         this.parent = parent;
         this.sCont = sCont;
@@ -70,7 +70,7 @@ public class JNewShipDialog extends javax.swing.JDialog {
             return;
         }
         
-        jLabelStatus.setText("OK");
+        jLabelStatus.setText("");
         jButtonCreate.setEnabled(true);
     }
     

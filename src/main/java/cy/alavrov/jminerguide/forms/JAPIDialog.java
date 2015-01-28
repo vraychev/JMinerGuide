@@ -417,7 +417,7 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         if (loading) return;
         
         updated = true;
-        JNewAPIDialog dlg = new JNewAPIDialog(this, true, dCont);
+        JNewAPIDialog dlg = new JNewAPIDialog(this, dCont);
         dlg.setLocationRelativeTo(this);
         dlg.setVisible(true);
     }//GEN-LAST:event_jButtonAddKeyActionPerformed
@@ -542,8 +542,9 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         CharacterContainer cCont = dCont.getCharacterContainer();
         
         enableAll();
-        if (success) {
+        if (success) {            
             cCont.updateAPIKey(processedKey);
+            cCont.reloadCharMap();
             loadKeys(false);
 
             int keysTotal = jListAPIKey.getModel().getSize();
