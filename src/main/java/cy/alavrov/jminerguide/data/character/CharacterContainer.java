@@ -58,6 +58,7 @@ public class CharacterContainer {
     private final Object blocker = new Object();
     
     private String selectedMiner;
+    private String selectedBooster;
     
     /**
      * Constructor.
@@ -67,6 +68,7 @@ public class CharacterContainer {
         this.path = path;
         keys = new LinkedHashMap<>();
         selectedMiner = all5.getName();
+        selectedBooster = all0.getName();
         reloadCharMap();
     }
     
@@ -83,14 +85,16 @@ public class CharacterContainer {
         }
         
         LinkedHashMap<Integer, APIKey> newkeys = new LinkedHashMap<>();
-        String lastSelected = null;
+        String lastSelectedMiner = null;
+        String lastSelectedBooster = null;
         
         SAXBuilder builder = new SAXBuilder();
         try {
             Document doc = builder.build(src);
             Element rootNode = doc.getRootElement();
             
-            lastSelected = rootNode.getChildText("lastselectedminer");
+            lastSelectedMiner = rootNode.getChildText("lastselectedminer");
+            lastSelectedBooster = rootNode.getChildText("lastselectedbooster");
             
             List<Element> keyList = rootNode.getChildren("apikey");
             for (Element keyEl : keyList) {
@@ -101,9 +105,11 @@ public class CharacterContainer {
             JMGLogger.logSevere("Unable to load a configuration file for characters", e);
         } 
         
-        if (lastSelected == null) lastSelected = all5.getName();
+        if (lastSelectedMiner == null) lastSelectedMiner = all5.getName();
+        if (lastSelectedBooster == null) lastSelectedBooster = all0.getName();
         
-        selectedMiner = lastSelected;
+        selectedMiner = lastSelectedMiner;
+        selectedBooster = lastSelectedBooster;
         keys = newkeys;
         reloadCharMap();
     }
@@ -129,11 +135,15 @@ public class CharacterContainer {
         Element root = new Element("apikeys");
         Document doc = new Document(root);
                 
-        String lastMiner = selectedMiner;
-        if (lastMiner == null) lastMiner = all5.getName();
-        root.addContent(new Element("lastselectedminer").setText(lastMiner));
-        
         synchronized(blocker) {
+            String lastMiner = selectedMiner;
+            if (lastMiner == null) lastMiner = all5.getName();
+            root.addContent(new Element("lastselectedminer").setText(lastMiner));
+
+            String lastBooster = selectedBooster;
+            if (lastBooster == null) lastBooster = all0.getName();
+            root.addContent(new Element("lastselectedbooster").setText(lastBooster));        
+        
             for (APIKey key : keys.values()) {
                 Element elem = key.getXMLElement();
                 root.addContent(elem);
@@ -299,6 +309,29 @@ public class CharacterContainer {
         synchronized(blocker) {
             EVECharacter ret = charMap.get(selectedMiner);
             if (ret == null) ret = all5;
+            
+            return ret;
+        }
+    }
+    
+    /**
+     * Sets name of selected miner.
+     * @param name 
+     */
+    public void setSelectedBooster(String name) {
+        synchronized(blocker) {
+            selectedBooster = name;
+        }
+    }
+    
+    /**
+     * Returns last selected miner (all5, if there were none).
+     * @return 
+     */
+    public EVECharacter getLastSelectedBooster() {
+        synchronized(blocker) {
+            EVECharacter ret = charMap.get(selectedBooster);
+            if (ret == null) ret = all0;
             
             return ret;
         }

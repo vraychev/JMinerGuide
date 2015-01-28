@@ -63,6 +63,13 @@ public class EVECharacter {
     public final static int SKILL_MINING_DRONE_OPERATION = 3438;
     public final static int SKILL_MINING_FRIGATE = 32918;
     
+    public final static int SKILL_MINING_FOREMAN = 22536;
+    public final static int SKILL_MINING_DIRECTOR = 22552;
+    public final static int SKILL_WARFARE_LINK_SPECIALIST = 3354;
+    public final static int SKILL_INDUSTRIAL_RECONFIGURATION = 28585;
+    public final static int SKILL_INDUSTRIAL_COMMAND_SHIPS = 29637;
+    public final static int SKILL_CAPITAL_INDUSTRIAL_SHIPS = 28374;
+    
     /**
      * Parent API key - we need its parameters to make API requests 
      * and to distinct same characters from different APIs.

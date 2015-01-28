@@ -97,7 +97,7 @@ public class JWaitDialog extends javax.swing.JDialog implements ICharLoadingResu
     public synchronized void loadingDone(boolean success, String result, EVECharacter processedChar) {
         finished = true;
         dCont.getCharacterContainer().reloadCharMap();
-        parent.loadMinerList(true);
+        parent.loadCharacterList(true);
         parent.recalculateStats();
         this.setVisible(false);
         this.dispose();

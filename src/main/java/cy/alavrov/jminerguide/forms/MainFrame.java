@@ -94,9 +94,11 @@ public final class MainFrame extends javax.swing.JFrame {
         initComponents();                    
         this.setLocationRelativeTo(null);
         
-        loadMinerList(false);
+        loadCharacterList(false);
         jComboBoxMiner.setSelectedItem(dCont.getCharacterContainer().getLastSelectedMiner());
-        loadSelectedMiner();
+        loadSelectedMiner();        
+        jComboBoxBooster.setSelectedItem(dCont.getCharacterContainer().getLastSelectedBooster());
+        loadSelectedBooster();
         
         loadShipList(false);
         jComboBoxShip.setSelectedItem(dCont.getShipContainer().getLastSelectedShip());
@@ -143,25 +145,37 @@ public final class MainFrame extends javax.swing.JFrame {
         ));
     }
     
-    public void loadMinerList(boolean loadSelection) {
+    public void loadCharacterList(boolean loadSelection) {
         
         CharacterContainer cCont = dCont.getCharacterContainer();    
         
-        EVECharacter sel = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        EVECharacter miner = (EVECharacter) jComboBoxMiner.getSelectedItem();
         
         DefaultComboBoxModel<EVECharacter> model = cCont.getCharModel();
         jComboBoxMiner.setModel(model);
         
+        EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
+        model = cCont.getCharModel(); // models have to be different objects.
+        jComboBoxBooster.setModel(model);
+        
         // we're assuming here that there is always something in the combobox
         
         if (loadSelection) {
-            if (sel == null) {
+            if (miner == null) {
                 jComboBoxMiner.setSelectedIndex(0);
             } else {
-                jComboBoxMiner.setSelectedItem(sel);
+                jComboBoxMiner.setSelectedItem(miner);
             }
             
             loadSelectedMiner();
+            
+            if (booster == null) {
+                jComboBoxBooster.setSelectedIndex(0);
+            } else {
+                jComboBoxBooster.setSelectedItem(booster);
+            }
+            
+            loadSelectedBooster();
         }
         
     }
@@ -228,6 +242,47 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxImplant10.setSelectedItem(sel.getSlot10Implant());
         
         jCheckBoxMichi.setSelected(sel.getSlot7Implant() == Implant.MICHI);
+    }
+    
+    public void loadSelectedBooster() {
+        // if we got there, selection is not null.
+        EVECharacter sel = (EVECharacter) jComboBoxBooster.getSelectedItem();
+        dCont.getCharacterContainer().setSelectedBooster(sel.getName());
+        
+        if (sel.isPreset()) {
+            jButtonBoosterReload.setEnabled(false);
+            
+            jComboBoxMForeman.setEnabled(false);
+            jComboBoxMDirector.setEnabled(false);
+            jComboBoxLinkSpec.setEnabled(false);
+            jComboBoxIReconf.setEnabled(false);
+            jComboBoxIComShips.setEnabled(false);
+            jComboBoxCapIShips.setEnabled(false);
+        } else {
+            jButtonBoosterReload.setEnabled(true);
+            
+            jComboBoxMForeman.setEnabled(true);
+            jComboBoxMDirector.setEnabled(true);
+            jComboBoxLinkSpec.setEnabled(true);
+            jComboBoxIReconf.setEnabled(true);
+            jComboBoxIComShips.setEnabled(true);
+            jComboBoxCapIShips.setEnabled(true);
+        } 
+        
+        jComboBoxMForeman.setSelectedItem(sel
+                .getSkillLevel(EVECharacter.SKILL_MINING_FOREMAN));
+        jComboBoxMDirector.setSelectedItem(sel
+                .getSkillLevel(EVECharacter.SKILL_MINING_DIRECTOR));
+        jComboBoxLinkSpec.setSelectedItem(sel
+                .getSkillLevel(EVECharacter.SKILL_WARFARE_LINK_SPECIALIST));
+        jComboBoxIReconf.setSelectedItem(sel
+                .getSkillLevel(EVECharacter.SKILL_INDUSTRIAL_RECONFIGURATION));
+        jComboBoxIComShips.setSelectedItem(sel
+                .getSkillLevel(EVECharacter.SKILL_INDUSTRIAL_COMMAND_SHIPS));
+        jComboBoxCapIShips.setSelectedItem(sel
+                .getSkillLevel(EVECharacter.SKILL_CAPITAL_INDUSTRIAL_SHIPS));
+        
+        jCheckBoxMindlink.setSelected(sel.getSlot7Implant() == Implant.MFMINDLINK);
     }
     
     public void loadShipList(boolean loadSelection) {
@@ -460,6 +515,26 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel13 = new javax.swing.JLabel();
         jCheckBoxMichi = new javax.swing.JCheckBox();
         jPanel3 = new javax.swing.JPanel();
+        jComboBoxBooster = new javax.swing.JComboBox<EVECharacter>();
+        jButtonBoosterReload = new javax.swing.JButton();
+        jLabel36 = new javax.swing.JLabel();
+        jComboBoxMForeman = new javax.swing.JComboBox<Integer>(skillLvls);
+        jLabel37 = new javax.swing.JLabel();
+        jComboBoxLinkSpec = new javax.swing.JComboBox<Integer>(skillLvls);
+        jLabel38 = new javax.swing.JLabel();
+        jComboBoxMDirector = new javax.swing.JComboBox<Integer>(skillLvls);
+        jLabel39 = new javax.swing.JLabel();
+        jComboBoxIReconf = new javax.swing.JComboBox<Integer>(skillLvls);
+        jLabel40 = new javax.swing.JLabel();
+        jComboBoxIComShips = new javax.swing.JComboBox<Integer>(skillLvls);
+        jLabel41 = new javax.swing.JLabel();
+        jComboBoxCapIShips = new javax.swing.JComboBox<Integer>(skillLvls);
+        jCheckBoxMindlink = new javax.swing.JCheckBox();
+        jComboBoxBoosterShip = new javax.swing.JComboBox();
+        jComboBoxLaserOptimization = new javax.swing.JComboBox();
+        jComboBoxLazerField = new javax.swing.JComboBox();
+        jCheckBoxDeployedMode = new javax.swing.JCheckBox();
+        jLabel42 = new javax.swing.JLabel();
         jPanel6 = new javax.swing.JPanel();
         jLabel19 = new javax.swing.JLabel();
         jLabelYield = new javax.swing.JLabel();
@@ -1074,15 +1149,121 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Booster"));
 
+        jComboBoxBooster.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxBoosterItemStateChanged(evt);
+            }
+        });
+
+        jButtonBoosterReload.setText("Reload");
+
+        jLabel36.setText("Mining Foreman");
+
+        jLabel37.setText("Warfare Link Specialist");
+
+        jLabel38.setText("Mining Director");
+
+        jLabel39.setText("Industrial Reconfiguration");
+
+        jLabel40.setText("Industrial Command Ships");
+
+        jLabel41.setText("Capital Industrial Ships");
+
+        jCheckBoxMindlink.setText("Mining Foreman Mindlink");
+
+        jCheckBoxDeployedMode.setText("Deployed Mode");
+
+        jLabel42.setText("Booster Ship");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 473, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel37, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel36, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel40, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jComboBoxIComShips, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jComboBoxLinkSpec, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jComboBoxMForeman, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addGap(174, 174, 174)
+                                .addComponent(jComboBoxIReconf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jLabel41, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jComboBoxCapIShips, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel39, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel38, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addComponent(jComboBoxMDirector, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jComboBoxBooster, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonBoosterReload, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jComboBoxLaserOptimization, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jComboBoxLazerField, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jCheckBoxMindlink)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jComboBoxBoosterShip, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jCheckBoxDeployedMode))
+                            .addComponent(jLabel42))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 254, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jComboBoxBooster, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonBoosterReload, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel36)
+                    .addComponent(jLabel38)
+                    .addComponent(jComboBoxMDirector, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jComboBoxMForeman, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel37)
+                    .addComponent(jComboBoxLinkSpec, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel39)
+                    .addComponent(jComboBoxIReconf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel40)
+                    .addComponent(jComboBoxIComShips, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel41)
+                    .addComponent(jComboBoxCapIShips, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jCheckBoxMindlink)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
+                .addComponent(jLabel42)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jComboBoxBoosterShip, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCheckBoxDeployedMode))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jComboBoxLaserOptimization, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jComboBoxLazerField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Stats"));
@@ -1247,7 +1428,7 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(18, 18, 18)
                         .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1267,9 +1448,9 @@ public final class MainFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jPanel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -1928,21 +2109,38 @@ public final class MainFrame extends javax.swing.JFrame {
         dlg.setVisible(true);
     }//GEN-LAST:event_jButtonShipRenameActionPerformed
 
+    private void jComboBoxBoosterItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxBoosterItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;
+        
+        loadSelectedBooster();
+        recalculateStats();
+        
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxBoosterItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JButtonManageAPI;
     private javax.swing.JButton JButtonQuit;
     private javax.swing.JLabel JLabel14;
     private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButtonBoosterReload;
     private javax.swing.JButton jButtonCharReload;
     private javax.swing.JButton jButtonSave;
     private javax.swing.JButton jButtonShipAdd;
     private javax.swing.JButton jButtonShipRemove;
     private javax.swing.JButton jButtonShipRename;
+    private javax.swing.JCheckBox jCheckBoxDeployedMode;
     private javax.swing.JCheckBox jCheckBoxHauler;
     private javax.swing.JCheckBox jCheckBoxMichi;
+    private javax.swing.JCheckBox jCheckBoxMindlink;
     private javax.swing.JCheckBox jCheckBoxStatsMerco;
     private javax.swing.JComboBox<Integer> jComboBoxAstrogeo;
+    private javax.swing.JComboBox<EVECharacter> jComboBoxBooster;
+    private javax.swing.JComboBox jComboBoxBoosterShip;
+    private javax.swing.JComboBox<Integer> jComboBoxCapIShips;
     private javax.swing.JComboBox<MiningCrystalLevel> jComboBoxCrystal;
     private javax.swing.JComboBox<Integer> jComboBoxDroneCount;
     private javax.swing.JComboBox<Integer> jComboBoxDroneInt;
@@ -1954,9 +2152,16 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox<HarvestUpgrade> jComboBoxHUpgradeType;
     private javax.swing.JComboBox<Integer> jComboBoxHUpgrades;
     private javax.swing.JComboBox<Hull> jComboBoxHull;
+    private javax.swing.JComboBox<Integer> jComboBoxIComShips;
+    private javax.swing.JComboBox<Integer> jComboBoxIReconf;
     private javax.swing.JComboBox<Integer> jComboBoxIceHar;
     private javax.swing.JComboBox<Implant> jComboBoxImplant10;
     private javax.swing.JComboBox<Implant> jComboBoxImplant8;
+    private javax.swing.JComboBox jComboBoxLaserOptimization;
+    private javax.swing.JComboBox jComboBoxLazerField;
+    private javax.swing.JComboBox<Integer> jComboBoxLinkSpec;
+    private javax.swing.JComboBox<Integer> jComboBoxMDirector;
+    private javax.swing.JComboBox<Integer> jComboBoxMForeman;
     private javax.swing.JComboBox<EVECharacter> jComboBoxMiner;
     private javax.swing.JComboBox<Integer> jComboBoxMining;
     private javax.swing.JComboBox<Integer> jComboBoxMiningBarge;
@@ -1997,7 +2202,14 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
+    private javax.swing.JLabel jLabel36;
+    private javax.swing.JLabel jLabel37;
+    private javax.swing.JLabel jLabel38;
+    private javax.swing.JLabel jLabel39;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel40;
+    private javax.swing.JLabel jLabel41;
+    private javax.swing.JLabel jLabel42;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;

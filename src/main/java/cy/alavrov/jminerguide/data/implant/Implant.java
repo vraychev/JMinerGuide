@@ -44,11 +44,12 @@ public enum Implant {
     MX1005("Inherent Implants 'Highwall' Mining MX-1005", 22535, 10, 5, 0, 0),
     IH1001("Inherent Implants 'Yeti' Ice Harvesting IH-1001", 27103, 10, 0, 0, 1),
     IH1003("Inherent Implants 'Yeti' Ice Harvesting IH-1003", 22570, 10, 0, 0, 3),
-    IH1005("Inherent Implants 'Yeti' Ice Harvesting IH-1005", 22571, 10, 0, 0, 5);
+    IH1005("Inherent Implants 'Yeti' Ice Harvesting IH-1005", 22571, 10, 0, 0, 5),
+    MFMINDLINK("Mining Foreman Mindlink", 20700, 10, 0, 0, 0),;
     
     public final static Implant[] slot7Imps = {NOTHING, MICHI};
     public final static Implant[] slot8Imps = {NOTHING, GH801, GH803, GH805};
-    public final static Implant[] slot10Imps = {NOTHING, MX1001, MX1003, MX1005, IH1001, IH1003, IH1005};
+    public final static Implant[] slot10Imps = {NOTHING, MX1001, MX1003, MX1005, IH1001, IH1003, IH1005, MFMINDLINK};
     
     public final static Map<Integer, Implant> implants;
     
