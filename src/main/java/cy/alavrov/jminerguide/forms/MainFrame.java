@@ -109,7 +109,8 @@ public final class MainFrame extends javax.swing.JFrame {
     }
     
     public void recalculateStats() {                
-        EVECharacter sel = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        EVECharacter miner = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         
         Turret turret = ship.getTurret();
@@ -121,7 +122,7 @@ public final class MainFrame extends javax.swing.JFrame {
             if (jCheckBoxStatsMerco.isEnabled()) jCheckBoxStatsMerco.setEnabled(false);
         }
         
-        CalculatedStats newStats = new CalculatedStats(sel, ship, isMerco);
+        CalculatedStats newStats = new CalculatedStats(miner, booster, ship, isMerco);
         
         jLabelYield.setText(String.valueOf(fmt.format(newStats.getCombinedTurretYield())));
         jLabelYield.setToolTipText(fmt.format(newStats.getTurretYield())+" per turret");

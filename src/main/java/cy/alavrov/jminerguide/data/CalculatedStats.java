@@ -33,6 +33,7 @@ import cy.alavrov.jminerguide.data.api.ship.Rig;
 import cy.alavrov.jminerguide.data.api.ship.Ship;
 import cy.alavrov.jminerguide.data.api.ship.Turret;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
+import cy.alavrov.jminerguide.data.implant.Implant;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -114,7 +115,7 @@ public class CalculatedStats {
      */
     private final int secsForOreHold;
     
-    public CalculatedStats(EVECharacter miner, Ship ship, boolean mercoxit) {
+    public CalculatedStats(EVECharacter miner, EVECharacter booster, Ship ship, boolean mercoxit) {
 
         
         Turret turret = ship.getTurret();
@@ -153,6 +154,15 @@ public class CalculatedStats {
                         actualTurretYield = actualTurretYield * ship.getTurretCrystal().getOreMod();
                     }
                 }
+                
+                // ATM there is only one mining mindlink, so we'll just hardcode it in.
+                boolean haveMindlink = booster.getSlot10Implant() == Implant.MFMINDLINK;
+                if (haveMindlink) {
+                    actualTurretYield = actualTurretYield * 1.15f;
+                } else {
+                    actualTurretYield = actualTurretYield * (1 + 0.02f * booster.getSkillLevel(EVECharacter.SKILL_MINING_FOREMAN));
+                }
+                        
                 break;
                 
             case GASHARVESTER:
