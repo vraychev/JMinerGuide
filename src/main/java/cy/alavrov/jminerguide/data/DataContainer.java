@@ -26,6 +26,7 @@
 
 package cy.alavrov.jminerguide.data;
 
+import cy.alavrov.jminerguide.data.booster.BoosterShipContainer;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.data.ship.ShipContainer;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
@@ -50,6 +51,7 @@ public class DataContainer {
     
     private CharacterContainer chars;
     private ShipContainer ships;
+    private BoosterShipContainer boosters;
     
     private volatile Ship ship;
     
@@ -63,6 +65,7 @@ public class DataContainer {
         this.path = path;
         chars = new CharacterContainer(path);
         ships = new ShipContainer(path);
+        boosters = new BoosterShipContainer(path);
         pool = Executors.newCachedThreadPool();
     }
     
@@ -74,6 +77,10 @@ public class DataContainer {
         return ships;
     }
     
+    public BoosterShipContainer getBoosterContainer() {
+        return boosters;
+    }
+    
     /**
      * Loads all the data from configuration files.
      * Should normally be called only on the start of the application lifecycle.
@@ -82,6 +89,7 @@ public class DataContainer {
         JMGLogger.logWarning("Loading data...");
         chars.load();
         ships.load();
+        boosters.load();
     }
     
     /**
@@ -91,6 +99,7 @@ public class DataContainer {
         JMGLogger.logWarning("Saving data...");
         chars.save();
         ships.save();
+        boosters.save();
     }
     
     /**
