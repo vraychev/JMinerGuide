@@ -25,8 +25,8 @@
  */
 package cy.alavrov.jminerguide.forms;
 
-import cy.alavrov.jminerguide.data.api.ship.Ship;
-import cy.alavrov.jminerguide.data.api.ship.ShipContainer;
+import cy.alavrov.jminerguide.data.ship.Ship;
+import cy.alavrov.jminerguide.data.ship.ShipContainer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;

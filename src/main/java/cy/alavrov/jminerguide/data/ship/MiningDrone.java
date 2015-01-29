@@ -23,66 +23,56 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package cy.alavrov.jminerguide.data.api.ship;
+package cy.alavrov.jminerguide.data.ship;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Harvest upgrade.
+ * Mining dronesMap.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public enum HarvestUpgrade {
-    NOTHING("- nothing -", 0, 0, 0),
+public enum MiningDrone {
+    // NOTHING have bandwidth of 5 no avoid division to null.
     
-    MININGI("Mining Laser Upgrade I", 
-            22542, 5, 0),
-    ELARA("Elara Restrained Mining Laser Upgrade", 
-            22611, 8, 0),
-    MININGII("Mining Laser Upgrade II", 
-            28576, 9, 0),
-    AOEDE("'Aoede' Mining Laser Upgrade", 
-            22615, 10, 0),
-    CARPO("'Carpo' Mining Laser Upgrade", 
-            22613, 9, 0),
+    NOTHING ("- nothing -", 0, 0, 0, 5),
+    CIVILIAN ("Civilian Mining Drone", 
+            1202, 13, 60, 5),
+    MININGI ("Mining Drone I", 
+            10246, 20, 60, 5),
+    MININGII ("Mining Drone II", 
+            10250, 33, 60, 5),
+    HARVESTER ("Harvester Mining Drone", 
+            3218, 40, 60, 10);
     
-    ICEI("Ice Harvester Upgrade I", 
-            22576, 0, 5),
-    FRIGORIS("Frigoris Restrained Ice Harvester Upgrade", 
-            22619, 0, 8),
-    ICEII("Ice Harvester Upgrade II", 
-            28578, 0, 9),
-    ANGUIS("'Anguis' Ice Harvester Upgrade", 
-            22621, 0, 9),
-    INGENII("'Ingenii' Ice Harvester Upgrade", 
-            22623, 0, 10);
-    
-    private final String name;
+    private final String name; 
     private final int id;
-    private final int oreYieldBonus;
-    private final int iceCycleBonus;
-
-    public final static Map<Integer, HarvestUpgrade> upgradesMap;
+    private final int baseYield;
+    private final int cycleDuration;
+    private final int bandwidth;
+    
+    
+    public final static Map<Integer, MiningDrone> dronesMap;
     
     static {
-        Map<Integer, HarvestUpgrade> upgrds = new HashMap<>();
-        for (HarvestUpgrade upgrade : HarvestUpgrade.values()) {
-            upgrds.put(upgrade.id, upgrade);
+        Map<Integer, MiningDrone> drons = new HashMap<>();
+        for (MiningDrone drone : MiningDrone.values()) {
+            drons.put(drone.id, drone);
         }
-        upgradesMap = Collections.unmodifiableMap(upgrds);
+        dronesMap = Collections.unmodifiableMap(drons);
     }
-    
-    private HarvestUpgrade(String name, int id, int oreYieldBonus, int iceCycleBonus) {
+
+    private MiningDrone(String name, int id, int baseYield, int cycleDuration, int bandwidth) {
         this.name = name;
         this.id = id;
-        this.oreYieldBonus = oreYieldBonus;
-        this.iceCycleBonus = iceCycleBonus;
+        this.baseYield = baseYield;
+        this.cycleDuration = cycleDuration;
+        this.bandwidth = bandwidth;
     }
     
-    
     /**
-     * Returns upgrade's name - just as you see it ingame.
+     * Returns drone's name - just as you see it ingame.
      * @return 
      */
     public String getName() {
@@ -90,31 +80,41 @@ public enum HarvestUpgrade {
     }
     
     /**
-     * Returns internal upgrade's id.
+     * Returns internal drone's id.
      * @return 
      */
     public int getID() {
         return id;
     }
     
+    
     /**
-     * Returns ore yield bonus, in percents.
+     * Returns base yield of a drone, in cubic metres.
      * @return 
      */
-    public int getOreYieldBonus() {
-        return oreYieldBonus;
+    public int getBaseYield() {
+        return baseYield;
     }
     
     /**
-     * Returns ice cycle bonus, in percents.
+     * Returns base cycle duration of a drone, in seconds.
      * @return 
      */
-    public int getIceCycleBonus() {
-        return iceCycleBonus;
+    public int getCycleDuration() {
+        return cycleDuration;
+    }
+    
+    /**
+     * Returns bandwidth, needed to use a drone.
+     * @return 
+     */
+    public int getBandwidth() {
+        return bandwidth;
     }
     
     @Override
     public String toString() {
         return name;
-    }    
+    }
+    
 }

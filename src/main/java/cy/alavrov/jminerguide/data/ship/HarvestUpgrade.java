@@ -23,69 +23,98 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package cy.alavrov.jminerguide.data.api.ship;
+package cy.alavrov.jminerguide.data.ship;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Different levels of a mining crystal.
+ * Harvest upgrade.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public enum MiningCrystalLevel {
-    NOTHING("- nothing -", 0, 1, 1),
-    T1("T1", 1, 1.625f, 1.25f),
-    T2("T2", 2,  1.75f, 1.375f);
+public enum HarvestUpgrade {
+    NOTHING("- nothing -", 0, 0, 0),
+    
+    MININGI("Mining Laser Upgrade I", 
+            22542, 5, 0),
+    ELARA("Elara Restrained Mining Laser Upgrade", 
+            22611, 8, 0),
+    MININGII("Mining Laser Upgrade II", 
+            28576, 9, 0),
+    AOEDE("'Aoede' Mining Laser Upgrade", 
+            22615, 10, 0),
+    CARPO("'Carpo' Mining Laser Upgrade", 
+            22613, 9, 0),
+    
+    ICEI("Ice Harvester Upgrade I", 
+            22576, 0, 5),
+    FRIGORIS("Frigoris Restrained Ice Harvester Upgrade", 
+            22619, 0, 8),
+    ICEII("Ice Harvester Upgrade II", 
+            28578, 0, 9),
+    ANGUIS("'Anguis' Ice Harvester Upgrade", 
+            22621, 0, 9),
+    INGENII("'Ingenii' Ice Harvester Upgrade", 
+            22623, 0, 10);
     
     private final String name;
     private final int id;
-    private final float oreMod;
-    private final float mercMod;
-    
-    public final static Map<Integer, MiningCrystalLevel> crystalLevelsMap;
+    private final int oreYieldBonus;
+    private final int iceCycleBonus;
+
+    public final static Map<Integer, HarvestUpgrade> upgradesMap;
     
     static {
-        Map<Integer, MiningCrystalLevel> levels = new HashMap<>();
-        for (MiningCrystalLevel lvl : MiningCrystalLevel.values()) {
-            levels.put(lvl.id, lvl);
+        Map<Integer, HarvestUpgrade> upgrds = new HashMap<>();
+        for (HarvestUpgrade upgrade : HarvestUpgrade.values()) {
+            upgrds.put(upgrade.id, upgrade);
         }
-        crystalLevelsMap = Collections.unmodifiableMap(levels);
+        upgradesMap = Collections.unmodifiableMap(upgrds);
     }
     
-    MiningCrystalLevel(String name, int id,  float oreMod, float mercMod) {
+    private HarvestUpgrade(String name, int id, int oreYieldBonus, int iceCycleBonus) {
         this.name = name;
         this.id = id;
-        this.oreMod = oreMod;
-        this.mercMod = mercMod;
+        this.oreYieldBonus = oreYieldBonus;
+        this.iceCycleBonus = iceCycleBonus;
     }
     
+    
+    /**
+     * Returns upgrade's name - just as you see it ingame.
+     * @return 
+     */
     public String getName() {
         return name;
     }
     
+    /**
+     * Returns internal upgrade's id.
+     * @return 
+     */
     public int getID() {
         return id;
     }
     
     /**
-     * Yield modificator for common ores
+     * Returns ore yield bonus, in percents.
      * @return 
      */
-    public float getOreMod() {
-        return oreMod;
+    public int getOreYieldBonus() {
+        return oreYieldBonus;
     }
     
     /**
-     * Yield modificator for mercoxit
+     * Returns ice cycle bonus, in percents.
      * @return 
      */
-    public float getMercMod() {
-        return mercMod;
+    public int getIceCycleBonus() {
+        return iceCycleBonus;
     }
     
     @Override
     public String toString() {
         return name;
-    }
+    }    
 }

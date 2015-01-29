@@ -26,8 +26,8 @@
 
 package cy.alavrov.jminerguide.data;
 
-import cy.alavrov.jminerguide.data.api.ship.Ship;
-import cy.alavrov.jminerguide.data.api.ship.ShipContainer;
+import cy.alavrov.jminerguide.data.ship.Ship;
+import cy.alavrov.jminerguide.data.ship.ShipContainer;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.util.concurrent.ExecutorService;

@@ -25,13 +25,13 @@
  */
 package cy.alavrov.jminerguide.data;
 
-import cy.alavrov.jminerguide.data.api.ship.HarvestUpgrade;
-import cy.alavrov.jminerguide.data.api.ship.Hull;
-import cy.alavrov.jminerguide.data.api.ship.MiningDrone;
-import cy.alavrov.jminerguide.data.api.ship.OreType;
-import cy.alavrov.jminerguide.data.api.ship.Rig;
-import cy.alavrov.jminerguide.data.api.ship.Ship;
-import cy.alavrov.jminerguide.data.api.ship.Turret;
+import cy.alavrov.jminerguide.data.ship.HarvestUpgrade;
+import cy.alavrov.jminerguide.data.ship.Hull;
+import cy.alavrov.jminerguide.data.ship.MiningDrone;
+import cy.alavrov.jminerguide.data.ship.OreType;
+import cy.alavrov.jminerguide.data.ship.Rig;
+import cy.alavrov.jminerguide.data.ship.Ship;
+import cy.alavrov.jminerguide.data.ship.Turret;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.implant.Implant;
 import java.util.Arrays;

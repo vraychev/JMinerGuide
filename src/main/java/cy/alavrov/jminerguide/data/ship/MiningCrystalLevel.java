@@ -23,98 +23,69 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package cy.alavrov.jminerguide.data.api.ship;
+package cy.alavrov.jminerguide.data.ship;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Mining dronesMap.
+ * Different levels of a mining crystal.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public enum MiningDrone {
-    // NOTHING have bandwidth of 5 no avoid division to null.
+public enum MiningCrystalLevel {
+    NOTHING("- nothing -", 0, 1, 1),
+    T1("T1", 1, 1.625f, 1.25f),
+    T2("T2", 2,  1.75f, 1.375f);
     
-    NOTHING ("- nothing -", 0, 0, 0, 5),
-    CIVILIAN ("Civilian Mining Drone", 
-            1202, 13, 60, 5),
-    MININGI ("Mining Drone I", 
-            10246, 20, 60, 5),
-    MININGII ("Mining Drone II", 
-            10250, 33, 60, 5),
-    HARVESTER ("Harvester Mining Drone", 
-            3218, 40, 60, 10);
-    
-    private final String name; 
+    private final String name;
     private final int id;
-    private final int baseYield;
-    private final int cycleDuration;
-    private final int bandwidth;
+    private final float oreMod;
+    private final float mercMod;
     
-    
-    public final static Map<Integer, MiningDrone> dronesMap;
+    public final static Map<Integer, MiningCrystalLevel> crystalLevelsMap;
     
     static {
-        Map<Integer, MiningDrone> drons = new HashMap<>();
-        for (MiningDrone drone : MiningDrone.values()) {
-            drons.put(drone.id, drone);
+        Map<Integer, MiningCrystalLevel> levels = new HashMap<>();
+        for (MiningCrystalLevel lvl : MiningCrystalLevel.values()) {
+            levels.put(lvl.id, lvl);
         }
-        dronesMap = Collections.unmodifiableMap(drons);
-    }
-
-    private MiningDrone(String name, int id, int baseYield, int cycleDuration, int bandwidth) {
-        this.name = name;
-        this.id = id;
-        this.baseYield = baseYield;
-        this.cycleDuration = cycleDuration;
-        this.bandwidth = bandwidth;
+        crystalLevelsMap = Collections.unmodifiableMap(levels);
     }
     
-    /**
-     * Returns drone's name - just as you see it ingame.
-     * @return 
-     */
+    MiningCrystalLevel(String name, int id,  float oreMod, float mercMod) {
+        this.name = name;
+        this.id = id;
+        this.oreMod = oreMod;
+        this.mercMod = mercMod;
+    }
+    
     public String getName() {
         return name;
     }
     
-    /**
-     * Returns internal drone's id.
-     * @return 
-     */
     public int getID() {
         return id;
     }
     
-    
     /**
-     * Returns base yield of a drone, in cubic metres.
+     * Yield modificator for common ores
      * @return 
      */
-    public int getBaseYield() {
-        return baseYield;
+    public float getOreMod() {
+        return oreMod;
     }
     
     /**
-     * Returns base cycle duration of a drone, in seconds.
+     * Yield modificator for mercoxit
      * @return 
      */
-    public int getCycleDuration() {
-        return cycleDuration;
-    }
-    
-    /**
-     * Returns bandwidth, needed to use a drone.
-     * @return 
-     */
-    public int getBandwidth() {
-        return bandwidth;
+    public float getMercMod() {
+        return mercMod;
     }
     
     @Override
     public String toString() {
         return name;
     }
-    
 }

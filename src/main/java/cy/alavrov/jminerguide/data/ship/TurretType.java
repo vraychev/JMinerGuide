@@ -23,15 +23,30 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package cy.alavrov.jminerguide.data.api.ship;
+package cy.alavrov.jminerguide.data.ship;
 
 /**
- *
+ * Turret type (mining laser or strip miner).
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public enum OreType {
-    ORE,
-    MERCOXIT,
-    ICE,
-    GAS
+public enum TurretType {
+    MININGLASER (false),
+    GASHARVESTER (false),
+    STRIPMINER (true),
+    ICEHARVESTER (true);
+    
+    private final boolean isStripMiner;
+
+    private TurretType(boolean isStripMiner) {
+        this.isStripMiner = isStripMiner;
+    }
+    
+    /**
+     * Returns true if this type is of strip miners class.
+     * Strip miners and ice harvesters are.
+     * @return 
+     */
+    public boolean isStripMiner() {
+        return isStripMiner;
+    }
 }
