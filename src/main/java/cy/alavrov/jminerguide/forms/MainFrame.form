@@ -1302,6 +1302,9 @@
               <StringArray count="0"/>
             </Property>
           </Properties>
+          <Events>
+            <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jComboBoxCapIShipsItemStateChanged"/>
+          </Events>
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JComboBox&lt;Integer&gt;(skillLvls)"/>
             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Integer&gt;"/>
@@ -1311,6 +1314,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Mining Foreman Mindlink"/>
           </Properties>
+          <Events>
+            <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jCheckBoxMindlinkItemStateChanged"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JComboBox" name="jComboBoxBoosterShip">
           <Properties>

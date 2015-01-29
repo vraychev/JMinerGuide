@@ -1200,7 +1200,18 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jLabel41.setText("Capital Industrial Ships");
 
+        jComboBoxCapIShips.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxCapIShipsItemStateChanged(evt);
+            }
+        });
+
         jCheckBoxMindlink.setText("Mining Foreman Mindlink");
+        jCheckBoxMindlink.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxMindlinkItemStateChanged(evt);
+            }
+        });
 
         jCheckBoxDeployedMode.setText("Deployed Mode");
 
@@ -2275,6 +2286,60 @@ public final class MainFrame extends javax.swing.JFrame {
         recalculateStats();        
         processEvents = true;
     }//GEN-LAST:event_jComboBoxIComShipsItemStateChanged
+
+    private void jComboBoxCapIShipsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxCapIShipsItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;                
+        
+        Integer level = (Integer) jComboBoxCapIShips.getSelectedItem();
+                                                       
+        EVECharacter curChar = (EVECharacter) jComboBoxBooster.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+        
+        curChar.setSkillLevel(EVECharacter.SKILL_CAPITAL_INDUSTRIAL_SHIPS, level);
+        
+        if (level > 0) {
+            if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_FOREMAN) < 5) {
+                curChar.setSkillLevel(EVECharacter.SKILL_MINING_FOREMAN, 5);
+                jComboBoxMining.setSelectedItem(5);
+            }
+            
+            if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_DIRECTOR) < 1) {
+                curChar.setSkillLevel(EVECharacter.SKILL_MINING_DIRECTOR, 1);
+                jComboBoxMining.setSelectedItem(1);
+            }
+            
+            if (curChar.getSkillLevel(EVECharacter.SKILL_INDUSTRIAL_COMMAND_SHIPS) < 3) {
+                curChar.setSkillLevel(EVECharacter.SKILL_INDUSTRIAL_COMMAND_SHIPS, 3);
+                jComboBoxMining.setSelectedItem(3);
+            }
+        }
+        
+        recalculateStats();        
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxCapIShipsItemStateChanged
+
+    private void jCheckBoxMindlinkItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxMindlinkItemStateChanged
+        if (!processEvents) return;
+        
+        processEvents = false;    
+        
+        boolean checked = jCheckBoxMindlink.isSelected();
+        EVECharacter curChar = (EVECharacter) jComboBoxBooster.getSelectedItem();
+        if (curChar == null) return;
+        
+        Implant implant = checked? Implant.MFMINDLINK : Implant.NOTHING;
+        curChar.setSlot10Implant(implant);
+        
+        EVECharacter miner = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        if (curChar.equals(miner)) {
+            jComboBoxImplant10.setSelectedItem(implant);
+        }
+        
+        recalculateStats();        
+        processEvents = true;
+    }//GEN-LAST:event_jCheckBoxMindlinkItemStateChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
