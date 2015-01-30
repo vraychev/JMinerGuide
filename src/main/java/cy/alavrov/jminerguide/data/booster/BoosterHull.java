@@ -51,7 +51,7 @@ public enum BoosterHull {
         @Override
         public float calculateBoostModifier(EVECharacter pilot, boolean deployed) {
             if (deployed) {
-                return 1 + 0.2f * pilot.getSkillLevel(EVECharacter.SKILL_CAPITAL_INDUSTRIAL_SHIPS);
+                return 1 + 0.1f * pilot.getSkillLevel(EVECharacter.SKILL_CAPITAL_INDUSTRIAL_SHIPS);
             } else {
                 return 1;
             }
