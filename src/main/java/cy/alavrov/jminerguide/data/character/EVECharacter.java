@@ -459,10 +459,11 @@ public class EVECharacter {
     }
     
     /**
-     * Returns bonus to mining yield, granted by skills and implants.
+     * Returns bonus modifier to mining yield, granted by skills and implants.
+     * Warning! Modifiers aren't in percents, you can directly multiply by them.
      * @return 
      */
-    public float getMiningYieldbonus () {
+    public float getMiningYieldModifier () {
         float out = 1;
         
         int miningLevel = this.getSkillLevel(SKILL_MINING);
@@ -491,10 +492,11 @@ public class EVECharacter {
     }
     
     /**
-     * Returns bonus to ice harvester cycle time, granted by skills and implants.
+     * Returns bonus modifier to ice harvester cycle time, granted by skills and implants.     
+     * Warning! Modifiers aren't in percents, you can directly multiply by them.
      * @return 
      */
-    public float getIceCycleBonus() {
+    public float getIceCycleModifier() {
         float out = 1;
         
         int iceLevel = this.getSkillLevel(SKILL_ICE_HARVESTING);
@@ -512,10 +514,11 @@ public class EVECharacter {
     }
     
     /**
-     * Returns bonus to gas harvester cycle time, granted by implants.
+     * Returns bonus modifier to gas harvester cycle time, granted by implants.
+     * Warning! Modifiers aren't in percents, you can directly multiply by them.
      * @return 
      */
-    public float getGasCycleBonus() {
+    public float getGasCycleModifier() {
         float out = 1;
         
         // gas bonus only in slot 8
@@ -530,10 +533,11 @@ public class EVECharacter {
     
     
     /**
-     * Returns bonus to drone yield, granted by skills.
+     * Returns bonus modifier to drone yield, granted by skills.
+     * Warning! Modifiers aren't in percents, you can directly multiply by them.
      * @return 
      */
-    public float getDroneYieldBonus() {
+    public float getDroneYieldModifier() {
         float out = 1;
         
         int droneOperBonus = this.getSkillLevel(SKILL_MINING_DRONE_OPERATION);
@@ -544,6 +548,27 @@ public class EVECharacter {
         int droneIntBonus = this.getSkillLevel(SKILL_DRONE_INTERFACING);
         if (droneIntBonus > 0) {
             out = out * (1f + 0.1f*droneIntBonus);
+        }
+        
+        return out;
+    }
+    
+    /**
+     * Returns bonus modifier to drone yield, granted by skills.
+     * Warning! Modifiers aren't in percents, you can directly multiply by them.
+     * @return 
+     */
+    public float getBoosterLinkModifier() {
+        float out = 1;
+        
+        int miningDirectorBonus = this.getSkillLevel(SKILL_MINING_DIRECTOR);
+        if (miningDirectorBonus > 0) {
+            out = out * (1f + 0.2f*miningDirectorBonus);
+        }
+        
+        int warfareLinkSpecBonus = this.getSkillLevel(SKILL_WARFARE_LINK_SPECIALIST);
+        if (warfareLinkSpecBonus > 0) {
+            out = out * (1f + 0.1f*warfareLinkSpecBonus);
         }
         
         return out;

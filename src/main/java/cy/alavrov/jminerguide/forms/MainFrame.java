@@ -30,6 +30,10 @@ import cy.alavrov.jminerguide.App;
 import cy.alavrov.jminerguide.data.CalculatedStats;
 import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.api.APICharLoader;
+import cy.alavrov.jminerguide.data.booster.BoosterHull;
+import cy.alavrov.jminerguide.data.booster.BoosterShip;
+import cy.alavrov.jminerguide.data.booster.BoosterShipContainer;
+import cy.alavrov.jminerguide.data.booster.ForemanLink;
 import cy.alavrov.jminerguide.data.ship.HarvestUpgrade;
 import cy.alavrov.jminerguide.data.ship.Hull;
 import cy.alavrov.jminerguide.data.ship.MiningCrystalLevel;
@@ -47,7 +51,6 @@ import java.awt.Image;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import javax.imageio.ImageIO;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import org.joda.time.Seconds;
 import org.joda.time.format.PeriodFormatter;
@@ -58,7 +61,7 @@ import org.joda.time.format.PeriodFormatterBuilder;
  * @author alavrov
  */
 public final class MainFrame extends javax.swing.JFrame {
-    
+
     private final static DecimalFormat fmt = new DecimalFormat("0.##");
     private final static PeriodFormatter minutesAndSeconds = new PeriodFormatterBuilder()
      .printZeroAlways()
@@ -66,52 +69,57 @@ public final class MainFrame extends javax.swing.JFrame {
      .appendSeparator(":")
      .appendSeconds()
      .toFormatter();
-    
+
     private Integer[] skillLvls = {0, 1, 2, 3, 4, 5};
-    
+
     private DataContainer dCont;
-    
+
     /**
      * JComboBox and JCheckBox fire off event on setSelectedItem, and we don't need
      * to react to it when we are the source of the change.
      */
     private volatile boolean processEvents = false;
-    
+
     /**
      * Creates new form MainFrame
      * @param container data container with data (captain Obvious to the rescue!)
      */
-    public MainFrame(DataContainer container) {        
+    public MainFrame(DataContainer container) {
         this.dCont = container;
-        try (InputStream resourceStream = getClass().getClassLoader().getResourceAsStream("app.png")) {  
+        try (InputStream resourceStream = getClass().getClassLoader().getResourceAsStream("app.png")) {
             Image image = ImageIO.read(resourceStream);
             this.setIconImage(image);
         } catch (Exception e) {
             JMGLogger.logSevere("Unable to set application icon", e);
         }
-        
-        this.setTitle("JMinerGuide "+App.getVersion());                
-        initComponents();                    
+
+        this.setTitle("JMinerGuide "+App.getVersion());
+        initComponents();
         this.setLocationRelativeTo(null);
-        
+
         loadCharacterList(false);
         jComboBoxMiner.setSelectedItem(dCont.getCharacterContainer().getLastSelectedMiner());
-        loadSelectedMiner();        
+        loadSelectedMiner();
         jComboBoxBooster.setSelectedItem(dCont.getCharacterContainer().getLastSelectedBooster());
         loadSelectedBooster();
-        
+
         loadShipList(false);
         jComboBoxShip.setSelectedItem(dCont.getShipContainer().getLastSelectedShip());
         loadSelectedShip();
-        
+
+        loadSelectedBoosterShip();
+        updateBoosterShipInterface();
+
         recalculateStats();
         processEvents = true;
     }
-    
-    public void recalculateStats() {                
+
+    public void recalculateStats() {
         EVECharacter miner = (EVECharacter) jComboBoxMiner.getSelectedItem();
         EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
+        BoosterShipContainer bCont = dCont.getBoosterContainer();
+        BoosterShip bShip = bCont.isUsingBoosterShip() ? bCont.getBooster() : bCont.getNoBooster();
         
         Turret turret = ship.getTurret();
         boolean isMerco = false;
@@ -121,74 +129,74 @@ public final class MainFrame extends javax.swing.JFrame {
         } else {
             if (jCheckBoxStatsMerco.isEnabled()) jCheckBoxStatsMerco.setEnabled(false);
         }
-        
-        CalculatedStats newStats = new CalculatedStats(miner, booster, ship, isMerco);
-        
+
+        CalculatedStats newStats = new CalculatedStats(miner, booster, ship, bShip, isMerco);
+
         jLabelYield.setText(String.valueOf(fmt.format(newStats.getCombinedTurretYield())));
         jLabelYield.setToolTipText(fmt.format(newStats.getTurretYield())+" per turret");
-        
+
         jLabelCycle.setText(fmt.format(newStats.getTurretCycle()));
         jLabelM3S.setText(fmt.format(newStats.getTurretM3S()));
-        
+
         jLabelDroneYield.setText(String.valueOf(fmt.format(newStats.getCombinedDroneYield())));
         jLabelDroneYield.setToolTipText(fmt.format(newStats.getDroneYield())+" per drone");
-        
+
         jLabelDroneCycle.setText(fmt.format(newStats.getDroneCycle()));
         jLabelDroneM3S.setText(fmt.format(newStats.getDroneM3S()));
-        
+
         jLabelM3H.setText(fmt.format(newStats.getTotalM3H()));
         jLabelOptimal.setText(fmt.format(newStats.getOptimal()));
-        
+
         jLabelOreHold.setText(fmt.format(newStats.getOreHold()));
         jLabelOreHoldFill.setText(minutesAndSeconds.print(
                 Seconds.seconds(newStats.getSecsForOreHold())
                         .toStandardDuration().toPeriod()
         ));
     }
-    
+
     public void loadCharacterList(boolean loadSelection) {
-        
-        CharacterContainer cCont = dCont.getCharacterContainer();    
-        
+
+        CharacterContainer cCont = dCont.getCharacterContainer();
+
         EVECharacter miner = (EVECharacter) jComboBoxMiner.getSelectedItem();
-        
+
         DefaultComboBoxModel<EVECharacter> model = cCont.getCharModel();
         jComboBoxMiner.setModel(model);
-        
+
         EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
         model = cCont.getCharModel(); // models have to be different objects.
         jComboBoxBooster.setModel(model);
-        
+
         // we're assuming here that there is always something in the combobox
-        
+
         if (loadSelection) {
             if (miner == null) {
                 jComboBoxMiner.setSelectedIndex(0);
             } else {
                 jComboBoxMiner.setSelectedItem(miner);
             }
-            
+
             loadSelectedMiner();
-            
+
             if (booster == null) {
                 jComboBoxBooster.setSelectedIndex(0);
             } else {
                 jComboBoxBooster.setSelectedItem(booster);
             }
-            
+
             loadSelectedBooster();
         }
-        
+
     }
 
     public void loadSelectedMiner() {
         // if we got there, selection is not null.
         EVECharacter sel = (EVECharacter) jComboBoxMiner.getSelectedItem();
         dCont.getCharacterContainer().setSelectedMiner(sel.getName());
-        
+
         if (sel.isPreset()) {
             jButtonCharReload.setEnabled(false);
-            
+
             jComboBoxAstrogeo.setEnabled(false);
             jComboBoxDroneInt.setEnabled(false);
             jComboBoxDrones.setEnabled(false);
@@ -202,7 +210,7 @@ public final class MainFrame extends javax.swing.JFrame {
             jComboBoxMiningFrig.setEnabled(false);
         } else {
             jButtonCharReload.setEnabled(true);
-            
+
             jComboBoxAstrogeo.setEnabled(true);
             jComboBoxDroneInt.setEnabled(true);
             jComboBoxDrones.setEnabled(true);
@@ -215,7 +223,7 @@ public final class MainFrame extends javax.swing.JFrame {
             jComboBoxMiningDrones.setEnabled(true);
             jComboBoxMiningFrig.setEnabled(true);
         }
-        
+
         jComboBoxAstrogeo.setSelectedItem(sel
                 .getSkillLevel(EVECharacter.SKILL_ASTROGEOLOGY));
         jComboBoxDroneInt.setSelectedItem(sel
@@ -238,21 +246,21 @@ public final class MainFrame extends javax.swing.JFrame {
                 .getSkillLevel(EVECharacter.SKILL_MINING_DRONE_OPERATION));
         jComboBoxMiningFrig.setSelectedItem(sel
                 .getSkillLevel(EVECharacter.SKILL_MINING_FRIGATE));
-        
+
         jComboBoxImplant8.setSelectedItem(sel.getSlot8Implant());
         jComboBoxImplant10.setSelectedItem(sel.getSlot10Implant());
-        
+
         jCheckBoxMichi.setSelected(sel.getSlot7Implant() == Implant.MICHI);
     }
-    
+
     public void loadSelectedBooster() {
         // if we got there, selection is not null.
         EVECharacter sel = (EVECharacter) jComboBoxBooster.getSelectedItem();
         dCont.getCharacterContainer().setSelectedBooster(sel.getName());
-        
+
         if (sel.isPreset()) {
             jButtonBoosterReload.setEnabled(false);
-            
+
             jComboBoxMForeman.setEnabled(false);
             jComboBoxMDirector.setEnabled(false);
             jComboBoxLinkSpec.setEnabled(false);
@@ -261,15 +269,15 @@ public final class MainFrame extends javax.swing.JFrame {
             jComboBoxCapIShips.setEnabled(false);
         } else {
             jButtonBoosterReload.setEnabled(true);
-            
+
             jComboBoxMForeman.setEnabled(true);
             jComboBoxMDirector.setEnabled(true);
             jComboBoxLinkSpec.setEnabled(true);
             jComboBoxIReconf.setEnabled(true);
             jComboBoxIComShips.setEnabled(true);
             jComboBoxCapIShips.setEnabled(true);
-        } 
-        
+        }
+
         jComboBoxMForeman.setSelectedItem(sel
                 .getSkillLevel(EVECharacter.SKILL_MINING_FOREMAN));
         jComboBoxMDirector.setSelectedItem(sel
@@ -282,59 +290,59 @@ public final class MainFrame extends javax.swing.JFrame {
                 .getSkillLevel(EVECharacter.SKILL_INDUSTRIAL_COMMAND_SHIPS));
         jComboBoxCapIShips.setSelectedItem(sel
                 .getSkillLevel(EVECharacter.SKILL_CAPITAL_INDUSTRIAL_SHIPS));
-        
+
         jCheckBoxMindlink.setSelected(sel.getSlot7Implant() == Implant.MFMINDLINK);
     }
-    
+
     public void loadShipList(boolean loadSelection) {
-        
+
         ShipContainer sCont = dCont.getShipContainer();
-        
+
         Ship sel = (Ship) jComboBoxShip.getSelectedItem();
-        
+
         DefaultComboBoxModel<Ship> model = sCont.getShipModel();
         jComboBoxShip.setModel(model);
-        
+
         if (sCont.getShipCount() < 2) {
             jButtonShipRemove.setEnabled(false);
         } else {
             jButtonShipRemove.setEnabled(true);
         }
-        
+
         // we're assuming here that there is always something in the combobox
-        
+
         if (loadSelection) {
             if (sel == null) {
                 jComboBoxShip.setSelectedIndex(0);
             } else {
                 jComboBoxShip.setSelectedItem(sel);
             }
-            
+
             loadSelectedShip();
         }
-        
+
     }
-    
+
     public void setSelectedShip(Ship ship) {
         jComboBoxShip.setSelectedItem(ship);
     }
-    
+
     public void loadSelectedShip() {
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
-        
+
         dCont.getShipContainer().setSelectedShip(ship.getName());
         Hull hull = ship.getHull();
-        
+
         jComboBoxHull.setSelectedItem(hull);
-        
+
         jComboBoxTurrets.setModel(getIntegerModel(hull.getMaxTurrets()));
         jComboBoxTurrets.setSelectedItem(ship.getTurretCount());
-        
+
         updateTurretComboBox(hull);
         jComboBoxTurretType.setSelectedItem(ship.getTurret());
         updateCrystalComboBox(ship.getTurret());
         jComboBoxCrystal.setSelectedItem(ship.getTurretCrystal());
-        
+
         jComboBoxHUpgradeType.setSelectedItem(ship.getHarvestUpgrade());
         jComboBoxHUpgrades.setModel(getIntegerModel(hull.getMaxUpgrades()));
         jComboBoxHUpgrades.setSelectedItem(ship.getHarvestUpgradeCount());
@@ -343,41 +351,84 @@ public final class MainFrame extends javax.swing.JFrame {
         } else {
             if (!jComboBoxHUpgrades.isEnabled()) jComboBoxHUpgrades.setEnabled(true);
         }
-        
+
         jComboBoxDroneType.setSelectedItem(ship.getDrone());
         jComboBoxDroneCount.setModel(getIntegerModel(ship.getMaxDrones()));
         jComboBoxDroneCount.setSelectedItem(ship.getDroneCount());
-        
+
         if (ship.getDrone() == MiningDrone.NOTHING) {
             if (jComboBoxDroneCount.isEnabled()) jComboBoxDroneCount.setEnabled(false);
         } else {
             if (!jComboBoxDroneCount.isEnabled()) jComboBoxDroneCount.setEnabled(true);
         }
-        
+
         updateRigComboBoxes(hull);
         jComboBoxRig1.setSelectedItem(ship.getRig1());
         jComboBoxRig2.setSelectedItem(ship.getRig2());
         jComboBoxRig3.setSelectedItem(ship.getRig3());
         updateCalibrationLabel(ship);
     }
+
+    public void loadSelectedBoosterShip() {
+        BoosterShip ship = dCont.getBoosterContainer().getBooster();
+
+        BoosterHull hull = ship.getHull();
+        jComboBoxBoosterHull.setSelectedItem(hull);
+        
+        if (dCont.getBoosterContainer().isUsingBoosterShip()) {
+            if (hull.haveDeployedMode()) {
+                if (!jCheckBoxDeployedMode.isEnabled()) jCheckBoxDeployedMode.setEnabled(true);
+                jCheckBoxDeployedMode.setSelected(ship.isDeployedMode());
+            } else {
+                if (jCheckBoxDeployedMode.isEnabled()) jCheckBoxDeployedMode.setEnabled(false);
+            }
+        } else {
+            if (jCheckBoxDeployedMode.isEnabled()) jCheckBoxDeployedMode.setEnabled(false);
+        }
+
+        ForemanLink cLink = ship.getCycleLink();
+        jComboBoxLinkCycle.setSelectedItem(cLink);
+
+        ForemanLink oLink = ship.getOptimalLink();
+        jComboBoxLinkOptimal.setSelectedItem(oLink);
+    }
     
+    public void updateBoosterShipInterface() {
+        boolean usingBooster = dCont.getBoosterContainer().isUsingBoosterShip();
+        if (jCheckBoxUseBoosterShip.isSelected() != usingBooster) {
+            jCheckBoxUseBoosterShip.setSelected(usingBooster);
+        }
+        
+        if (usingBooster) {
+            jComboBoxBoosterHull.setEnabled(true);
+            jComboBoxLinkCycle.setEnabled(true);
+            jComboBoxLinkOptimal.setEnabled(true);
+            jCheckBoxDeployedMode.setEnabled(true);
+        } else {
+            jComboBoxBoosterHull.setEnabled(false);
+            jComboBoxLinkCycle.setEnabled(false);
+            jComboBoxLinkOptimal.setEnabled(false);
+            jCheckBoxDeployedMode.setEnabled(false);
+        }
+    }
+
     public DefaultComboBoxModel<Integer> getIntegerModel(int upto) {
         DefaultComboBoxModel<Integer> out = new DefaultComboBoxModel<>();
-        
+
         if (upto > 0) {
             for (int i = upto; i > 0; i-- ) {
                 out.addElement(i);
             }
         }
         out.addElement(0);
-        
+
         return out;
     }
-    
+
     /**
-     * Updates turret combo box with appropriate turrets based on a hull's 
+     * Updates turret combo box with appropriate turrets based on a hull's
      * support for strip miners.
-     * @param hull 
+     * @param hull
      */
     public void updateTurretComboBox(Hull hull) {
         Turret[] turrets;
@@ -386,14 +437,14 @@ public final class MainFrame extends javax.swing.JFrame {
         } else {
             turrets = Turret.smallTurrets;
         }
-        
+
         jComboBoxTurretType.setModel(new DefaultComboBoxModel<>(turrets));
     }
-    
+
     /**
      * Updates turret crystal combo box enabled state according to turret's
      * ability to use crystals.
-     * @param turret 
+     * @param turret
      */
     public void updateCrystalComboBox(Turret turret) {
         if (turret.isUsingCrystals()) {
@@ -402,11 +453,11 @@ public final class MainFrame extends javax.swing.JFrame {
             if (jComboBoxCrystal.isEnabled()) jComboBoxCrystal.setEnabled(false);
         }
     }
-    
+
     /**
-     * Updates all rig combo boxes with appropriate rigs based on a hull's 
+     * Updates all rig combo boxes with appropriate rigs based on a hull's
      * size.
-     * @param hull 
+     * @param hull
      */
     public void updateRigComboBoxes(Hull hull) {
         if (hull.isMediumHull()) {
@@ -418,23 +469,23 @@ public final class MainFrame extends javax.swing.JFrame {
             jComboBoxRig2.setModel(new DefaultComboBoxModel<>(Rig.nonMediumRigArr));
             jComboBoxRig3.setModel(new DefaultComboBoxModel<>(Rig.nonMediumRigArr));
         }
-        
+
         if (hull.getRigSlots() > 2) {
             if (!jComboBoxRig3.isEnabled()) jComboBoxRig3.setEnabled(true);
         } else {
             if (jComboBoxRig3.isEnabled()) jComboBoxRig3.setEnabled(false);
         }
     }
-    
+
     public void updateCalibrationLabel(Ship ship) {
         int calibration = 0;
         calibration += ship.getRig1().getCalibrationCost();
         calibration += ship.getRig2().getCalibrationCost();
         calibration += ship.getRig3().getCalibrationCost();
-        
+
         jLabelCalibration.setText(calibration+"/400");
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -531,11 +582,12 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel41 = new javax.swing.JLabel();
         jComboBoxCapIShips = new javax.swing.JComboBox<Integer>(skillLvls);
         jCheckBoxMindlink = new javax.swing.JCheckBox();
-        jComboBoxBoosterShip = new javax.swing.JComboBox();
-        jComboBoxLaserOptimization = new javax.swing.JComboBox();
-        jComboBoxLazerField = new javax.swing.JComboBox();
+        jComboBoxBoosterHull = new javax.swing.JComboBox<BoosterHull>(BoosterHull.values());
+        jComboBoxLinkCycle = new javax.swing.JComboBox<ForemanLink>(ForemanLink.cycleLinksArr);
+        jComboBoxLinkOptimal = new javax.swing.JComboBox<ForemanLink>(ForemanLink.optimalLinksArr);
         jCheckBoxDeployedMode = new javax.swing.JCheckBox();
         jLabel42 = new javax.swing.JLabel();
+        jCheckBoxUseBoosterShip = new javax.swing.JCheckBox();
         jPanel6 = new javax.swing.JPanel();
         jLabel19 = new javax.swing.JLabel();
         jLabelYield = new javax.swing.JLabel();
@@ -1157,6 +1209,11 @@ public final class MainFrame extends javax.swing.JFrame {
         });
 
         jButtonBoosterReload.setText("Reload");
+        jButtonBoosterReload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonBoosterReloadActionPerformed(evt);
+            }
+        });
 
         jLabel36.setText("Mining Foreman");
 
@@ -1213,9 +1270,40 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        jComboBoxBoosterHull.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxBoosterHullItemStateChanged(evt);
+            }
+        });
+
+        jComboBoxLinkCycle.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxLinkCycleItemStateChanged(evt);
+            }
+        });
+
+        jComboBoxLinkOptimal.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxLinkOptimalItemStateChanged(evt);
+            }
+        });
+
         jCheckBoxDeployedMode.setText("Deployed Mode");
+        jCheckBoxDeployedMode.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxDeployedModeItemStateChanged(evt);
+            }
+        });
 
         jLabel42.setText("Booster Ship");
+
+        jCheckBoxUseBoosterShip.setText("Dedicated Booster Ship");
+        jCheckBoxUseBoosterShip.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+        jCheckBoxUseBoosterShip.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxUseBoosterShipItemStateChanged(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -1254,18 +1342,21 @@ public final class MainFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonBoosterReload, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jComboBoxLaserOptimization, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jComboBoxLinkCycle, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBoxLazerField, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jComboBoxLinkOptimal, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jCheckBoxMindlink)
                             .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(jComboBoxBoosterShip, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jComboBoxBoosterHull, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jCheckBoxDeployedMode))
                             .addComponent(jLabel42))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jCheckBoxUseBoosterShip)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -1294,17 +1385,19 @@ public final class MainFrame extends javax.swing.JFrame {
                     .addComponent(jLabel41)
                     .addComponent(jComboBoxCapIShips, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jCheckBoxMindlink)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCheckBoxMindlink)
+                    .addComponent(jCheckBoxUseBoosterShip))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
                 .addComponent(jLabel42)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jComboBoxBoosterShip, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jComboBoxBoosterHull, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jCheckBoxDeployedMode))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jComboBoxLaserOptimization, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBoxLazerField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jComboBoxLinkCycle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jComboBoxLinkOptimal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -1470,7 +1563,7 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1491,8 +1584,8 @@ public final class MainFrame extends javax.swing.JFrame {
                         .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -1525,25 +1618,25 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private void jComboBoxMinerItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMinerItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         loadSelectedMiner();
         recalculateStats();
-        
+
         processEvents = true;
     }//GEN-LAST:event_jComboBoxMinerItemStateChanged
 
     private void jButtonCharReloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCharReloadActionPerformed
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-                
+
         final JWaitDialog dlg = new JWaitDialog(this, "Character Data", dCont);
-        
+
         // As setVisible blocks until the dialog is closed,
-        // we'll have to run it in a different thread.        
+        // we'll have to run it in a different thread.
         java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {  
+            public void run() {
                 synchronized(dlg) {
                     // hypotetically, we can find ourself in a situation
                     // where loader stopped worked already, and dialog
@@ -1556,23 +1649,23 @@ public final class MainFrame extends javax.swing.JFrame {
                 }
             }
         });
-        
+
         APICharLoader loader = new APICharLoader(curChar, dlg);
         dCont.startAPILoader(loader);
     }//GEN-LAST:event_jButtonCharReloadActionPerformed
 
     private void jComboBoxMiningItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMiningItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Integer level = (Integer) jComboBoxMining.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_MINING, level);
-        
+
         if (level < 4) {
             curChar.setSkillLevel(EVECharacter.SKILL_ASTROGEOLOGY, 0);
             jComboBoxAstrogeo.setSelectedItem(0);
@@ -1585,349 +1678,349 @@ public final class MainFrame extends javax.swing.JFrame {
             curChar.setSkillLevel(EVECharacter.SKILL_EXHUMERS, 0);
             jComboBoxExhumers.setSelectedItem(0);
         }
-        
-        if (level < 2) {            
+
+        if (level < 2) {
             curChar.setSkillLevel(EVECharacter.SKILL_MINING_DRONE_OPERATION, 0);
             jComboBoxMiningDrones.setSelectedItem(0);
         }
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxMiningItemStateChanged
 
     private void jComboBoxAstrogeoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxAstrogeoItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Integer level = (Integer) jComboBoxAstrogeo.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_ASTROGEOLOGY, level);
-        
+
         if (level < 5) {
             curChar.setSkillLevel(EVECharacter.SKILL_EXHUMERS, 0);
-            jComboBoxExhumers.setSelectedItem(0);            
+            jComboBoxExhumers.setSelectedItem(0);
         }
-        
+
         if (level < 3) {
             curChar.setSkillLevel(EVECharacter.SKILL_MINING_BARGE, 0);
-            jComboBoxMiningBarge.setSelectedItem(0);           
+            jComboBoxMiningBarge.setSelectedItem(0);
         }
-        
+
         if (level > 0) {
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING) < 4) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING, 4);
                 jComboBoxMining.setSelectedItem(4);
             }
         }
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxAstrogeoItemStateChanged
 
     private void jComboBoxIceHarItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxIceHarItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Integer level = (Integer) jComboBoxIceHar.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_ICE_HARVESTING, level);
-        
+
         if (level > 0) {
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING) < 4) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING, 4);
                 jComboBoxMining.setSelectedItem(4);
             }
         }
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxIceHarItemStateChanged
 
     private void jComboBoxDronesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDronesItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Integer level = (Integer) jComboBoxDrones.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_DRONES, level);
-        
+
         if (level < 5) {
             curChar.setSkillLevel(EVECharacter.SKILL_DRONE_INTERFACING, 0);
-            jComboBoxDroneInt.setSelectedItem(0);            
+            jComboBoxDroneInt.setSelectedItem(0);
         }
-        
+
         if (level < 1) {
             curChar.setSkillLevel(EVECharacter.SKILL_MINING_DRONE_OPERATION, 0);
-            jComboBoxMiningDrones.setSelectedItem(0);            
+            jComboBoxMiningDrones.setSelectedItem(0);
         }
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxDronesItemStateChanged
 
     private void jComboBoxMiningDronesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMiningDronesItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Integer level = (Integer) jComboBoxMiningDrones.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_MINING_DRONE_OPERATION, level);
-        
+
         if (level > 0) {
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING) < 2) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING, 2);
                 jComboBoxMining.setSelectedItem(2);
             }
-            
+
             if (curChar.getSkillLevel(EVECharacter.SKILL_DRONES) < 1) {
                 curChar.setSkillLevel(EVECharacter.SKILL_DRONES, 1);
                 jComboBoxDrones.setSelectedItem(1);
             }
         }
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxMiningDronesItemStateChanged
 
     private void jComboBoxGasHarItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxGasHarItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Integer level = (Integer) jComboBoxGasHar.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_GAS_CLOUD_HARVESTING, level);
-        
+
         if (level > 0) {
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING) < 4) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING, 4);
                 jComboBoxMining.setSelectedItem(4);
             }
         }
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxGasHarItemStateChanged
 
     private void jComboBoxMiningFrigItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMiningFrigItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Integer level = (Integer) jComboBoxMiningFrig.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_MINING_FRIGATE, level);
-        
+
         if (level < 3) {
             curChar.setSkillLevel(EVECharacter.SKILL_MINING_BARGE, 0);
-            jComboBoxMiningBarge.setSelectedItem(0);           
+            jComboBoxMiningBarge.setSelectedItem(0);
         }
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxMiningFrigItemStateChanged
 
     private void jComboBoxExpeFrigItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxExpeFrigItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Integer level = (Integer) jComboBoxExpeFrig.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_EXPEDITION_FRIGATES, level);
         // The most independent skill of them all.
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxExpeFrigItemStateChanged
 
     private void jComboBoxMiningBargeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMiningBargeItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Integer level = (Integer) jComboBoxMiningBarge.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_MINING_BARGE, level);
-        
+
         if (level > 0) {
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING) < 4) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING, 4);
                 jComboBoxMining.setSelectedItem(4);
             }
-            
+
             if (curChar.getSkillLevel(EVECharacter.SKILL_ASTROGEOLOGY) < 3) {
                 curChar.setSkillLevel(EVECharacter.SKILL_ASTROGEOLOGY, 3);
                 jComboBoxAstrogeo.setSelectedItem(3);
             }
-            
+
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_FRIGATE) < 3) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING_FRIGATE, 3);
                 jComboBoxMiningFrig.setSelectedItem(3);
             }
         }
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxMiningBargeItemStateChanged
 
     private void jComboBoxExhumersItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxExhumersItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Integer level = (Integer) jComboBoxExhumers.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_EXHUMERS, level);
-        
+
         if (level > 0) {
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING) < 4) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING, 4);
                 jComboBoxMining.setSelectedItem(4);
             }
-            
+
             if (curChar.getSkillLevel(EVECharacter.SKILL_ASTROGEOLOGY) < 5) {
                 curChar.setSkillLevel(EVECharacter.SKILL_ASTROGEOLOGY, 5);
                 jComboBoxAstrogeo.setSelectedItem(5);
             }
         }
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxExhumersItemStateChanged
 
     private void jComboBoxDroneIntItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDroneIntItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Integer level = (Integer) jComboBoxDroneInt.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_DRONE_INTERFACING, level);
-        
+
         if (level > 0) {
             if (curChar.getSkillLevel(EVECharacter.SKILL_DRONES) < 5) {
                 curChar.setSkillLevel(EVECharacter.SKILL_DRONES, 5);
                 jComboBoxDrones.setSelectedItem(5);
             }
         }
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxDroneIntItemStateChanged
 
     private void jComboBoxImplant8ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxImplant8ItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Implant imp = (Implant) jComboBoxImplant8.getSelectedItem();
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null) return;
-        
+
         curChar.setSlot8Implant(imp);
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxImplant8ItemStateChanged
 
     private void jComboBoxImplant10ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxImplant10ItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Implant imp = (Implant) jComboBoxImplant10.getSelectedItem();
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null) return;
-        
+
         curChar.setSlot10Implant(imp);
-        
+
         EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
         if (curChar.equals(booster)) {
             jCheckBoxMindlink.setSelected(imp == Implant.MFMINDLINK);
         }
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxImplant10ItemStateChanged
 
     private void jCheckBoxMichiItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxMichiItemStateChanged
         if (!processEvents) return;
-        
-        processEvents = false;     
-        
+
+        processEvents = false;
+
         boolean checked = jCheckBoxMichi.isSelected();
         EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar == null) return;
-        
+
         curChar.setSlot7Implant(checked? Implant.MICHI : Implant.NOTHING);
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jCheckBoxMichiItemStateChanged
 
     private void jComboBoxHullItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxHullItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         Hull newHull = (Hull) jComboBoxHull.getSelectedItem();
         ship.setHull(newHull);
-        
+
         newHull = ship.getHull();
-        
+
         jComboBoxTurrets.setModel(getIntegerModel(newHull.getMaxTurrets()));
         jComboBoxTurrets.setSelectedItem(ship.getTurretCount());
-        
+
         Turret curTurret = jComboBoxTurretType.getItemAt(0);
-        if (curTurret.getTurretType().isStripMiner() 
+        if (curTurret.getTurretType().isStripMiner()
                 != ship.getTurret().getTurretType().isStripMiner()) {
-            updateTurretComboBox(newHull);                        
+            updateTurretComboBox(newHull);
         }
-        
+
         jComboBoxTurretType.setSelectedItem(ship.getTurret());
         updateCrystalComboBox(ship.getTurret());
-              
+
         jComboBoxHUpgradeType.setSelectedItem(ship.getHarvestUpgrade());
-        
+
         jComboBoxHUpgrades.setModel(getIntegerModel(newHull.getMaxUpgrades()));
         jComboBoxHUpgrades.setSelectedItem(ship.getHarvestUpgradeCount());
-        
+
         jComboBoxDroneCount.setModel(getIntegerModel(ship.getMaxDrones()));
         jComboBoxDroneCount.setSelectedItem(ship.getDroneCount());
         if (ship.getDrone() == MiningDrone.NOTHING) {
@@ -1935,109 +2028,109 @@ public final class MainFrame extends javax.swing.JFrame {
         } else {
             if (!jComboBoxDroneCount.isEnabled()) jComboBoxDroneCount.setEnabled(true);
         }
-        
+
         updateRigComboBoxes(newHull);
         jComboBoxRig1.setSelectedItem(ship.getRig1());
         jComboBoxRig2.setSelectedItem(ship.getRig2());
         jComboBoxRig3.setSelectedItem(ship.getRig3());
         updateCalibrationLabel(ship);
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxHullItemStateChanged
 
     private void jComboBoxTurretsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxTurretsItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         Integer turretcnt = (Integer) jComboBoxTurrets.getSelectedItem();
-        ship.setTurrentCount(turretcnt);   
-        
+        ship.setTurrentCount(turretcnt);
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxTurretsItemStateChanged
 
     private void jComboBoxTurretTypeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxTurretTypeItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
-        Turret newTurret = (Turret) (jComboBoxTurretType.getSelectedItem());        
-        ship.setTurret(newTurret);  
+        Turret newTurret = (Turret) (jComboBoxTurretType.getSelectedItem());
+        ship.setTurret(newTurret);
         newTurret = ship.getTurret();
-        
+
         updateCrystalComboBox(newTurret);
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxTurretTypeItemStateChanged
 
     private void jComboBoxCrystalItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxCrystalItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         MiningCrystalLevel crystal = (MiningCrystalLevel) jComboBoxCrystal.getSelectedItem();
         ship.setTurretCrystal(crystal);
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxCrystalItemStateChanged
 
     private void jComboBoxHUpgradeTypeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxHUpgradeTypeItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         HarvestUpgrade upgrade = (HarvestUpgrade) jComboBoxHUpgradeType.getSelectedItem();
         ship.setHarvestUpgrade(upgrade);
-        
+
         if (ship.getHarvestUpgrade() == HarvestUpgrade.NOTHING) {
             if (jComboBoxHUpgrades.isEnabled()) jComboBoxHUpgrades.setEnabled(false);
         } else {
             if (!jComboBoxHUpgrades.isEnabled()) jComboBoxHUpgrades.setEnabled(true);
         }
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxHUpgradeTypeItemStateChanged
 
     private void jComboBoxHUpgradesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxHUpgradesItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         Integer upcnt = (Integer) jComboBoxHUpgrades.getSelectedItem();
-        ship.setHarvestUpgradeCount(upcnt);   
-        
+        ship.setHarvestUpgradeCount(upcnt);
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxHUpgradesItemStateChanged
 
     private void jCheckBoxStatsMercoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxStatsMercoItemStateChanged
         if (!processEvents) return;
-        
-        processEvents = false;                
+
+        processEvents = false;
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jCheckBoxStatsMercoItemStateChanged
 
     private void jComboBoxDroneTypeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDroneTypeItemStateChanged
         if (!processEvents) return;
-        
-        processEvents = false;                
-        
+
+        processEvents = false;
+
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         MiningDrone drone =  (MiningDrone) jComboBoxDroneType.getSelectedItem();
-        
+
         ship.setDrone(drone);
-        
+
         jComboBoxDroneCount.setModel(getIntegerModel(ship.getMaxDrones()));
         jComboBoxDroneCount.setSelectedItem(ship.getDroneCount());
         if (ship.getDrone() == MiningDrone.NOTHING) {
@@ -2045,95 +2138,95 @@ public final class MainFrame extends javax.swing.JFrame {
         } else {
             if (!jComboBoxDroneCount.isEnabled()) jComboBoxDroneCount.setEnabled(true);
         }
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxDroneTypeItemStateChanged
 
     private void jComboBoxDroneCountItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDroneCountItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         Integer droneCount = (Integer) jComboBoxDroneCount.getSelectedItem();
-        ship.setDroneCount(droneCount);   
-        
+        ship.setDroneCount(droneCount);
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxDroneCountItemStateChanged
 
     private void jComboBoxRig1ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxRig1ItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         Rig rig = (Rig) jComboBoxRig1.getSelectedItem();
         if (!ship.setRig1(rig)) {
             jComboBoxRig1.setSelectedItem(ship.getRig1());
         }
         updateCalibrationLabel(ship);
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxRig1ItemStateChanged
 
     private void jComboBoxRig2ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxRig2ItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         Rig rig = (Rig) jComboBoxRig2.getSelectedItem();
         if (!ship.setRig2(rig)) {
             jComboBoxRig2.setSelectedItem(ship.getRig2());
         }
         updateCalibrationLabel(ship);
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxRig2ItemStateChanged
 
     private void jComboBoxRig3ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxRig3ItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         Rig rig = (Rig) jComboBoxRig3.getSelectedItem();
         if (!ship.setRig3(rig)) {
             jComboBoxRig3.setSelectedItem(ship.getRig3());
         }
         updateCalibrationLabel(ship);
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxRig3ItemStateChanged
 
     private void jComboBoxShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxShipItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         loadSelectedShip();
-        
+
         recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxShipItemStateChanged
 
     private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         dCont.save();
         processEvents = true;
     }//GEN-LAST:event_jButtonSaveActionPerformed
 
     private void jButtonShipAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonShipAddActionPerformed
         JNewShipDialog dlg = new JNewShipDialog(this, dCont.getShipContainer());
-        
+
         dlg.setLocationRelativeTo(MainFrame.this);
         dlg.setVisible(true);
     }//GEN-LAST:event_jButtonShipAddActionPerformed
@@ -2142,7 +2235,7 @@ public final class MainFrame extends javax.swing.JFrame {
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         if (ship == null || dCont.getShipContainer().getShipCount() < 2) return;
         JRemoveShipDialog dlg = new JRemoveShipDialog(this, ship, dCont.getShipContainer());
-        
+
         dlg.setLocationRelativeTo(MainFrame.this);
         dlg.setVisible(true);
     }//GEN-LAST:event_jButtonShipRemoveActionPerformed
@@ -2151,34 +2244,34 @@ public final class MainFrame extends javax.swing.JFrame {
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         if (ship == null) return;
         JChangeShipNameDialog dlg = new JChangeShipNameDialog(this, ship, dCont.getShipContainer());
-        
+
         dlg.setLocationRelativeTo(MainFrame.this);
         dlg.setVisible(true);
     }//GEN-LAST:event_jButtonShipRenameActionPerformed
 
     private void jComboBoxBoosterItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxBoosterItemStateChanged
         if (!processEvents) return;
-        
+
         processEvents = false;
-        
+
         loadSelectedBooster();
-        
-        recalculateStats();        
+
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxBoosterItemStateChanged
 
     private void jComboBoxMForemanItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMForemanItemStateChanged
         if (!processEvents) return;
-        
-        processEvents = false;                
-        
+
+        processEvents = false;
+
         Integer level = (Integer) jComboBoxMForeman.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxBooster.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_MINING_FOREMAN, level);
-        
+
         if (level < 5) {
             curChar.setSkillLevel(EVECharacter.SKILL_MINING_DIRECTOR, 0);
             jComboBoxMDirector.setSelectedItem(0);
@@ -2187,159 +2280,252 @@ public final class MainFrame extends javax.swing.JFrame {
             curChar.setSkillLevel(EVECharacter.SKILL_CAPITAL_INDUSTRIAL_SHIPS, 0);
             jComboBoxCapIShips.setSelectedItem(0);
         }
-        
-        recalculateStats();        
+
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxMForemanItemStateChanged
 
     private void jComboBoxMDirectorItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMDirectorItemStateChanged
         if (!processEvents) return;
-        
-        processEvents = false;                
-        
+
+        processEvents = false;
+
         Integer level = (Integer) jComboBoxMDirector.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxBooster.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_MINING_DIRECTOR, level);
-        
+
         if (level < 1) {
             curChar.setSkillLevel(EVECharacter.SKILL_INDUSTRIAL_COMMAND_SHIPS, 0);
             jComboBoxIComShips.setSelectedItem(0);
             curChar.setSkillLevel(EVECharacter.SKILL_CAPITAL_INDUSTRIAL_SHIPS, 0);
             jComboBoxCapIShips.setSelectedItem(0);
         }
-        
+
         if (level > 0) {
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_FOREMAN) < 5) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING_FOREMAN, 5);
                 jComboBoxMining.setSelectedItem(5);
             }
         }
-        
-        recalculateStats();        
+
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxMDirectorItemStateChanged
 
     private void jComboBoxIReconfItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxIReconfItemStateChanged
         if (!processEvents) return;
-        
-        processEvents = false;                
-        
+
+        processEvents = false;
+
         Integer level = (Integer) jComboBoxIReconf.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxBooster.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_INDUSTRIAL_RECONFIGURATION, level);
-        
-        recalculateStats();        
+
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxIReconfItemStateChanged
 
     private void jComboBoxLinkSpecItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxLinkSpecItemStateChanged
         if (!processEvents) return;
-        
-        processEvents = false;                
-        
+
+        processEvents = false;
+
         Integer level = (Integer) jComboBoxLinkSpec.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxBooster.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_WARFARE_LINK_SPECIALIST, level);
-        
-        recalculateStats();        
+
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxLinkSpecItemStateChanged
 
     private void jComboBoxIComShipsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxIComShipsItemStateChanged
         if (!processEvents) return;
-        
-        processEvents = false;                
-        
+
+        processEvents = false;
+
         Integer level = (Integer) jComboBoxIComShips.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxBooster.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_INDUSTRIAL_COMMAND_SHIPS, level);
-        
+
         if (level < 3) {
             curChar.setSkillLevel(EVECharacter.SKILL_CAPITAL_INDUSTRIAL_SHIPS, 0);
             jComboBoxCapIShips.setSelectedItem(0);
         }
-        
+
         if (level > 0) {
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_FOREMAN) < 5) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING_FOREMAN, 5);
                 jComboBoxMining.setSelectedItem(5);
             }
-            
+
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_DIRECTOR) < 1) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING_DIRECTOR, 1);
                 jComboBoxMining.setSelectedItem(1);
             }
         }
-        
-        recalculateStats();        
+
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxIComShipsItemStateChanged
 
     private void jComboBoxCapIShipsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxCapIShipsItemStateChanged
         if (!processEvents) return;
-        
-        processEvents = false;                
-        
+
+        processEvents = false;
+
         Integer level = (Integer) jComboBoxCapIShips.getSelectedItem();
-                                                       
+
         EVECharacter curChar = (EVECharacter) jComboBoxBooster.getSelectedItem();
         if (curChar == null || curChar.isPreset()) return;
-        
+
         curChar.setSkillLevel(EVECharacter.SKILL_CAPITAL_INDUSTRIAL_SHIPS, level);
-        
+
         if (level > 0) {
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_FOREMAN) < 5) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING_FOREMAN, 5);
                 jComboBoxMining.setSelectedItem(5);
             }
-            
+
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_DIRECTOR) < 1) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING_DIRECTOR, 1);
                 jComboBoxMining.setSelectedItem(1);
             }
-            
+
             if (curChar.getSkillLevel(EVECharacter.SKILL_INDUSTRIAL_COMMAND_SHIPS) < 3) {
                 curChar.setSkillLevel(EVECharacter.SKILL_INDUSTRIAL_COMMAND_SHIPS, 3);
                 jComboBoxMining.setSelectedItem(3);
             }
         }
-        
-        recalculateStats();        
+
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jComboBoxCapIShipsItemStateChanged
 
     private void jCheckBoxMindlinkItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxMindlinkItemStateChanged
         if (!processEvents) return;
-        
-        processEvents = false;    
-        
+
+        processEvents = false;
+
         boolean checked = jCheckBoxMindlink.isSelected();
         EVECharacter curChar = (EVECharacter) jComboBoxBooster.getSelectedItem();
         if (curChar == null) return;
-        
+
         Implant implant = checked? Implant.MFMINDLINK : Implant.NOTHING;
         curChar.setSlot10Implant(implant);
-        
+
         EVECharacter miner = (EVECharacter) jComboBoxMiner.getSelectedItem();
         if (curChar.equals(miner)) {
             jComboBoxImplant10.setSelectedItem(implant);
         }
-        
-        recalculateStats();        
+
+        recalculateStats();
         processEvents = true;
     }//GEN-LAST:event_jCheckBoxMindlinkItemStateChanged
+
+    private void jCheckBoxDeployedModeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxDeployedModeItemStateChanged
+        if (!processEvents) return;
+
+        processEvents = false;
+
+        boolean checked = jCheckBoxDeployedMode.isSelected();
+        BoosterShip ship = dCont.getBoosterContainer().getBooster();
+        ship.setDeployedMode(checked);
+
+        recalculateStats();
+        processEvents = true;
+    }//GEN-LAST:event_jCheckBoxDeployedModeItemStateChanged
+
+    private void jComboBoxBoosterHullItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxBoosterHullItemStateChanged
+        if (!processEvents) return;
+
+        processEvents = false;
+
+        BoosterShip ship = dCont.getBoosterContainer().getBooster();
+        ship.setHull((BoosterHull) jComboBoxBoosterHull.getSelectedItem());
+        if (ship.getHull().haveDeployedMode()) {
+            if (!jCheckBoxDeployedMode.isEnabled()) jCheckBoxDeployedMode.setEnabled(true);
+        } else {
+            if (jCheckBoxDeployedMode.isEnabled()) jCheckBoxDeployedMode.setEnabled(false);
+        }
+        
+        recalculateStats();
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxBoosterHullItemStateChanged
+
+    private void jComboBoxLinkCycleItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxLinkCycleItemStateChanged
+        if (!processEvents) return;
+
+        processEvents = false;
+        
+        BoosterShip ship = dCont.getBoosterContainer().getBooster();
+        ship.setCycleLink((ForemanLink) jComboBoxLinkCycle.getSelectedItem());
+        
+        recalculateStats();
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxLinkCycleItemStateChanged
+
+    private void jComboBoxLinkOptimalItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxLinkOptimalItemStateChanged
+        if (!processEvents) return;
+
+        processEvents = false;
+        
+        BoosterShip ship = dCont.getBoosterContainer().getBooster();
+        ship.setOptimalLink((ForemanLink) jComboBoxLinkOptimal.getSelectedItem());
+        
+        recalculateStats();
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxLinkOptimalItemStateChanged
+
+    private void jCheckBoxUseBoosterShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxUseBoosterShipItemStateChanged
+        if (!processEvents) return;
+
+        processEvents = false;
+        
+        dCont.getBoosterContainer().setUsingBoosterShip(jCheckBoxUseBoosterShip.isSelected());
+        updateBoosterShipInterface();
+        
+        recalculateStats();
+        processEvents = true;
+    }//GEN-LAST:event_jCheckBoxUseBoosterShipItemStateChanged
+
+    private void jButtonBoosterReloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBoosterReloadActionPerformed
+        EVECharacter curChar = (EVECharacter) jComboBoxBooster.getSelectedItem();
+        if (curChar == null || curChar.isPreset()) return;
+
+        final JWaitDialog dlg = new JWaitDialog(this, "Character Data", dCont);
+
+        // As setVisible blocks until the dialog is closed,
+        // we'll have to run it in a different thread.
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                synchronized(dlg) {
+                    // hypotetically, we can find ourself in a situation
+                    // where loader stopped worked already, and dialog
+                    // still haven't showed up. practically, we shouldn't,
+                    // but because of THREADS, we'd better be overparanoid here.
+                    if (!dlg.isFinished()) {
+                        dlg.setLocationRelativeTo(MainFrame.this);
+                        dlg.setVisible(true);
+                    }
+                }
+            }
+        });
+
+        APICharLoader loader = new APICharLoader(curChar, dlg);
+        dCont.startAPILoader(loader);
+    }//GEN-LAST:event_jButtonBoosterReloadActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -2358,9 +2544,10 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JCheckBox jCheckBoxMichi;
     private javax.swing.JCheckBox jCheckBoxMindlink;
     private javax.swing.JCheckBox jCheckBoxStatsMerco;
+    private javax.swing.JCheckBox jCheckBoxUseBoosterShip;
     private javax.swing.JComboBox<Integer> jComboBoxAstrogeo;
     private javax.swing.JComboBox<EVECharacter> jComboBoxBooster;
-    private javax.swing.JComboBox jComboBoxBoosterShip;
+    private javax.swing.JComboBox<BoosterHull> jComboBoxBoosterHull;
     private javax.swing.JComboBox<Integer> jComboBoxCapIShips;
     private javax.swing.JComboBox<MiningCrystalLevel> jComboBoxCrystal;
     private javax.swing.JComboBox<Integer> jComboBoxDroneCount;
@@ -2378,8 +2565,8 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox<Integer> jComboBoxIceHar;
     private javax.swing.JComboBox<Implant> jComboBoxImplant10;
     private javax.swing.JComboBox<Implant> jComboBoxImplant8;
-    private javax.swing.JComboBox jComboBoxLaserOptimization;
-    private javax.swing.JComboBox jComboBoxLazerField;
+    private javax.swing.JComboBox<ForemanLink> jComboBoxLinkCycle;
+    private javax.swing.JComboBox<ForemanLink> jComboBoxLinkOptimal;
     private javax.swing.JComboBox<Integer> jComboBoxLinkSpec;
     private javax.swing.JComboBox<Integer> jComboBoxMDirector;
     private javax.swing.JComboBox<Integer> jComboBoxMForeman;

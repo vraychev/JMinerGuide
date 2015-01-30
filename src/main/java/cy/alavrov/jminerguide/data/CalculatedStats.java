@@ -25,6 +25,8 @@
  */
 package cy.alavrov.jminerguide.data;
 
+import cy.alavrov.jminerguide.data.booster.BoosterShip;
+import cy.alavrov.jminerguide.data.booster.ForemanLink;
 import cy.alavrov.jminerguide.data.ship.HarvestUpgrade;
 import cy.alavrov.jminerguide.data.ship.Hull;
 import cy.alavrov.jminerguide.data.ship.MiningDrone;
@@ -115,8 +117,7 @@ public class CalculatedStats {
      */
     private final int secsForOreHold;
     
-    public CalculatedStats(EVECharacter miner, EVECharacter booster, Ship ship, boolean mercoxit) {
-
+    public CalculatedStats(EVECharacter miner, EVECharacter booster, Ship ship, BoosterShip boosterShip, boolean mercoxit) {
         
         Turret turret = ship.getTurret();
         Hull hull = ship.getHull();
@@ -124,6 +125,34 @@ public class CalculatedStats {
         
         int upgrades = ship.getHarvestUpgradeCount();
         HarvestUpgrade upgrade = ship.getHarvestUpgrade();
+                
+        
+        // ATM there is only one mining mindlink, so we'll just hardcode it in.
+        boolean haveMindlink = booster.getSlot10Implant() == Implant.MFMINDLINK;                
+        
+        ForemanLink cycleLink = boosterShip.getCycleLink();
+        float baseCycleBonus = cycleLink.getCycleBonus();
+        float effectiveCycleBonus = baseCycleBonus * boosterShip.getHull()
+                .calculateBoostModifier(booster, boosterShip.isDeployedMode());
+        effectiveCycleBonus = effectiveCycleBonus * booster.getBoosterLinkModifier();                
+        
+        ForemanLink optimalLink = boosterShip.getOptimalLink();
+        float baseOptimalBonus = optimalLink.getOptimalBonus();
+        float effectiveOptimalBonus = baseOptimalBonus * boosterShip.getHull()
+                .calculateBoostModifier(booster, boosterShip.isDeployedMode());
+        effectiveOptimalBonus = effectiveOptimalBonus * booster.getBoosterLinkModifier();
+        
+        
+        if (haveMindlink) {
+            effectiveCycleBonus = effectiveCycleBonus * 1.25f;
+            effectiveOptimalBonus = effectiveOptimalBonus * 1.25f;
+        }
+        
+        System.err.println("Cycle: "+effectiveCycleBonus);
+        System.err.println("Optimal: "+effectiveOptimalBonus);
+        
+        float effectiveCycleModifier = 1 - 0.01f*effectiveCycleBonus;
+        float effectiveOptimalModifier = 1 + 0.01f*effectiveOptimalBonus;
         
         float baseTurretYield = turret.getBaseYield();
         float actualTurretYield;
@@ -133,7 +162,7 @@ public class CalculatedStats {
             case STRIPMINER:
                 actualTurretYield = baseTurretYield * 
                     (1 + hull.getRoleMiningYieldBonus()/100f) * 
-                    bonus.miningYieldMod * miner.getMiningYieldbonus();
+                    bonus.miningYieldMod * miner.getMiningYieldModifier();
                 
                 if (upgrades > 0 ) {
                     for (int i = 0; i < upgrades; i++) {
@@ -155,8 +184,7 @@ public class CalculatedStats {
                     }
                 }
                 
-                // ATM there is only one mining mindlink, so we'll just hardcode it in.
-                boolean haveMindlink = booster.getSlot10Implant() == Implant.MFMINDLINK;
+                
                 if (haveMindlink) {
                     actualTurretYield = actualTurretYield * 1.15f;
                 } else {
@@ -186,8 +214,7 @@ public class CalculatedStats {
         
         switch (turret.getTurretType()) {
             default:
-            case MININGLASER:
-                // booster to the rescue! later.                    
+            case MININGLASER:                                    
                 actualTurretCycle = baseTurretCycle;
                 break;
                 
@@ -197,13 +224,13 @@ public class CalculatedStats {
                 
             case GASHARVESTER:
                 actualTurretCycle = baseTurretCycle * bonus.gasCycleMod * 
-                    miner.getGasCycleBonus();
+                    miner.getGasCycleModifier();
                 break;
                 
             case ICEHARVESTER:
                 actualTurretCycle = baseTurretCycle * 
                     (1 - hull.getRoleIceCycleBonus()/100f) *
-                    bonus.stripCycleMod * miner.getIceCycleBonus();
+                    bonus.stripCycleMod * miner.getIceCycleModifier();
                 
                 if (upgrades > 0 ) {
                     for (int i = 0; i < upgrades; i++) {
@@ -221,6 +248,7 @@ public class CalculatedStats {
                 break;
         }
         
+        actualTurretCycle = actualTurretCycle * effectiveCycleModifier;
         turretCycle = actualTurretCycle;
         
         turretM3S = combinedTurretYield/turretCycle;
@@ -235,7 +263,7 @@ public class CalculatedStats {
             droneCycle = 0;  
             droneM3S = 0;
         } else {                        
-            float droneEffectiveYield = drone.getBaseYield() * miner.getDroneYieldBonus();
+            float droneEffectiveYield = drone.getBaseYield() * miner.getDroneYieldModifier();
                         
             // ok, here it is harder, due to diminishing returns on rigs.
             // we'll have to apply rigs with greater bonus first, so it's 
@@ -278,7 +306,7 @@ public class CalculatedStats {
                 effectiveOptimal = baseOptimal;
         }
         
-        // booster to the rescue, later.
+        effectiveOptimal = (int) (effectiveOptimal * effectiveOptimalModifier);
         
         optimal = effectiveOptimal;
         

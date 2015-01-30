@@ -43,11 +43,14 @@ import org.jdom2.output.XMLOutputter;
  */
 public class BoosterShipContainer {
     private BoosterShip booster;
+    private BoosterShip notABoosterShip = new NoBoosterShip();
     private final String path;
-
+    private boolean useBoosterShip;
+    
     public BoosterShipContainer(String path) {
         this.booster = new BoosterShip();
         this.path = path;
+        useBoosterShip = false;
     }
     
     /**
@@ -67,6 +70,7 @@ public class BoosterShipContainer {
         try {
             Document doc = builder.build(src);
             Element rootNode = doc.getRootElement();
+            useBoosterShip = rootNode.getAttribute("useship").getBooleanValue();
             List<Element> shipList = rootNode.getChildren("booster");
             for (Element shipEl : shipList) {
                 BoosterShip ship = new BoosterShip(shipEl);
@@ -98,6 +102,8 @@ public class BoosterShipContainer {
         Element root = new Element("boosters");
         Document doc = new Document(root);
                 
+        root.setAttribute("useship", String.valueOf(useBoosterShip));
+        
         Element elem = booster.getXMLElement();
         root.addContent(elem);
         
@@ -112,5 +118,29 @@ public class BoosterShipContainer {
     
     public BoosterShip getBooster() {
         return booster;
+    }
+    
+    /**
+     * Generic hull without any booster links.
+     * @return 
+     */
+    public BoosterShip getNoBooster() {
+        return notABoosterShip;
+    }
+    
+    /**
+     * Should we use boosting ship for boosting?
+     * @return 
+     */
+    public boolean isUsingBoosterShip() {
+        return useBoosterShip;
+    }
+    
+    /**
+     * Sets if we should use boosting ships for boosting.
+     * @param what 
+     */
+    public void setUsingBoosterShip(boolean what) {
+        useBoosterShip = what;
     }
 }
