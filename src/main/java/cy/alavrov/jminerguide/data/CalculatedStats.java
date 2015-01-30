@@ -117,6 +117,16 @@ public class CalculatedStats {
      */
     private final int secsForOreHold;
     
+    /**
+     * Link bonus to the cycle time, in percents.
+     */
+    private final float linkCycleBonus;
+    
+    /**
+     * Link bonus to the mining turret optimal, in percents.
+     */
+    private final float linkOptimalBonus;
+    
     public CalculatedStats(EVECharacter miner, EVECharacter booster, Ship ship, BoosterShip boosterShip, boolean mercoxit) {
         
         Turret turret = ship.getTurret();
@@ -148,8 +158,8 @@ public class CalculatedStats {
             effectiveOptimalBonus = effectiveOptimalBonus * 1.25f;
         }
         
-        System.err.println("Cycle: "+effectiveCycleBonus);
-        System.err.println("Optimal: "+effectiveOptimalBonus);
+        linkCycleBonus = effectiveCycleBonus;
+        linkOptimalBonus = effectiveOptimalBonus;
         
         float effectiveCycleModifier = 1 - 0.01f*effectiveCycleBonus;
         float effectiveOptimalModifier = 1 + 0.01f*effectiveOptimalBonus;
@@ -412,6 +422,22 @@ public class CalculatedStats {
      */
     public int getSecsForOreHold() {
         return secsForOreHold;
+    }
+
+    /**
+     * Link bonus to the cycle time, in percents.
+     * @return the linkCycleBonus
+     */
+    public float getLinkCycleBonus() {
+        return linkCycleBonus;
+    }
+
+    /**
+     * Link bonus to the mining turret optimal, in percents.
+     * @return the linkOptimalBonus
+     */
+    public float getLinkOptimalBonus() {
+        return linkOptimalBonus;
     }
 }
 

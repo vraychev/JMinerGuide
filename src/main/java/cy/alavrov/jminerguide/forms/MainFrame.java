@@ -152,6 +152,9 @@ public final class MainFrame extends javax.swing.JFrame {
                 Seconds.seconds(newStats.getSecsForOreHold())
                         .toStandardDuration().toPeriod()
         ));
+        
+        jLabelLinkCycleBonus.setText(fmt.format(newStats.getLinkCycleBonus())+"%");
+        jLabelLinkOptimalBonus.setText(fmt.format(newStats.getLinkOptimalBonus())+"%");
     }
 
     public void loadCharacterList(boolean loadSelection) {
@@ -399,11 +402,19 @@ public final class MainFrame extends javax.swing.JFrame {
             jCheckBoxUseBoosterShip.setSelected(usingBooster);
         }
         
+        BoosterShip ship = dCont.getBoosterContainer().getBooster();
+        BoosterHull hull = ship.getHull();
+        
         if (usingBooster) {
             jComboBoxBoosterHull.setEnabled(true);
             jComboBoxLinkCycle.setEnabled(true);
             jComboBoxLinkOptimal.setEnabled(true);
-            jCheckBoxDeployedMode.setEnabled(true);
+            if (hull.haveDeployedMode()) {
+                if (!jCheckBoxDeployedMode.isEnabled()) jCheckBoxDeployedMode.setEnabled(true);
+                jCheckBoxDeployedMode.setSelected(ship.isDeployedMode());
+            } else {
+                if (jCheckBoxDeployedMode.isEnabled()) jCheckBoxDeployedMode.setEnabled(false);
+            }
         } else {
             jComboBoxBoosterHull.setEnabled(false);
             jComboBoxLinkCycle.setEnabled(false);
@@ -588,6 +599,10 @@ public final class MainFrame extends javax.swing.JFrame {
         jCheckBoxDeployedMode = new javax.swing.JCheckBox();
         jLabel42 = new javax.swing.JLabel();
         jCheckBoxUseBoosterShip = new javax.swing.JCheckBox();
+        jLabel43 = new javax.swing.JLabel();
+        jLabel44 = new javax.swing.JLabel();
+        jLabelLinkCycleBonus = new javax.swing.JLabel();
+        jLabelLinkOptimalBonus = new javax.swing.JLabel();
         jPanel6 = new javax.swing.JPanel();
         jLabel19 = new javax.swing.JLabel();
         jLabelYield = new javax.swing.JLabel();
@@ -1305,6 +1320,14 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        jLabel43.setText("Bonus:");
+
+        jLabel44.setText("Bonus:");
+
+        jLabelLinkCycleBonus.setText("0%");
+
+        jLabelLinkOptimalBonus.setText("0%");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -1341,22 +1364,30 @@ public final class MainFrame extends javax.swing.JFrame {
                         .addComponent(jComboBoxBooster, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonBoosterReload, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jComboBoxLinkCycle, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBoxLinkOptimal, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jCheckBoxMindlink)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(jComboBoxBoosterHull, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jCheckBoxDeployedMode))
-                            .addComponent(jLabel42))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jCheckBoxMindlink)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jCheckBoxUseBoosterShip)))
+                        .addComponent(jCheckBoxUseBoosterShip))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jComboBoxBoosterHull, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jCheckBoxDeployedMode))
+                    .addComponent(jLabel42)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jComboBoxLinkCycle, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jLabel43)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabelLinkCycleBonus)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jLabel44)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabelLinkOptimalBonus)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jComboBoxLinkOptimal, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -1388,7 +1419,7 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jCheckBoxMindlink)
                     .addComponent(jCheckBoxUseBoosterShip))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
                 .addComponent(jLabel42)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1398,7 +1429,12 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jComboBoxLinkCycle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jComboBoxLinkOptimal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel43)
+                    .addComponent(jLabel44)
+                    .addComponent(jLabelLinkCycleBonus)
+                    .addComponent(jLabelLinkOptimalBonus)))
         );
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Stats"));
@@ -2618,6 +2654,8 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel40;
     private javax.swing.JLabel jLabel41;
     private javax.swing.JLabel jLabel42;
+    private javax.swing.JLabel jLabel43;
+    private javax.swing.JLabel jLabel44;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -2628,6 +2666,8 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabelDroneCycle;
     private javax.swing.JLabel jLabelDroneM3S;
     private javax.swing.JLabel jLabelDroneYield;
+    private javax.swing.JLabel jLabelLinkCycleBonus;
+    private javax.swing.JLabel jLabelLinkOptimalBonus;
     private javax.swing.JLabel jLabelM3H;
     private javax.swing.JLabel jLabelM3S;
     private javax.swing.JLabel jLabelOptimal;
