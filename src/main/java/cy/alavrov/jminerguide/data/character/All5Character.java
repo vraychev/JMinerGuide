@@ -31,8 +31,11 @@ package cy.alavrov.jminerguide.data.character;
  */
 public class All5Character extends EVECharacter{
 
-    public All5Character() {
-        super(-1, "All 5", null);
+    private final String namemod;
+    
+    public All5Character(String namemod) {
+        super(-1, "All 5"+namemod, null);
+        this.namemod = namemod;
     }
     
     @Override
@@ -47,7 +50,7 @@ public class All5Character extends EVECharacter{
     
     @Override
     public String toString() {
-        return "All 5";
+        return "All 5"+namemod;
     }
     
     @Override

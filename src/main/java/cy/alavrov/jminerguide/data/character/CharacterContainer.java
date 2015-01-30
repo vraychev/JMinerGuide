@@ -47,7 +47,8 @@ import org.jdom2.output.XMLOutputter;
  */
 public class CharacterContainer {
     
-    private final EVECharacter all5 = new All5Character();
+    private final EVECharacter all5booster = new All5Character(" - booster");
+    private final EVECharacter all5miner = new All5Character(" - miner");
     private final EVECharacter all0 = new All0Character();
     
     private final String path;
@@ -67,7 +68,7 @@ public class CharacterContainer {
     public CharacterContainer(String path) {
         this.path = path;
         keys = new LinkedHashMap<>();
-        selectedMiner = all5.getName();
+        selectedMiner = all5miner.getName();
         selectedBooster = all0.getName();
         reloadCharMap();
     }
@@ -105,7 +106,7 @@ public class CharacterContainer {
             JMGLogger.logSevere("Unable to load a configuration file for characters", e);
         } 
         
-        if (lastSelectedMiner == null) lastSelectedMiner = all5.getName();
+        if (lastSelectedMiner == null) lastSelectedMiner = all5miner.getName();
         if (lastSelectedBooster == null) lastSelectedBooster = all0.getName();
         
         selectedMiner = lastSelectedMiner;
@@ -137,7 +138,7 @@ public class CharacterContainer {
                 
         synchronized(blocker) {
             String lastMiner = selectedMiner;
-            if (lastMiner == null) lastMiner = all5.getName();
+            if (lastMiner == null) lastMiner = all5miner.getName();
             root.addContent(new Element("lastselectedminer").setText(lastMiner));
 
             String lastBooster = selectedBooster;
@@ -184,7 +185,8 @@ public class CharacterContainer {
         synchronized(blocker) {
             HashMap<String, EVECharacter> newCharMap = new HashMap<>();
             
-            newCharMap.put(all5.getName(), all5);
+            newCharMap.put(all5miner.getName(), all5miner);
+            newCharMap.put(all5booster.getName(), all5booster);
             newCharMap.put(all0.getName(), all0);
             for (APIKey key : keys.values()) {
                 for (EVECharacter eveChar : key.getCharacters()) {
@@ -275,8 +277,9 @@ public class CharacterContainer {
      */
     public DefaultComboBoxModel<EVECharacter> getCharModel() {
         DefaultComboBoxModel<EVECharacter> out = new DefaultComboBoxModel<>();
-                      
-        out.addElement(all5);
+        
+        out.addElement(all5miner);
+        out.addElement(all5booster);
         out.addElement(all0);
         
         synchronized(blocker) {            
@@ -308,7 +311,7 @@ public class CharacterContainer {
     public EVECharacter getLastSelectedMiner() {
         synchronized(blocker) {
             EVECharacter ret = charMap.get(selectedMiner);
-            if (ret == null) ret = all5;
+            if (ret == null) ret = all5miner;
             
             return ret;
         }

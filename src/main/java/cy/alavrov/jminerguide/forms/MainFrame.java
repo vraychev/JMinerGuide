@@ -294,7 +294,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxCapIShips.setSelectedItem(sel
                 .getSkillLevel(EVECharacter.SKILL_CAPITAL_INDUSTRIAL_SHIPS));
 
-        jCheckBoxMindlink.setSelected(sel.getSlot7Implant() == Implant.MFMINDLINK);
+        jCheckBoxMindlink.setSelected(sel.getSlot10Implant() == Implant.MFMINDLINK);
     }
 
     public void loadShipList(boolean loadSelection) {
