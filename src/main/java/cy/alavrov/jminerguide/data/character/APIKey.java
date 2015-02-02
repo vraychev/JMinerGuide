@@ -260,6 +260,7 @@ public class APIKey {
     
     /**
      * Returns a list model for a Swing list. Characters are sorted by insertion order.
+     * Contains hidden characters.
      * @return 
      */
     public DefaultListModel<EVECharacter> getListModel() {

@@ -180,6 +180,7 @@ public class CharacterContainer {
     
     /**
      * Reloads character name to character map. Stores only one character per name.
+     * Does not contain hidden characters.
      */
     public void reloadCharMap() {
         synchronized(blocker) {
@@ -190,7 +191,9 @@ public class CharacterContainer {
             newCharMap.put(all0.getName(), all0);
             for (APIKey key : keys.values()) {
                 for (EVECharacter eveChar : key.getCharacters()) {
-                    newCharMap.put(eveChar.getName(), eveChar);
+                    if (!eveChar.isHidden()) {
+                        newCharMap.put(eveChar.getName(), eveChar);
+                    }
                 }
             }
             
@@ -273,6 +276,7 @@ public class CharacterContainer {
      * Returns a combo box model with all chars of all keys for a Swing combo box. 
      * Keys are sorted by insertion order. Always contains at least "All 5" and "All 0"
      * characters.
+     * Does not contain hidden characters.
      * @return 
      */
     public DefaultComboBoxModel<EVECharacter> getCharModel() {
@@ -286,7 +290,9 @@ public class CharacterContainer {
             for (APIKey key : keys.values()) {
                 List<EVECharacter> chrs = key.getCharacters();
                 for (EVECharacter chr : chrs) {
-                    out.addElement(chr);
+                    if (!chr.isHidden()) {
+                        out.addElement(chr);
+                    }
                 }
             }
         }

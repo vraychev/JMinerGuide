@@ -85,6 +85,8 @@ public class EVECharacter {
     private volatile HashMap<Integer, Integer> skills;
     private final Object blocker = new Object();
     
+    private volatile boolean hidden;
+    
     /**
      * Constructor for a new character.
      * @param id
@@ -101,6 +103,7 @@ public class EVECharacter {
         this.slot7 = Implant.NOTHING;
         this.slot8 = Implant.NOTHING;
         this.slot10 = Implant.NOTHING;
+        hidden = false;
     }
     
     /**
@@ -114,6 +117,13 @@ public class EVECharacter {
         Attribute attr = root.getAttribute("id");
         id = attr.getIntValue();
         name = root.getChildText("name");
+        
+        try {
+            attr = root.getAttribute("hidden");
+            hidden = attr.getBooleanValue();
+        } catch (Exception e) {
+            hidden = false;
+        }
         
         this.slot7 = Implant.NOTHING;
         this.slot8 = Implant.NOTHING;
@@ -170,6 +180,7 @@ public class EVECharacter {
         synchronized(blocker) {
             Element root = new Element("character");
             root.setAttribute(new Attribute("id", String.valueOf(id)));    
+            root.setAttribute(new Attribute("hidden", String.valueOf(hidden)));    
             root.addContent(new Element("name").setText(name));
 
             Element skillSet = new Element("skills");
@@ -425,11 +436,14 @@ public class EVECharacter {
     
     @Override
     public EVECharacter clone() {
-        EVECharacter out = new EVECharacter(id, name, parentKey);
-        out.slot7 = slot7;
-        out.slot8 = slot8;
-        out.slot10 = slot10;
-        return out;
+        synchronized(blocker) {
+            EVECharacter out = new EVECharacter(id, name, parentKey);
+            out.slot7 = slot7;
+            out.slot8 = slot8;
+            out.slot10 = slot10;   
+            out.hidden = hidden;     
+            return out;
+        }
     }
     
     /**
@@ -438,16 +452,19 @@ public class EVECharacter {
      * @return 
      */
     public EVECharacter clone(APIKey parentKey) {
-        EVECharacter out = new EVECharacter(id, name, parentKey);
-        out.slot7 = slot7;
-        out.slot8 = slot8;
-        out.slot10 = slot10;
-        return out;
+        synchronized(blocker) {
+            EVECharacter out = new EVECharacter(id, name, parentKey);
+            out.slot7 = slot7;
+            out.slot8 = slot8;
+            out.slot10 = slot10;
+            out.hidden = hidden;
+            return out;
+        }
     }
     
     @Override
     public String toString() {
-        return name;
+        return name + (hidden? " - hidden" : "");
     }
     
     /**
@@ -466,26 +483,28 @@ public class EVECharacter {
     public float getMiningYieldModifier () {
         float out = 1;
         
-        int miningLevel = this.getSkillLevel(SKILL_MINING);
-        if (miningLevel > 0) {
-            out = out * (1f + 0.05f*miningLevel);
-        }
-        
-        int astroLevel = this.getSkillLevel(SKILL_ASTROGEOLOGY);
-        if (astroLevel > 0) {
-            out = out * (1f + 0.05f*astroLevel);
-        }
-        
-        int slot7Yield = this.slot7.getMiningYieldBonus();
-        if (slot7Yield > 0) {
-            out = out * (1f + 0.01f*slot7Yield);
-        }
-        
-        // slot 8 contains gas implants only, so we may pass it.
-        
-        int slot10Yield = this.slot10.getMiningYieldBonus();
-        if (slot10Yield > 0) {
-            out = out * (1f + 0.01f*slot10Yield);
+        synchronized(blocker) {
+            int miningLevel = this.getSkillLevel(SKILL_MINING);
+            if (miningLevel > 0) {
+                out = out * (1f + 0.05f*miningLevel);
+            }
+
+            int astroLevel = this.getSkillLevel(SKILL_ASTROGEOLOGY);
+            if (astroLevel > 0) {
+                out = out * (1f + 0.05f*astroLevel);
+            }
+
+            int slot7Yield = this.slot7.getMiningYieldBonus();
+            if (slot7Yield > 0) {
+                out = out * (1f + 0.01f*slot7Yield);
+            }
+
+            // slot 8 contains gas implants only, so we may pass it.
+
+            int slot10Yield = this.slot10.getMiningYieldBonus();
+            if (slot10Yield > 0) {
+                out = out * (1f + 0.01f*slot10Yield);
+            }
         }
         
         return out;
@@ -499,15 +518,17 @@ public class EVECharacter {
     public float getIceCycleModifier() {
         float out = 1;
         
-        int iceLevel = this.getSkillLevel(SKILL_ICE_HARVESTING);
-        if (iceLevel > 0) {
-            out = out * (1f - 0.05f*iceLevel);
-        }
-        
-        // ice bonus only in slot 10
-        int slot10CycleBonus = this.slot10.getIceCycleBonus();
-        if (slot10CycleBonus > 0) {
-            out = out * (1f - 0.01f*slot10CycleBonus);
+        synchronized(blocker) {
+            int iceLevel = this.getSkillLevel(SKILL_ICE_HARVESTING);
+            if (iceLevel > 0) {
+                out = out * (1f - 0.05f*iceLevel);
+            }
+
+            // ice bonus only in slot 10
+            int slot10CycleBonus = this.slot10.getIceCycleBonus();
+            if (slot10CycleBonus > 0) {
+                out = out * (1f - 0.01f*slot10CycleBonus);
+            }
         }
         
         return out;
@@ -521,10 +542,12 @@ public class EVECharacter {
     public float getGasCycleModifier() {
         float out = 1;
         
-        // gas bonus only in slot 8
-        int slot8CycleBonus = this.slot8.getGasCycleBonus();
-        if (slot8CycleBonus > 0) {
-            out = out * (1f - 0.01f*slot8CycleBonus);
+        synchronized(blocker) {
+            // gas bonus only in slot 8
+            int slot8CycleBonus = this.slot8.getGasCycleBonus();
+            if (slot8CycleBonus > 0) {
+                out = out * (1f - 0.01f*slot8CycleBonus);
+            }
         }
         
         return out;
@@ -540,14 +563,16 @@ public class EVECharacter {
     public float getDroneYieldModifier() {
         float out = 1;
         
-        int droneOperBonus = this.getSkillLevel(SKILL_MINING_DRONE_OPERATION);
-        if (droneOperBonus > 0) {
-            out = out * (1f + 0.05f*droneOperBonus);
-        }
-        
-        int droneIntBonus = this.getSkillLevel(SKILL_DRONE_INTERFACING);
-        if (droneIntBonus > 0) {
-            out = out * (1f + 0.1f*droneIntBonus);
+        synchronized(blocker) {
+            int droneOperBonus = this.getSkillLevel(SKILL_MINING_DRONE_OPERATION);
+            if (droneOperBonus > 0) {
+                out = out * (1f + 0.05f*droneOperBonus);
+            }
+
+            int droneIntBonus = this.getSkillLevel(SKILL_DRONE_INTERFACING);
+            if (droneIntBonus > 0) {
+                out = out * (1f + 0.1f*droneIntBonus);
+            }
         }
         
         return out;
@@ -561,16 +586,38 @@ public class EVECharacter {
     public float getBoosterLinkModifier() {
         float out = 1;
         
-        int miningDirectorBonus = this.getSkillLevel(SKILL_MINING_DIRECTOR);
-        if (miningDirectorBonus > 0) {
-            out = out * (1f + 0.2f*miningDirectorBonus);
-        }
-        
-        int warfareLinkSpecBonus = this.getSkillLevel(SKILL_WARFARE_LINK_SPECIALIST);
-        if (warfareLinkSpecBonus > 0) {
-            out = out * (1f + 0.1f*warfareLinkSpecBonus);
+        synchronized(blocker) {
+            int miningDirectorBonus = this.getSkillLevel(SKILL_MINING_DIRECTOR);
+            if (miningDirectorBonus > 0) {
+                out = out * (1f + 0.2f*miningDirectorBonus);
+            }
+
+            int warfareLinkSpecBonus = this.getSkillLevel(SKILL_WARFARE_LINK_SPECIALIST);
+            if (warfareLinkSpecBonus > 0) {
+                out = out * (1f + 0.1f*warfareLinkSpecBonus);
+            }
         }
         
         return out;
+    }
+    
+    /**
+     * Returns true, if the character should be hidden.
+     * @return 
+     */
+    public boolean isHidden() {
+        synchronized(blocker) {
+            return hidden;
+        }
+    }
+    
+    /**
+     * Sets the hidden flag.
+     * @param what 
+     */
+    public void setHidden(boolean what) {
+        synchronized(blocker) {
+            hidden = what;
+        }
     }
 }

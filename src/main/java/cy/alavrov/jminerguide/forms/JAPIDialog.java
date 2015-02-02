@@ -48,7 +48,9 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
     
     private final MainFrame parent;
     
-    private boolean updated = false;
+    private boolean updated = false;    
+    
+    private boolean processEvents = false;
 
     /**
      * Creates new form JAPIDialog
@@ -67,6 +69,8 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         
         AbstractDocument verDoc = ((AbstractDocument)jTextFieldVerification.getDocument());
         verDoc.addDocumentListener(new APIDialogDocumentListener());
+        
+        processEvents = true;
     }
 
     /**
@@ -98,6 +102,7 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         jLabelExpires = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jLabelStatus = new javax.swing.JLabel();
+        jCheckBoxCharHidden = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("API Key Management");
@@ -185,6 +190,11 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         jLabel3.setText("Characters");
 
         jListCharacters.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jListCharacters.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                jListCharactersValueChanged(evt);
+            }
+        });
         jScrollPane2.setViewportView(jListCharacters);
 
         jButtonClose.setText("Close");
@@ -202,6 +212,13 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
 
         jLabelStatus.setText("Ready");
 
+        jCheckBoxCharHidden.setText("Hide This Character");
+        jCheckBoxCharHidden.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxCharHiddenItemStateChanged(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -212,7 +229,8 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
                     .addComponent(jTextFieldVerification)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jCheckBoxCharHidden)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButtonClose))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -260,7 +278,9 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButtonClose)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonClose)
+                    .addComponent(jCheckBoxCharHidden))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -304,7 +324,7 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
                     jListAPIKey.setSelectedIndex(0);
                 }
 
-                loadSelectedKey();
+                loadSelectedKey(true);
             }
         } else {
             disableAll(true);                        
@@ -322,13 +342,16 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
     
     /**
      * Loads selected key's data into a sidebar.
+     * @param preserveSelection if true, we will try to preserve a selection.
      */
-    public void loadSelectedKey() {
+    public void loadSelectedKey(boolean preserveSelection) {
         APIKey sel = jListAPIKey.getSelectedValue();
         if (sel == null) {
             disableAll(true);
         } else {
             enableAll();
+            
+            EVECharacter selChar = jListCharacters.getSelectedValue();
             
             jLabelExpires.setText(sel.getExpires());
             jLabelStatus.setText("Ready");
@@ -337,7 +360,29 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
             jTextFieldVerification.setText(sel.getVerification());
             
             jListCharacters.setModel(sel.getListModel());
+            
+            if (selChar != null && preserveSelection) {
+                jListCharacters.setSelectedValue(selChar, true);
+            }
+            
+            loadCharacter();
         }
+    }
+    
+    /**
+     * Loads selected character.
+     */
+    public void loadCharacter() {
+        EVECharacter character = jListCharacters.getSelectedValue();
+        if (character == null) { 
+            jCheckBoxCharHidden.setSelected(false);
+            jCheckBoxCharHidden.setEnabled(false);
+            return;
+        }
+        
+        if (!jCheckBoxCharHidden.isEnabled()) jCheckBoxCharHidden.setEnabled(true);
+        
+        jCheckBoxCharHidden.setSelected(character.isHidden());
     }
     
     /**
@@ -448,7 +493,7 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
             if (pos >= keysTotal) pos = keysTotal - 1;
         
             jListAPIKey.setSelectedIndex(pos);
-            loadSelectedKey();
+            loadSelectedKey(false);
         } else {
             disableAll(true);
         }                
@@ -459,9 +504,14 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
      * @param evt 
      */
     private void jListAPIKeyValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListAPIKeyValueChanged
-        if (loading) return;
+        if (loading) return;        
+        if (!processEvents) return;
+
+        processEvents = false;
         
-        loadSelectedKey();
+        loadSelectedKey(false);
+        
+        processEvents = true;
     }//GEN-LAST:event_jListAPIKeyValueChanged
     
     /**
@@ -508,12 +558,40 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         }
     }//GEN-LAST:event_formWindowClosing
 
+    private void jListCharactersValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListCharactersValueChanged
+        if (!processEvents) return;
+
+        processEvents = false;
+        
+        loadCharacter();
+        
+        processEvents = true;
+    }//GEN-LAST:event_jListCharactersValueChanged
+
+    private void jCheckBoxCharHiddenItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxCharHiddenItemStateChanged
+        if (!processEvents) return;
+
+        processEvents = false;
+        
+        boolean sel = jCheckBoxCharHidden.isSelected();
+        
+        EVECharacter selChar = jListCharacters.getSelectedValue();
+        if (selChar == null) return;
+        
+        selChar.setHidden(sel);
+        loadSelectedKey(true);
+        updated = true;
+        
+        processEvents = true;
+    }//GEN-LAST:event_jCheckBoxCharHiddenItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonAddKey;
     private javax.swing.JButton jButtonClose;
     private javax.swing.JButton jButtonReload;
     private javax.swing.JButton jButtonRemoveKey;
+    private javax.swing.JCheckBox jCheckBoxCharHidden;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -551,7 +629,7 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
 
             if (keysTotal > 0) {                
                 jListAPIKey.setSelectedValue(processedKey, true);
-                loadSelectedKey();
+                loadSelectedKey(true);
                 jLabelStatus.setText("Key loaded successfully");
             } else {
                 disableAll(true);
