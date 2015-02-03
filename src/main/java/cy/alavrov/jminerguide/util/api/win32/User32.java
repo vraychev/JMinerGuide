@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Andrey Lavrov <lavroff@gmail.com>
+ * Copyright (c) 2015, Andrey Lavrov <lavroff@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,46 +23,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package cy.alavrov.jminerguide.util.api.win32;
 
-package cy.alavrov.jminerguide.util;
-
+import com.sun.jna.Native;
 import com.sun.jna.platform.win32.WinDef.HWND;
-import com.sun.jna.platform.win32.WinNT.HANDLE;
-import cy.alavrov.jminerguide.util.api.win32.Shell32;
-import java.io.File;
+import com.sun.jna.ptr.PointerByReference;
+import com.sun.jna.win32.StdCallLibrary;
 
 /**
- *
- * @author alavrov
+ * User32 JNA mapping.
+ * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class DirUtils {
+public class User32 {
+    static { 
+        Native.register("user32"); 
+    }
+    public static native int GetWindowThreadProcessId(HWND hWnd, PointerByReference pref);
+    public static native HWND GetForegroundWindow();
+    public static native int GetWindowTextW(HWND hWnd, char[] lpString, int nMaxCount);
+    public static native boolean EnumWindows (WndEnumProc wndenumproc, int lParam);
     
-    /**
-     * Returns the path to the ~/Documents/ (note the finishing slash), OS-dependent.
-     * @return 
-     */
-    public static String getDocumentsDir(){ 
-        String dir;
-        
-        if (com.sun.jna.Platform.isWindows()) {
-            HWND hwndOwner = null;
-            int nFolder = Shell32.CSIDL_PERSONAL;
-            HANDLE hToken = null;
-            int dwFlags = Shell32.SHGFP_TYPE_CURRENT;
-            char[] pszPath = new char[Shell32.MAX_PATH];
-            int hResult = Shell32.SHGetFolderPathW(hwndOwner, nFolder,
-                    hToken, dwFlags, pszPath);
-            if (Shell32.S_OK == hResult) {
-                String path = new String(pszPath);
-                int len = path.indexOf('\0');
-                dir = path.substring(0, len);
-            } else {
-                System.err.println("Cannot detect home path: "+hResult);
-                dir = ""; // Error? Let's write to the game directory!11
-            }
-        } else {
-            dir = System.getProperty("user.home")+File.separator+"Documents";
-        }
-        return dir+File.separator;        
-    }    
+    public static interface WndEnumProc extends StdCallLibrary.StdCallCallback {
+        boolean callback (HWND hWnd, int lParam);
+    }
 }

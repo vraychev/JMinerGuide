@@ -47,6 +47,8 @@ import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.implant.Implant;
 import cy.alavrov.jminerguide.log.JMGLogger;
+import cy.alavrov.jminerguide.util.winmanager.IWindowManager;
+import cy.alavrov.jminerguide.util.winmanager.win32.Win32WindowManager;
 import java.awt.Image;
 import java.io.InputStream;
 import java.text.DecimalFormat;
@@ -79,6 +81,8 @@ public final class MainFrame extends javax.swing.JFrame {
      * to react to it when we are the source of the change.
      */
     private volatile boolean processEvents = false;
+    
+    private final IWindowManager wManager;
 
     /**
      * Creates new form MainFrame
@@ -111,6 +115,14 @@ public final class MainFrame extends javax.swing.JFrame {
         updateBoosterShipInterface();
 
         recalculateStats();
+        
+        if (com.sun.jna.Platform.isWindows()) {
+            wManager = new Win32WindowManager();
+            jButtonAsteroidMonitor.setEnabled(true);
+        } else {
+            wManager = null;
+            jButtonAsteroidMonitor.setEnabled(false);
+        }
         processEvents = true;
     }
 
@@ -511,6 +523,8 @@ public final class MainFrame extends javax.swing.JFrame {
         jToolBar1 = new javax.swing.JToolBar();
         JButtonManageAPI = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
+        jPanel7 = new javax.swing.JPanel();
+        jButtonAsteroidMonitor = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         jButtonSave = new javax.swing.JButton();
         JButtonQuit = new javax.swing.JButton();
@@ -655,11 +669,30 @@ public final class MainFrame extends javax.swing.JFrame {
         jButton4.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(jButton4);
 
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 82, Short.MAX_VALUE)
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 23, Short.MAX_VALUE)
+        );
+
+        jToolBar1.add(jPanel7);
+
+        jButtonAsteroidMonitor.setText("Asteroid Monitor");
+        jButtonAsteroidMonitor.setFocusable(false);
+        jButtonAsteroidMonitor.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonAsteroidMonitor.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(jButtonAsteroidMonitor);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 966, Short.MAX_VALUE)
+            .addGap(0, 798, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1621,7 +1654,7 @@ public final class MainFrame extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 273, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -2569,6 +2602,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton JButtonQuit;
     private javax.swing.JLabel JLabel14;
     private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButtonAsteroidMonitor;
     private javax.swing.JButton jButtonBoosterReload;
     private javax.swing.JButton jButtonCharReload;
     private javax.swing.JButton jButtonSave;
@@ -2680,6 +2714,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextFieldTrip;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Andrey Lavrov <lavroff@gmail.com>
+ * Copyright (c) 2015, Andrey Lavrov <lavroff@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,46 +23,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package cy.alavrov.jminerguide.util.api.win32;
 
-package cy.alavrov.jminerguide.util;
-
+import com.sun.jna.Native;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
-import cy.alavrov.jminerguide.util.api.win32.Shell32;
-import java.io.File;
 
 /**
- *
- * @author alavrov
+ * Shell32 JNA mapping.
+ * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class DirUtils {
-    
-    /**
-     * Returns the path to the ~/Documents/ (note the finishing slash), OS-dependent.
-     * @return 
-     */
-    public static String getDocumentsDir(){ 
-        String dir;
+public class Shell32 {
+        public static final int MAX_PATH = 260;
+        public static final int CSIDL_PERSONAL = 0x05;
+        public static final int SHGFP_TYPE_CURRENT = 0;
+        public static final int SHGFP_TYPE_DEFAULT = 1;
+        public static final int S_OK = 0;
         
-        if (com.sun.jna.Platform.isWindows()) {
-            HWND hwndOwner = null;
-            int nFolder = Shell32.CSIDL_PERSONAL;
-            HANDLE hToken = null;
-            int dwFlags = Shell32.SHGFP_TYPE_CURRENT;
-            char[] pszPath = new char[Shell32.MAX_PATH];
-            int hResult = Shell32.SHGetFolderPathW(hwndOwner, nFolder,
-                    hToken, dwFlags, pszPath);
-            if (Shell32.S_OK == hResult) {
-                String path = new String(pszPath);
-                int len = path.indexOf('\0');
-                dir = path.substring(0, len);
-            } else {
-                System.err.println("Cannot detect home path: "+hResult);
-                dir = ""; // Error? Let's write to the game directory!11
-            }
-        } else {
-            dir = System.getProperty("user.home")+File.separator+"Documents";
-        }
-        return dir+File.separator;        
-    }    
-}
+        static {
+            Native.register("shell32"); 
+        };
+
+        /**
+         * see http://msdn.microsoft.com/en-us/library/bb762181(VS.85).aspx
+         * 
+         * HRESULT SHGetFolderPath( HWND hwndOwner, int nFolder, HANDLE hToken,
+         * DWORD dwFlags, LPTSTR pszPath);
+         */
+        public static native int SHGetFolderPathW(HWND hwndOwner, int nFolder, HANDLE hToken,
+                int dwFlags, char[] pszPath);
+
+    }
