@@ -27,29 +27,83 @@ package cy.alavrov.jminerguide.monitor;
 
 import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
 import cy.alavrov.jminerguide.util.winmanager.IWindowManager;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
+ * Monitor for the EVE (mining and whatnot) sessions.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class MiningSessionMonitor {
     private final IWindowManager wManager;
     private volatile IEVEWindow currentWindow = null;
+    private final ConcurrentHashMap<IEVEWindow, MiningSession> sessions;
 
     public MiningSessionMonitor(IWindowManager wManager) {
         this.wManager = wManager;
+        this.sessions = new ConcurrentHashMap<>();
     }
     
+    /**
+     * Updates all available EVE window lists and creates/cleans up sessions
+     * accordingly.
+     */
     public void update() {
         currentWindow = wManager.getCurrentEVEWindow();
+        
+        Collection<MiningSession> sessionEntries = sessions.values();
+        Iterator<MiningSession> iter = sessionEntries.iterator();
+        while (iter.hasNext()) {
+            MiningSession session = iter.next();
+            
+            session.updateWindow();
+            
+            if (!session.exists()) iter.remove();
+        }
+        
+        List<IEVEWindow> windows = wManager.getEVEWindowList();
+        for (IEVEWindow window : windows) {
+            if (!sessions.containsKey(window)) {
+                MiningSession newSession = new MiningSession(window);
+                sessions.putIfAbsent(window, newSession);
+            }
+        }
     }
 
     /**
      * Returns the current EVE window, or null, if the current window is EVE's.
      * @return 
      */
-    public IEVEWindow getCurrentWindow() {
-        return currentWindow;
+    public MiningSession getCurrentSession() {
+        IEVEWindow window = currentWindow;
+        if (window == null) return null;
+        
+        MiningSession out = sessions.get(window);
+        
+        if (out == null) {            
+            MiningSession newOut = new MiningSession(window);
+            out = sessions.putIfAbsent(window, newOut);
+            // will return null, if there's nothing here and new value was 
+            // inserted successfully, otherwise will return stored value. 
+            // We will probably not run into this, but it's better to be safe.
+            if (out == null) out = newOut;
+        }
+        
+        return out;
     }
         
+    /**
+     * Returns all of the sessions available at this moment.
+     * @return 
+     */
+    public List<MiningSession> getSessions() {
+        ArrayList<MiningSession> out = new ArrayList<>();
+        for (MiningSession session : sessions.values()) {
+            out.add(session);
+        }
+        return out;
+    }
 }

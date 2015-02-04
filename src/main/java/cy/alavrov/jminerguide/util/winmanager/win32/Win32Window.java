@@ -53,7 +53,7 @@ public class Win32Window implements IEVEWindow {
 
     @Override
     public void makeActive() {
-        // tba
+        User32.SetForegroundWindow(window);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class Win32Window implements IEVEWindow {
                 if (parts.length < 2) { 
                     name = null;
                 } else {
-                    name = parts[1];
+                    name = parts[1].trim();
                 }
             }
         }
@@ -89,4 +89,15 @@ public class Win32Window implements IEVEWindow {
         return exists;
     }
     
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Win32Window)) return false;
+        Win32Window other = (Win32Window) o;
+        return window.equals(other.window);
+    }
+
+    @Override
+    public int hashCode() {
+        return window.hashCode();
+    }
 }

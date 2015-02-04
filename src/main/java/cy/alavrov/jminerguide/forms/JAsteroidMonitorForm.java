@@ -27,15 +27,20 @@ package cy.alavrov.jminerguide.forms;
 
 import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.log.JMGLogger;
+import cy.alavrov.jminerguide.monitor.MiningSession;
 import cy.alavrov.jminerguide.monitor.MiningSessionMonitor;
 import cy.alavrov.jminerguide.monitor.UpdateWindowTask;
-import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
 import cy.alavrov.jminerguide.util.winmanager.IWindowManager;
+import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
 
 /**
  *
@@ -52,6 +57,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private final ScheduledThreadPoolExecutor timer = new ScheduledThreadPoolExecutor(2);
     
     private volatile String currentMiner = null;
+    private volatile List<MiningSession> currentSessions;
     
     private volatile long loseOnTopAt = 0;
     private volatile boolean shouldLooseOnTop = false;
@@ -78,8 +84,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     }
 
     public void updateCurrentSession() {
-        IEVEWindow window = msMonitor.getCurrentWindow();
-        if (window == null) {            
+        MiningSession session = msMonitor.getCurrentSession();
+        if (session == null) {            
             // wait a few milliseconds to lose always on top to combat flickering.
             if (this.isAlwaysOnTop() && !shouldLooseOnTop) {
                 shouldLooseOnTop = true;
@@ -97,7 +103,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 this.setAlwaysOnTop(true);
             }
             
-            String name = window.getCharacterName();
+            String name = session.getCharacterName();
             if (name == null) {
                 if (currentMiner != null) {
                     currentMiner = null;
@@ -108,8 +114,37 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     currentMiner = name;
                     jLabelMinerName.setText(currentMiner);
                 }
-            }
+            }                        
         }
+        
+        List<MiningSession> sessions = msMonitor.getSessions();
+        if (!sessions.equals(currentSessions)) {
+            recreateButtons(sessions);
+            currentSessions = sessions;
+        }
+    }
+    
+    private void recreateButtons(List<MiningSession> sessions) {
+        jPanelSelector.removeAll();
+        int rows = (int) Math.ceil(sessions.size() / 2f);
+        GridLayout layout = new GridLayout(rows, 2, 2, 2);
+        jPanelSelector.setLayout(layout);
+        for (final MiningSession session : sessions) {
+            JButton button = new JButton(session.getCharacterName());
+            
+            button.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    JAsteroidMonitorForm.this.setAlwaysOnTop(true);
+                    session.switchToWindow();
+                }
+            });
+            
+            jPanelSelector.add(button);
+        }
+        layout.layoutContainer(jPanelSelector);
+        jPanelSelector.validate();
     }
     
     /**
@@ -142,8 +177,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             .addGap(0, 206, Short.MAX_VALUE)
         );
 
-        jPanelSelector.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
         javax.swing.GroupLayout jPanelSelectorLayout = new javax.swing.GroupLayout(jPanelSelector);
         jPanelSelector.setLayout(jPanelSelectorLayout);
         jPanelSelectorLayout.setHorizontalGroup(
@@ -152,7 +185,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         );
         jPanelSelectorLayout.setVerticalGroup(
             jPanelSelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 138, Short.MAX_VALUE)
+            .addGap(0, 142, Short.MAX_VALUE)
         );
 
         jButtonClose.setText("Close");
@@ -205,6 +238,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private void jButtonCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCloseActionPerformed
         this.setVisible(false);
         this.dispose();
+        timer.shutdown();
         parent.deleteMonitorForm();
     }//GEN-LAST:event_jButtonCloseActionPerformed
 

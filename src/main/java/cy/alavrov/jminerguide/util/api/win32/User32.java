@@ -42,6 +42,7 @@ public class User32 {
     public static native HWND GetForegroundWindow();
     public static native int GetWindowTextW(HWND hWnd, char[] lpString, int nMaxCount);
     public static native boolean EnumWindows (WndEnumProc wndenumproc, int lParam);
+    public static native boolean SetForegroundWindow(HWND hWnd);
     
     public static interface WndEnumProc extends StdCallLibrary.StdCallCallback {
         boolean callback (HWND hWnd, int lParam);

@@ -46,6 +46,7 @@ public class UpdateWindowTask implements Runnable{
     public void run() {
         msMonitor.update();
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 form.updateCurrentSession();
             }

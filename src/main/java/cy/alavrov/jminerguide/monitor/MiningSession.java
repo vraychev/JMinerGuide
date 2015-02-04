@@ -25,10 +25,56 @@
  */
 package cy.alavrov.jminerguide.monitor;
 
+import cy.alavrov.jminerguide.data.character.EVECharacter;
+import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
+
 /**
  *
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class MiningSession {
+    private final IEVEWindow window;
+    private volatile EVECharacter character;
+
+    public MiningSession(IEVEWindow window) {
+        this.window = window;
+    }
+    
+    /**
+     * Retursn session's character name or null, if no character selected yet.
+     * You should run window update before querying this!
+     * @return 
+     */
+    public String getCharacterName() {
+        return window.getCharacterName();
+    }
+    
+    /**
+     * Returns false, if the session's window is no more.
+     * You should run window update before querying this!
+     * @return 
+     */
+    public boolean exists() {
+        return window.exists();
+    }
+    
+    /**
+     * Updates current window parametes - name and aliveness.
+     */
+    public void updateWindow() {
+        window.update();
+    }
+    
+    public void switchToWindow() {
+        window.makeActive();
+    }
+    
+    public EVECharacter getCharacter() {
+        return character;
+    }
+
+    public void setCharacter(EVECharacter character) {
+        this.character = character;
+    }        
     
 }
