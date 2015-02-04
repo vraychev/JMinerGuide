@@ -26,6 +26,7 @@
 package cy.alavrov.jminerguide.forms;
 
 import cy.alavrov.jminerguide.data.DataContainer;
+import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import cy.alavrov.jminerguide.monitor.MiningSession;
 import cy.alavrov.jminerguide.monitor.MiningSessionMonitor;
@@ -78,7 +79,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         this.parent = parent;
         this.dCont = dCont;
         this.wManager = wManager;
-        this.msMonitor = new MiningSessionMonitor(wManager);
+        this.msMonitor = new MiningSessionMonitor(wManager, dCont);
         
         timer.scheduleWithFixedDelay(new UpdateWindowTask(msMonitor, this), 100, 100, TimeUnit.MILLISECONDS);
     }
@@ -112,7 +113,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             } else {
                 if (!name.equals(currentMiner)) {
                     currentMiner = name;
-                    jLabelMinerName.setText(currentMiner);
+                    EVECharacter curchar = session.getCharacter();
+                    jLabelMinerName.setText(currentMiner + (curchar == null ? "(not found)" : ""));
                 }
             }                        
         }

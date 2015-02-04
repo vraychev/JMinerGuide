@@ -25,6 +25,8 @@
  */
 package cy.alavrov.jminerguide.monitor;
 
+import cy.alavrov.jminerguide.data.DataContainer;
+import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
 import cy.alavrov.jminerguide.util.winmanager.IWindowManager;
 import java.util.ArrayList;
@@ -39,12 +41,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MiningSessionMonitor {
     private final IWindowManager wManager;
+    private final DataContainer dCont;
     private volatile IEVEWindow currentWindow = null;
     private final ConcurrentHashMap<IEVEWindow, MiningSession> sessions;
 
-    public MiningSessionMonitor(IWindowManager wManager) {
+    public MiningSessionMonitor(IWindowManager wManager, DataContainer dCont) {
         this.wManager = wManager;
         this.sessions = new ConcurrentHashMap<>();
+        this.dCont = dCont;
     }
     
     /**
@@ -60,14 +64,43 @@ public class MiningSessionMonitor {
             MiningSession session = iter.next();
             
             session.updateWindow();
-            
-            if (!session.exists()) iter.remove();
+                                                
+            if (!session.exists()) {
+                iter.remove();
+            } else {
+                String name = session.getCharacterName();
+                if (name == null) {
+                    if (session.getCharacter() != null) iter.remove();
+                    // if a window lose it's logged in character (BUT HOW?!)
+                    // we probably would be better destroying the session with all contents.                    
+                } else {
+                    EVECharacter curChar = session.getCharacter();
+                    if (curChar == null) {
+                        // not very optimal, but will do for now, performance overhead is minimal.
+                        EVECharacter newChar = dCont.getCharacterContainer().getCharacterByName(name);                        
+                        if (newChar != null) {
+                            session.setCharacter(newChar);
+                        }
+                    } else if (curChar.getName().equals(name)) {
+                        iter.remove();
+                        // shouldn't happen ever! and if it does - kill it with fire.
+                    }
+                }
+            }
         }
         
         List<IEVEWindow> windows = wManager.getEVEWindowList();
         for (IEVEWindow window : windows) {
             if (!sessions.containsKey(window)) {
                 MiningSession newSession = new MiningSession(window);
+                String name = newSession.getCharacterName();
+                if (name != null) {
+                    EVECharacter newChar = dCont.getCharacterContainer().getCharacterByName(name);                        
+                    if (newChar != null) {
+                        newSession.setCharacter(newChar);
+                    }
+                }
+                
                 sessions.putIfAbsent(window, newSession);
             }
         }
