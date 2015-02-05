@@ -70,18 +70,18 @@ public class MiningSessionMonitor {
             } else {
                 String name = session.getCharacterName();
                 if (name == null) {
-                    if (session.getCharacter() != null) iter.remove();
+                    if (session.getSessionCharacter() != null) iter.remove();
                     // if a window lose it's logged in character (BUT HOW?!)
                     // we probably would be better destroying the session with all contents.                    
                 } else {
-                    EVECharacter curChar = session.getCharacter();
+                    SessionCharacter curChar = session.getSessionCharacter();
                     if (curChar == null) {
                         // not very optimal, but will do for now, performance overhead is minimal.
                         EVECharacter newChar = dCont.getCharacterContainer().getCharacterByName(name);                        
                         if (newChar != null) {
-                            session.setCharacter(newChar);
+                            session.createSessionCharacter(newChar, dCont);
                         }
-                    } else if (curChar.getName().equals(name)) {
+                    } else if (!curChar.getCharacter().getName().equals(name)) {
                         iter.remove();
                         // shouldn't happen ever! and if it does - kill it with fire.
                     }
@@ -97,7 +97,7 @@ public class MiningSessionMonitor {
                 if (name != null) {
                     EVECharacter newChar = dCont.getCharacterContainer().getCharacterByName(name);                        
                     if (newChar != null) {
-                        newSession.setCharacter(newChar);
+                        newSession.createSessionCharacter(newChar, dCont);
                     }
                 }
                 

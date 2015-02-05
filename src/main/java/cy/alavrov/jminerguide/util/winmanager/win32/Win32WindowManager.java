@@ -93,7 +93,7 @@ public class Win32WindowManager implements IWindowManager {
                 
                 res = Psapi.GetModuleBaseNameW(process, null, buffer, 1024);
                 if (res != 0) {
-                    String exeName = Native.toString(buffer);                
+                    String exeName = Native.toString(buffer);           
                     return exeName.toLowerCase().equals("exefile.exe");                                              
                 }
             }

@@ -2621,6 +2621,7 @@ public final class MainFrame extends javax.swing.JFrame {
         }
         
         monitorForm.setVisible(true);
+        this.setVisible(false);
     }//GEN-LAST:event_jButtonAsteroidMonitorActionPerformed
 
 

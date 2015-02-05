@@ -85,6 +85,9 @@ public class EVECharacter {
     private volatile HashMap<Integer, Integer> skills;
     private final Object blocker = new Object();
     
+    private volatile String monitorShip;
+    private volatile String monitorBooster;
+    
     private volatile boolean hidden;
     
     /**
@@ -168,6 +171,15 @@ public class EVECharacter {
             JMGLogger.logWarning("Unable to load character implants for "+name, e);
         }
         
+        Element monitorConf = root.getChild("monitor");
+        
+        try {
+            monitorBooster = monitorConf.getChildText("booster");
+            monitorShip = monitorConf.getChildText("ship");
+        } catch (NullPointerException e) {
+            JMGLogger.logWarning("Unable to load monitor settings for "+name, e);
+        }
+        
         this.skills = newSkills;
         this.parentKey = parentKey;                
     }
@@ -203,6 +215,19 @@ public class EVECharacter {
             }
             root.addContent(implantSet);
 
+            Element monitorConf = new Element("monitor");
+            if (monitorBooster != null) {
+               Element boosterElem = new Element("booster");
+               boosterElem.setText(monitorBooster);
+               monitorConf.addContent(boosterElem);
+            }            
+            if (monitorShip != null) {
+               Element shipElem = new Element("ship");
+               shipElem.setText(monitorShip);
+               monitorConf.addContent(shipElem);
+            }            
+            root.addContent(monitorConf);
+            
             return root;
         }
     }
@@ -620,4 +645,46 @@ public class EVECharacter {
             hidden = what;
         }
     }
+
+    /**
+     * Returns the name of last selected booster in asteroid monitor.
+     * Can return null!
+     * @return 
+     */
+    public String getMonitorBooster() {
+        synchronized(blocker) {
+            return monitorBooster;
+        }
+    }
+
+     /**
+     * Returns the name of last selected ship in asteroid monitor.
+     * Can return null!
+     * @return 
+     */
+    public String getMonitorShip() {
+        synchronized(blocker) {
+            return monitorShip;
+        }
+    }
+
+     /**
+     * Sets the name of last selected booster in asteroid monitor. 
+     * @param monitorBooster
+     */
+    public void setMonitorBooster(String monitorBooster) {
+        synchronized(blocker) {
+            this.monitorBooster = monitorBooster;
+        }
+    }
+
+    /**
+     * Sets the name of last selected ship in asteroid monitor.
+     * @param monitorShip 
+     */
+    public void setMonitorShip(String monitorShip) {
+        synchronized(blocker) {
+            this.monitorShip = monitorShip;
+        }
+    }        
 }

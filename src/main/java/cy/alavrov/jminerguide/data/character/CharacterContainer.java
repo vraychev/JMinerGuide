@@ -26,6 +26,7 @@
 
 package cy.alavrov.jminerguide.data.character;
 
+import cy.alavrov.jminerguide.data.implant.Implant;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.io.File;
 import java.io.FileWriter;
@@ -70,6 +71,7 @@ public class CharacterContainer {
         keys = new LinkedHashMap<>();
         selectedMiner = all5miner.getName();
         selectedBooster = all0.getName();
+        all5booster.setSlot10Implant(Implant.MFMINDLINK);
         reloadCharMap();
     }
     
@@ -109,6 +111,7 @@ public class CharacterContainer {
         if (lastSelectedMiner == null) lastSelectedMiner = all5miner.getName();
         if (lastSelectedBooster == null) lastSelectedBooster = all0.getName();
         
+        all5booster.setSlot10Implant(Implant.MFMINDLINK);
         selectedMiner = lastSelectedMiner;
         selectedBooster = lastSelectedBooster;
         keys = newkeys;
@@ -345,4 +348,29 @@ public class CharacterContainer {
             return ret;
         }
     }
+
+    /**
+     * Returns default "All 0" character.
+     * @return 
+     */
+    public EVECharacter getAll0() {
+        return all0;
+    }
+
+    /**
+     * Returns default "All 5" booster character.
+     * @return 
+     */
+    public EVECharacter getAll5booster() {
+        return all5booster;
+    }
+
+    /**
+     * Returns default "All 5" miner character.
+     * @return 
+     */
+    public EVECharacter getAll5miner() {
+        return all5miner;
+    }
+        
 }

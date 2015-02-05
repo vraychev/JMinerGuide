@@ -32,7 +32,7 @@ import cy.alavrov.jminerguide.util.api.win32.Shell32;
 import java.io.File;
 
 /**
- *
+ * Directory-related utils.
  * @author alavrov
  */
 public class DirUtils {

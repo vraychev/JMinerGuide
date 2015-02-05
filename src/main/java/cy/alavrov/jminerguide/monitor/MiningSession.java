@@ -25,7 +25,9 @@
  */
 package cy.alavrov.jminerguide.monitor;
 
+import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
+import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
 
 /**
@@ -34,7 +36,7 @@ import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
  */
 public class MiningSession {
     private final IEVEWindow window;
-    private volatile EVECharacter character;
+    private volatile SessionCharacter character;    
 
     public MiningSession(IEVEWindow window) {
         this.window = window;
@@ -69,12 +71,28 @@ public class MiningSession {
         window.makeActive();
     }
     
-    public EVECharacter getCharacter() {
+    public SessionCharacter getSessionCharacter() {
         return character;
     }
 
-    public void setCharacter(EVECharacter character) {
-        this.character = character;
+    public void createSessionCharacter(EVECharacter character, DataContainer dCont) {                       
+        if (character == null) return;
+        
+        SessionCharacter schar = new SessionCharacter(character, dCont);
+        this.character = schar;
     }        
     
+    public void updateCharacherShip(Ship ship) {
+        if (ship == null || character == null) return;
+        
+        SessionCharacter schar = new SessionCharacter(character, ship);
+        this.character = schar;
+    }
+    
+    public void updateCharacherBooster(EVECharacter booster) {
+        if (booster == null || character == null) return;
+        
+        SessionCharacter schar = new SessionCharacter(character, booster);
+        this.character = schar;
+    }
 }

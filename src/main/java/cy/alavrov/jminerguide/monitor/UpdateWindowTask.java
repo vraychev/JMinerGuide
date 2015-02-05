@@ -26,6 +26,7 @@
 package cy.alavrov.jminerguide.monitor;
 
 import cy.alavrov.jminerguide.forms.JAsteroidMonitorForm;
+import cy.alavrov.jminerguide.log.JMGLogger;
 
 /**
  * A task to update EVE window state.
@@ -44,7 +45,11 @@ public class UpdateWindowTask implements Runnable{
 
     @Override
     public void run() {
-        msMonitor.update();
+        try {
+            msMonitor.update();
+        } catch (Exception e) {
+            JMGLogger.logSevere("unable to peform monitor update", e);
+        }
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
