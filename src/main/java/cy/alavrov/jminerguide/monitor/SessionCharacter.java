@@ -43,6 +43,8 @@ public class SessionCharacter {
     private final Ship ship;
     private final EVECharacter booster;
     private final BoosterShip boosterShip;
+    private final BoosterShip noBoosterShip;
+    private final boolean useBoosterShip;
     private final CalculatedStats stats;    
     
     public SessionCharacter(EVECharacter character, DataContainer dCont) {
@@ -50,7 +52,7 @@ public class SessionCharacter {
         
         CharacterContainer cCont = dCont.getCharacterContainer();
         ShipContainer sCont = dCont.getShipContainer();
-        BoosterShipContainer bCont = dCont.getBoosterContainer();
+        BoosterShipContainer bCont = dCont.getBoosterShipContainer();
         
         String boosterName = character.getMonitorBooster();
         EVECharacter newBooster = cCont.getCharacterByName(boosterName);
@@ -60,13 +62,20 @@ public class SessionCharacter {
         Ship newShip = sCont.getShip(shipName);
         if (newShip == null) newShip = sCont.getShipModel().getElementAt(0); // always have something, so safe.
         
-        BoosterShip bship = bCont.isUsingBoosterShip() ? bCont.getBooster() : bCont.getNoBooster();
+        String boosterShipName = character.getMonitorBooster();
+        BoosterShip newBoosterShip = bCont.getBoosterShip(boosterShipName);
+        if (newBoosterShip == null) newBoosterShip = bCont.getBoosterShipModel().getElementAt(0);                
+   
+        Boolean isUseBoosterShip = character.isMonitorUseBoosterShip();
         
         booster = newBooster;
         ship = newShip;
-        boosterShip = bship;
+        boosterShip = newBoosterShip;
+        useBoosterShip = isUseBoosterShip;
+        noBoosterShip = bCont.getNoBooster();
         
-        CalculatedStats newStats = new CalculatedStats(character, booster, ship, boosterShip, false);
+        CalculatedStats newStats = new CalculatedStats(character, booster, ship, 
+                useBoosterShip ? boosterShip : noBoosterShip, false);
         
         stats = newStats;
         
@@ -77,9 +86,12 @@ public class SessionCharacter {
         character = oldChar.character;
         booster = oldChar.booster;
         boosterShip = oldChar.boosterShip;
+        useBoosterShip = oldChar.useBoosterShip;
+        noBoosterShip = oldChar.noBoosterShip;
         ship = newShip;
         
-        CalculatedStats newStats = new CalculatedStats(character, booster, ship, boosterShip, false);
+        CalculatedStats newStats = new CalculatedStats(character, booster, ship, 
+                useBoosterShip ? boosterShip : noBoosterShip, false);
         
         stats = newStats;
         character.setMonitorShip(newShip.getName());
@@ -89,12 +101,45 @@ public class SessionCharacter {
         character = oldChar.character;
         booster = newBooster;
         boosterShip = oldChar.boosterShip;
+        useBoosterShip = oldChar.useBoosterShip;
+        noBoosterShip = oldChar.noBoosterShip;
         ship = oldChar.ship;
         
-        CalculatedStats newStats = new CalculatedStats(character, booster, ship, boosterShip, false);
+        CalculatedStats newStats = new CalculatedStats(character, booster, ship, 
+                useBoosterShip ? boosterShip : noBoosterShip, false);
         
         stats = newStats;
         character.setMonitorBooster(newBooster.getName());
+    }
+            
+    public SessionCharacter(SessionCharacter oldChar, BoosterShip newBoosterShip) {
+        character = oldChar.character;
+        booster = oldChar.booster;
+        boosterShip = newBoosterShip;
+        useBoosterShip = oldChar.useBoosterShip;
+        noBoosterShip = oldChar.noBoosterShip;
+        ship = oldChar.ship;
+        
+        CalculatedStats newStats = new CalculatedStats(character, booster, ship, 
+                useBoosterShip ? boosterShip : noBoosterShip, false);
+        
+        stats = newStats;
+        character.setMonitorBoosterShip(newBoosterShip.getName());
+    }
+            
+    public SessionCharacter(SessionCharacter oldChar, boolean doUseBoosterShip) {
+        character = oldChar.character;
+        booster = oldChar.booster;
+        boosterShip = oldChar.boosterShip;
+        useBoosterShip = doUseBoosterShip;
+        noBoosterShip = oldChar.noBoosterShip;
+        ship = oldChar.ship;
+        
+        CalculatedStats newStats = new CalculatedStats(character, booster, ship, 
+                useBoosterShip ? boosterShip : noBoosterShip, false);
+        
+        stats = newStats;
+        character.setMonitorUseBoosterShip(doUseBoosterShip);
     }
 
     public EVECharacter getCharacter() {
@@ -113,6 +158,10 @@ public class SessionCharacter {
         return boosterShip;
     }
 
+    public boolean isUseBoosterShip() {
+        return useBoosterShip;
+    }    
+    
     public CalculatedStats getStats() {
         return stats;
     }        

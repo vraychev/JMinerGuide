@@ -113,7 +113,10 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxShip.setSelectedItem(dCont.getShipContainer().getLastSelectedShip());
         loadSelectedShip();
 
+        loadBoosterShipList(false);
+        jComboBoxBoosterShip.setSelectedItem(dCont.getBoosterShipContainer().getLastSelectedBoosterShip());
         loadSelectedBoosterShip();
+        
         updateBoosterShipInterface();
 
         recalculateStats();
@@ -132,8 +135,9 @@ public final class MainFrame extends javax.swing.JFrame {
         EVECharacter miner = (EVECharacter) jComboBoxMiner.getSelectedItem();
         EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
-        BoosterShipContainer bCont = dCont.getBoosterContainer();
-        BoosterShip bShip = bCont.isUsingBoosterShip() ? bCont.getBooster() : bCont.getNoBooster();
+        BoosterShipContainer bCont = dCont.getBoosterShipContainer();
+        BoosterShip selBShip = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
+        BoosterShip bShip = bCont.isUsingBoosterShip() ? selBShip : bCont.getNoBooster();
         
         Turret turret = ship.getTurret();
         boolean isMerco = false;
@@ -339,6 +343,35 @@ public final class MainFrame extends javax.swing.JFrame {
         }
 
     }
+    
+    public void loadBoosterShipList(boolean loadSelection) {
+
+        BoosterShipContainer bCont = dCont.getBoosterShipContainer();
+
+        BoosterShip sel = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
+
+        DefaultComboBoxModel<BoosterShip> model = bCont.getBoosterShipModel();
+        jComboBoxBoosterShip.setModel(model);
+
+        if (bCont.getBoosterShipCount() < 2) {
+            jButtonBoosterShipRemove.setEnabled(false);
+        } else {
+            jButtonBoosterShipRemove.setEnabled(true);
+        }
+
+        // we're assuming here that there is always something in the combobox
+
+        if (loadSelection) {
+            if (sel == null) {
+                jComboBoxBoosterShip.setSelectedIndex(0);
+            } else {
+                jComboBoxBoosterShip.setSelectedItem(sel);
+            }
+
+            loadSelectedBoosterShip();
+        }
+
+    }
 
     public void setSelectedShip(Ship ship) {
         jComboBoxShip.setSelectedItem(ship);
@@ -387,12 +420,12 @@ public final class MainFrame extends javax.swing.JFrame {
     }
 
     public void loadSelectedBoosterShip() {
-        BoosterShip ship = dCont.getBoosterContainer().getBooster();
+        BoosterShip ship = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
 
         BoosterHull hull = ship.getHull();
         jComboBoxBoosterHull.setSelectedItem(hull);
         
-        if (dCont.getBoosterContainer().isUsingBoosterShip()) {
+        if (dCont.getBoosterShipContainer().isUsingBoosterShip()) {
             if (hull.haveDeployedMode()) {
                 if (!jCheckBoxDeployedMode.isEnabled()) jCheckBoxDeployedMode.setEnabled(true);
                 jCheckBoxDeployedMode.setSelected(ship.isDeployedMode());
@@ -411,12 +444,12 @@ public final class MainFrame extends javax.swing.JFrame {
     }
     
     public void updateBoosterShipInterface() {
-        boolean usingBooster = dCont.getBoosterContainer().isUsingBoosterShip();
+        boolean usingBooster = dCont.getBoosterShipContainer().isUsingBoosterShip();
         if (jCheckBoxUseBoosterShip.isSelected() != usingBooster) {
             jCheckBoxUseBoosterShip.setSelected(usingBooster);
         }
         
-        BoosterShip ship = dCont.getBoosterContainer().getBooster();
+        BoosterShip ship = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
         BoosterHull hull = ship.getHull();
         
         if (usingBooster) {
@@ -2561,7 +2594,7 @@ public final class MainFrame extends javax.swing.JFrame {
         processEvents = false;
 
         boolean checked = jCheckBoxDeployedMode.isSelected();
-        BoosterShip ship = dCont.getBoosterContainer().getBooster();
+        BoosterShip ship = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
         ship.setDeployedMode(checked);
 
         recalculateStats();
@@ -2573,7 +2606,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         processEvents = false;
 
-        BoosterShip ship = dCont.getBoosterContainer().getBooster();
+        BoosterShip ship = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
         ship.setHull((BoosterHull) jComboBoxBoosterHull.getSelectedItem());
         if (ship.getHull().haveDeployedMode()) {
             if (!jCheckBoxDeployedMode.isEnabled()) jCheckBoxDeployedMode.setEnabled(true);
@@ -2590,7 +2623,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         processEvents = false;
         
-        BoosterShip ship = dCont.getBoosterContainer().getBooster();
+        BoosterShip ship = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
         ship.setCycleLink((ForemanLink) jComboBoxLinkCycle.getSelectedItem());
         
         recalculateStats();
@@ -2602,7 +2635,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         processEvents = false;
         
-        BoosterShip ship = dCont.getBoosterContainer().getBooster();
+        BoosterShip ship = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
         ship.setOptimalLink((ForemanLink) jComboBoxLinkOptimal.getSelectedItem());
         
         recalculateStats();
@@ -2614,7 +2647,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         processEvents = false;
         
-        dCont.getBoosterContainer().setUsingBoosterShip(jCheckBoxUseBoosterShip.isSelected());
+        dCont.getBoosterShipContainer().setUsingBoosterShip(jCheckBoxUseBoosterShip.isSelected());
         updateBoosterShipInterface();
         
         recalculateStats();

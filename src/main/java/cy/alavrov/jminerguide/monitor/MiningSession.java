@@ -26,6 +26,7 @@
 package cy.alavrov.jminerguide.monitor;
 
 import cy.alavrov.jminerguide.data.DataContainer;
+import cy.alavrov.jminerguide.data.booster.BoosterShip;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
@@ -93,6 +94,20 @@ public class MiningSession {
         if (booster == null || character == null) return;
         
         SessionCharacter schar = new SessionCharacter(character, booster);
+        this.character = schar;
+    }
+    
+    public void updateCharacherBoosterShip(BoosterShip boosterShip) {
+        if (boosterShip == null || character == null) return;
+        
+        SessionCharacter schar = new SessionCharacter(character, boosterShip);
+        this.character = schar;
+    }
+    
+    public void updateCharacherUsingBoosterShip(boolean what) {
+        if (character == null) return;
+        
+        SessionCharacter schar = new SessionCharacter(character, what);
         this.character = schar;
     }
 }

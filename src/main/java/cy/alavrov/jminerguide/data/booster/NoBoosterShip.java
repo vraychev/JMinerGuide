@@ -31,6 +31,10 @@ package cy.alavrov.jminerguide.data.booster;
  */
 public class NoBoosterShip extends BoosterShip{
 
+    public NoBoosterShip() {
+        super("No Booster");
+    }
+
     @Override
     public BoosterHull getHull() {
         return BoosterHull.GENERIC;

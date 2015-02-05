@@ -88,14 +88,16 @@ public class ShipContainer {
             JMGLogger.logSevere("Unable to load a configuration file for ships", e);
         } 
         
-        ships = newShips;
-        if (ships.isEmpty()) {
-            Ship ship = new Ship("T1 Venture");
-            ships.put(ship.getName(), ship);
+        synchronized(blocker) {
+            ships = newShips;
+            if (ships.isEmpty()) {
+                Ship ship = new Ship("T1 Venture");
+                ships.put(ship.getName(), ship);
+            }
+            // ships is never empty, so it's ok.
+            if (lastSelectedShip == null) lastSelectedShip = ships.values().iterator().next().getName();
+            selectedShip = lastSelectedShip;
         }
-        // ships is never empty, so it's ok.
-        if (lastSelectedShip == null) lastSelectedShip = ships.values().iterator().next().getName();
-        selectedShip = lastSelectedShip;
     }
     
     /**
@@ -140,7 +142,7 @@ public class ShipContainer {
     }
     
     /**
-     * Returns a combo box model with ships for a Swing list. Ships are sorted by insertion order.
+     * Returns a combo box model with ships for a Swing combo box. Ships are sorted by insertion order.
      * @return 
      */
     public DefaultComboBoxModel<Ship> getShipModel() {
@@ -218,9 +220,9 @@ public class ShipContainer {
     
     /**
      * Changes ship's name and moves it to the appropriate key.
-     * New ship name shouldn't be used by another ship.
-     * New ship name shouldn't be empty or whitespace-only.
-     * New ship name should be different from the current one.
+     * New name shouldn't be used by another ship.
+     * New name shouldn't be empty or whitespace-only.
+     * New name should be different from the current one.
      * Null parameters lead to false.
      * @param oldName name of existing ship.
      * @param newName desired new name.

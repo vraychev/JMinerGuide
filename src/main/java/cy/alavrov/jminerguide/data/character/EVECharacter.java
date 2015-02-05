@@ -87,6 +87,8 @@ public class EVECharacter {
     
     private volatile String monitorShip;
     private volatile String monitorBooster;
+    private volatile String monitorBoosterShip;
+    private volatile boolean monitorUseBoosterShip = false;
     
     private volatile boolean hidden;
     
@@ -176,9 +178,11 @@ public class EVECharacter {
         try {
             monitorBooster = monitorConf.getChildText("booster");
             monitorShip = monitorConf.getChildText("ship");
+            monitorBoosterShip = monitorConf.getChildText("boostership");
+            monitorUseBoosterShip = "true".equals(monitorConf.getChildText("useboostership"));
         } catch (NullPointerException e) {
             JMGLogger.logWarning("Unable to load monitor settings for "+name, e);
-        }
+        }                
         
         this.skills = newSkills;
         this.parentKey = parentKey;                
@@ -225,7 +229,16 @@ public class EVECharacter {
                Element shipElem = new Element("ship");
                shipElem.setText(monitorShip);
                monitorConf.addContent(shipElem);
+            }           
+            if (monitorBoosterShip != null) {
+               Element bShipElem = new Element("boostership");
+               bShipElem.setText(monitorBoosterShip);
+               monitorConf.addContent(bShipElem);
             }            
+            
+            Element useBShipElem = new Element("useboostership");
+            useBShipElem.setText(String.valueOf(monitorUseBoosterShip));
+            monitorConf.addContent(useBShipElem);
             root.addContent(monitorConf);
             
             return root;
@@ -685,6 +698,47 @@ public class EVECharacter {
     public void setMonitorShip(String monitorShip) {
         synchronized(blocker) {
             this.monitorShip = monitorShip;
+        }
+    }        
+
+    /**
+     * Returns the name of last selected booster ship in asteroid monitor.
+     * Can return null!
+     * @return 
+     */
+    public String getMonitorBoosterShip() {
+        synchronized(blocker) {
+            return monitorBoosterShip;
+        }
+    }
+
+    /**
+     * Sets the name of last selected booster ship in asteroid monitor.
+     * @param monitorBoosterShip 
+     */
+    public void setMonitorBoosterShip(String monitorBoosterShip) {
+        synchronized(blocker) {
+            this.monitorBoosterShip = monitorBoosterShip;
+        }
+    }        
+
+    /**
+     * Returns true, if the character uses boosting ship in asteroid monitor,
+     * @return 
+     */
+    public boolean isMonitorUseBoosterShip() {
+        synchronized(blocker) {
+            return monitorUseBoosterShip;
+        }
+    }
+
+    /**
+     * Sets if the character uses boosting ship in asteroid monitor,
+     * @param monitorUseBoosterShip 
+     */
+    public void setMonitorUseBoosterShip(boolean monitorUseBoosterShip) {
+        synchronized(blocker) {
+            this.monitorUseBoosterShip = monitorUseBoosterShip;
         }
     }        
 }

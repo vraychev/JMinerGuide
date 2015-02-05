@@ -33,6 +33,8 @@ import org.jdom2.Element;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class BoosterShip {
+    private String name;
+    
     private BoosterHull hull;
     private ForemanLink cycleLink;
     private ForemanLink optimalLink;
@@ -40,7 +42,8 @@ public class BoosterShip {
     
     private final Object blocker = new Object();
 
-    public BoosterShip() {
+    public BoosterShip(String name) {
+        this.name = name;
         hull = BoosterHull.GENERIC;
         cycleLink = ForemanLink.NOTHING;
         optimalLink = ForemanLink.NOTHING;
@@ -48,6 +51,10 @@ public class BoosterShip {
     }
     
     public BoosterShip(Element root) throws Exception {
+        String newName = root.getChildText("name");
+        if (newName == null) newName = "Unnamed Booster Ship "+System.nanoTime();
+        name = newName;
+        
         // same catch-all logic, as in Ship
         try {
             Element hullElem = root.getChild("hull");
@@ -189,6 +196,26 @@ public class BoosterShip {
     public ForemanLink getCycleLink() {
         synchronized(blocker) {
             return cycleLink;
+        }
+    }
+    
+    public String getName() {
+        synchronized(blocker) {
+            return name;
+        }
+    }
+    
+    public void setName(String name) {
+        if (name == null) return;
+        synchronized(blocker) {
+            this.name = name;
+        }
+    }
+    
+    @Override
+    public String toString() {
+        synchronized(blocker) {
+            return name;
         }
     }
 }

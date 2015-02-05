@@ -77,7 +77,7 @@ public class DataContainer {
         return ships;
     }
     
-    public BoosterShipContainer getBoosterContainer() {
+    public BoosterShipContainer getBoosterShipContainer() {
         return boosters;
     }
     

@@ -29,7 +29,9 @@ import cy.alavrov.jminerguide.log.JMGLogger;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import javax.swing.DefaultComboBoxModel;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
@@ -42,13 +44,20 @@ import org.jdom2.output.XMLOutputter;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class BoosterShipContainer {
-    private BoosterShip booster;
+    private LinkedHashMap<String, BoosterShip> boosterShips;
     private BoosterShip notABoosterShip = new NoBoosterShip();
     private final String path;
+    
     private boolean useBoosterShip;
+    private String selectedBoosterShip;
+    
+    private final Object blocker = new Object();
     
     public BoosterShipContainer(String path) {
-        this.booster = new BoosterShip();
+        boosterShips = new LinkedHashMap<>();
+        BoosterShip booster = new BoosterShip("Generic Ship");
+        boosterShips.put(booster.getName(), booster);
+        
         this.path = path;
         useBoosterShip = false;
     }
@@ -65,20 +74,36 @@ public class BoosterShipContainer {
             return;
         }
         
+        LinkedHashMap<String, BoosterShip> newBoosterShips = new LinkedHashMap<>();
+        String lastSelectedBoosterShip = null;
+        boolean doUseBoosterShip = false;
         
         SAXBuilder builder = new SAXBuilder();
         try {
             Document doc = builder.build(src);
             Element rootNode = doc.getRootElement();
-            useBoosterShip = rootNode.getAttribute("useship").getBooleanValue();
+            doUseBoosterShip = rootNode.getAttribute("useship").getBooleanValue();
+            lastSelectedBoosterShip = rootNode.getChildText("lastselectedboostership");
             List<Element> shipList = rootNode.getChildren("booster");
             for (Element shipEl : shipList) {
                 BoosterShip ship = new BoosterShip(shipEl);
-                booster = ship;
+                newBoosterShips.put(ship.getName(), ship);
             }
         } catch (Exception e) {
             JMGLogger.logSevere("Unable to load a configuration file for booster ships", e);
-        }         
+        }        
+        
+        synchronized(blocker) {
+            useBoosterShip = doUseBoosterShip;
+            boosterShips = newBoosterShips;
+            if (boosterShips.isEmpty()) {
+                BoosterShip booster = new BoosterShip("Generic Ship");
+                boosterShips.put(booster.getName(), booster);
+            }
+            // booster ships is never empty, so it's ok.
+            if (lastSelectedBoosterShip == null) lastSelectedBoosterShip = boosterShips.values().iterator().next().getName();
+            selectedBoosterShip = lastSelectedBoosterShip;
+        }
     }
     
     /**
@@ -102,10 +127,18 @@ public class BoosterShipContainer {
         Element root = new Element("boosters");
         Document doc = new Document(root);
                 
-        root.setAttribute("useship", String.valueOf(useBoosterShip));
-        
-        Element elem = booster.getXMLElement();
-        root.addContent(elem);
+        synchronized(blocker) {
+            root.setAttribute("useship", String.valueOf(useBoosterShip));
+            
+            String lastBoosterShip = selectedBoosterShip;
+            if (lastBoosterShip == null) lastBoosterShip = boosterShips.values().iterator().next().getName();            
+            root.addContent(new Element("lastselectedboostership").setText(lastBoosterShip));
+            
+            for (BoosterShip booster : boosterShips.values()) {
+                Element elem = booster.getXMLElement();
+                root.addContent(elem);
+            }
+        }
         
         XMLOutputter xmlOutput = new XMLOutputter();
         xmlOutput.setFormat(Format.getPrettyFormat());
@@ -116,8 +149,31 @@ public class BoosterShipContainer {
         }
     }
     
-    public BoosterShip getBooster() {
-        return booster;
+    /**
+     * Returns a combo box model with booster ships for a Swing combo box. 
+     * Ships are sorted by insertion order.
+     * @return 
+     */
+    public DefaultComboBoxModel<BoosterShip> getBoosterShipModel() {
+        DefaultComboBoxModel<BoosterShip> out = new DefaultComboBoxModel<>();
+                                        
+        synchronized(blocker) {
+            if (boosterShips.isEmpty()) return out;
+            
+            for (BoosterShip ship : boosterShips.values()) {
+                out.addElement(ship);
+            }
+        }
+        
+        return out;
+    }
+    
+    public BoosterShip getBoosterShip(String name) {
+        if (name == null) return null;
+        
+        synchronized(blocker) {
+            return boosterShips.get(name);
+        }
     }
     
     /**
@@ -142,5 +198,100 @@ public class BoosterShipContainer {
      */
     public void setUsingBoosterShip(boolean what) {
         useBoosterShip = what;
+    }        
+    
+    /**
+     * Creates a new booster ship with a given name. If the name is used already,
+     * null returned. Same with null and whitespace-only names.
+     * @param name
+     * @return 
+     */
+    public BoosterShip createNewBoosterShip(String name) {
+        if (name == null || name.trim().isEmpty()) return null;
+        
+        synchronized(blocker) {
+            if (getBoosterShip(name) != null) return null;
+            
+            BoosterShip newShip = new BoosterShip(name);
+            boosterShips.put(name, newShip);
+            
+            return newShip;
+        }
+    }
+    
+    /**
+     * How many booster ships are there?
+     * @return 
+     */
+    public int getBoosterShipCount() {
+        synchronized(blocker) {
+            return boosterShips.size();
+        }
+    }
+    
+    /**
+     * Deletes the booster ship from container. Can't delete last ship!
+     * @param ship
+     * @return true, if successfully deleted.
+     */
+    public boolean deleteBoosterShip(BoosterShip ship) {
+        if (ship == null) return false;
+        
+        synchronized(blocker) {
+            if (getBoosterShipCount() < 2) return false;
+            
+            BoosterShip res = boosterShips.remove(ship.getName());
+            return (res != null);
+        }
+    }
+    
+    /**
+     * Changes booster ship's name and moves it to the appropriate key.
+     * New name shouldn't be used by another ship.
+     * New name shouldn't be empty or whitespace-only.
+     * New name should be different from the current one.
+     * Null parameters lead to false.
+     * @param oldName name of existing booster ship.
+     * @param newName desired new name.
+     * @return true, if renamed successfully, false otherwise.
+     */
+    public boolean renameBoosterShip(String oldName, String newName) {
+        if (oldName == null || newName == null) return false;
+        if (newName.trim().isEmpty()) return false;
+        if (oldName.equals(newName)) return false;
+        
+        synchronized(blocker) {
+            if (boosterShips.containsKey(newName)) return false;
+            
+            BoosterShip oldship = boosterShips.remove(oldName);
+            if (oldship == null) return false;
+            oldship.setName(newName);
+            boosterShips.put(newName, oldship);
+            
+            return true;
+        }
+    }
+    
+    /**
+     * Sets the name of a last selected booster ship.
+     * @param name 
+     */
+    public void setSelectedBoosterShip(String name) {
+        synchronized(blocker) {
+            selectedBoosterShip = name;
+        }
+    }
+    
+    /**
+     * Returns last selected booster ship.
+     * @return 
+     */
+    public BoosterShip getLastSelectedBoosterShip() {
+        synchronized(blocker) {
+            BoosterShip ret = boosterShips.get(selectedBoosterShip);
+            // ships is never empty, so it's safe
+            if (ret == null) ret = boosterShips.values().iterator().next();
+            return ret;
+        }
     }
 }

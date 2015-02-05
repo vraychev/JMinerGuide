@@ -92,6 +92,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         
         jComboBoxShip.setModel(dCont.getShipContainer().getShipModel());
         jComboBoxBooster.setModel(dCont.getCharacterContainer().getCharModel());
+        jComboBoxBoosterShip.setModel(dCont.getBoosterShipContainer().getBoosterShipModel());
         
         timer.scheduleWithFixedDelay(new UpdateWindowTask(msMonitor, this), 100, 100, TimeUnit.MILLISECONDS);
         disableMonitorPanel();
@@ -169,6 +170,18 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         EVECharacter booster = character.getBooster();
         jComboBoxBooster.setSelectedItem(booster);
         
+        BoosterShip bShip = character.getBoosterShip();
+        jComboBoxBoosterShip.setSelectedItem(bShip);
+        
+        boolean isUsingBS = character.isUseBoosterShip();
+        jCheckBoxUseBoosterShip.setSelected(isUsingBS);
+        
+        if (isUsingBS) {
+            if (!jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(true);
+        } else {
+            if (jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(false);
+        }
+        
         CalculatedStats stats = character.getStats();
         updateCharacterStats(stats);
     }
@@ -230,7 +243,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jComboBox2 = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
         jPanelSetup = new javax.swing.JPanel();
         jComboBoxShip = new javax.swing.JComboBox<Ship>();
@@ -260,8 +272,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jLabelMinerName = new javax.swing.JLabel();
         jCheckBox1 = new javax.swing.JCheckBox();
         jCheckBox2 = new javax.swing.JCheckBox();
-
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
@@ -348,7 +358,19 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
 
         jLabel6.setText("Ore Hold");
 
+        jComboBoxBoosterShip.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxBoosterShipItemStateChanged(evt);
+            }
+        });
+
         jLabel4.setText("B. Ship");
+
+        jCheckBoxUseBoosterShip.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxUseBoosterShipItemStateChanged(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanelSetupLayout = new javax.swing.GroupLayout(jPanelSetup);
         jPanelSetup.setLayout(jPanelSetupLayout);
@@ -559,6 +581,47 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         processEvents = true;
     }//GEN-LAST:event_jComboBoxBoosterItemStateChanged
 
+    private void jComboBoxBoosterShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxBoosterShipItemStateChanged
+        if (!processEvents) return;
+        processEvents = false;
+        
+        BoosterShip bShip = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
+        if (currentSession != null) {
+            currentSession.updateCharacherBoosterShip(bShip);
+            SessionCharacter curchar = currentSession.getSessionCharacter();
+            
+            if (curchar != null) {
+                CalculatedStats stats = currentSession.getSessionCharacter().getStats();
+                updateCharacterStats(stats);
+            }
+        }
+        
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxBoosterShipItemStateChanged
+
+    private void jCheckBoxUseBoosterShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxUseBoosterShipItemStateChanged
+        if (!processEvents) return;
+        processEvents = false;
+                
+        if (currentSession != null) {
+            currentSession.updateCharacherUsingBoosterShip(jCheckBoxUseBoosterShip.isSelected());
+            SessionCharacter curchar = currentSession.getSessionCharacter();
+            
+            if (curchar != null) {
+                if (jCheckBoxUseBoosterShip.isSelected()) {
+                    if (!jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(true);
+                } else {
+                    if (jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(false);
+                }
+                
+                CalculatedStats stats = currentSession.getSessionCharacter().getStats();
+                updateCharacterStats(stats);
+            }
+        }
+        
+        processEvents = true;
+    }//GEN-LAST:event_jCheckBoxUseBoosterShipItemStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
@@ -573,7 +636,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox2;
     private javax.swing.JCheckBox jCheckBoxUseBoosterShip;
-    private javax.swing.JComboBox jComboBox2;
     private javax.swing.JComboBox<EVECharacter> jComboBoxBooster;
     private javax.swing.JComboBox<BoosterShip> jComboBoxBoosterShip;
     private javax.swing.JComboBox<Ship> jComboBoxShip;
