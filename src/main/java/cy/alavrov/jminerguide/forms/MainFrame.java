@@ -420,6 +420,11 @@ public final class MainFrame extends javax.swing.JFrame {
         BoosterHull hull = ship.getHull();
         
         if (usingBooster) {
+            jComboBoxBoosterShip.setEnabled(true);
+            jButtonBoosterShipAdd.setEnabled(true);
+            jButtonBoosterShipRemove.setEnabled(true);
+            jButtonBoosterShipRename.setEnabled(true);
+            
             jComboBoxBoosterHull.setEnabled(true);
             jComboBoxLinkCycle.setEnabled(true);
             jComboBoxLinkOptimal.setEnabled(true);
@@ -430,6 +435,11 @@ public final class MainFrame extends javax.swing.JFrame {
                 if (jCheckBoxDeployedMode.isEnabled()) jCheckBoxDeployedMode.setEnabled(false);
             }
         } else {
+            jComboBoxBoosterShip.setEnabled(false);
+            jButtonBoosterShipAdd.setEnabled(false);
+            jButtonBoosterShipRemove.setEnabled(false);
+            jButtonBoosterShipRename.setEnabled(false);
+            
             jComboBoxBoosterHull.setEnabled(false);
             jComboBoxLinkCycle.setEnabled(false);
             jComboBoxLinkOptimal.setEnabled(false);
@@ -627,6 +637,10 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel44 = new javax.swing.JLabel();
         jLabelLinkCycleBonus = new javax.swing.JLabel();
         jLabelLinkOptimalBonus = new javax.swing.JLabel();
+        jComboBoxBoosterShip = new javax.swing.JComboBox<BoosterShip>();
+        jButtonBoosterShipAdd = new javax.swing.JButton();
+        jButtonBoosterShipRemove = new javax.swing.JButton();
+        jButtonBoosterShipRename = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         jLabel19 = new javax.swing.JLabel();
         jLabelYield = new javax.swing.JLabel();
@@ -749,7 +763,7 @@ public final class MainFrame extends javax.swing.JFrame {
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGap(0, 388, Short.MAX_VALUE)
         );
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Mining Ship"));
@@ -1008,7 +1022,7 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addComponent(jLabel35)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jComboBoxRig3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 6, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel33)
                     .addComponent(jTextFieldTrip, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1376,6 +1390,12 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jLabelLinkOptimalBonus.setText("0%");
 
+        jButtonBoosterShipAdd.setText("Add");
+
+        jButtonBoosterShipRemove.setText("Remove");
+
+        jButtonBoosterShipRename.setText("Rename");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -1383,6 +1403,7 @@ public final class MainFrame extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jComboBoxBoosterShip, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jLabel37, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1412,15 +1433,9 @@ public final class MainFrame extends javax.swing.JFrame {
                         .addComponent(jComboBoxBooster, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonBoosterReload, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jCheckBoxMindlink)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jCheckBoxUseBoosterShip))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jComboBoxBoosterHull, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jCheckBoxDeployedMode))
-                    .addComponent(jLabel42)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jComboBoxLinkCycle, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1435,7 +1450,22 @@ public final class MainFrame extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jLabelLinkOptimalBonus)
                                 .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(jComboBoxLinkOptimal, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(jComboBoxLinkOptimal, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jCheckBoxMindlink)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jComboBoxBoosterHull, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jCheckBoxDeployedMode))
+                            .addComponent(jLabel42)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jButtonBoosterShipAdd)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonBoosterShipRemove)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonBoosterShipRename)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -1467,8 +1497,15 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jCheckBoxMindlink)
                     .addComponent(jCheckBoxUseBoosterShip))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel42)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jComboBoxBoosterShip, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonBoosterShipAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonBoosterShipRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonBoosterShipRename, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jComboBoxBoosterHull, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1667,11 +1704,11 @@ public final class MainFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 273, Short.MAX_VALUE))
+                            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
 
@@ -2632,6 +2669,9 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButtonAsteroidMonitor;
     private javax.swing.JButton jButtonBoosterReload;
+    private javax.swing.JButton jButtonBoosterShipAdd;
+    private javax.swing.JButton jButtonBoosterShipRemove;
+    private javax.swing.JButton jButtonBoosterShipRename;
     private javax.swing.JButton jButtonCharReload;
     private javax.swing.JButton jButtonSave;
     private javax.swing.JButton jButtonShipAdd;
@@ -2646,6 +2686,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox<Integer> jComboBoxAstrogeo;
     private javax.swing.JComboBox<EVECharacter> jComboBoxBooster;
     private javax.swing.JComboBox<BoosterHull> jComboBoxBoosterHull;
+    private javax.swing.JComboBox<BoosterShip> jComboBoxBoosterShip;
     private javax.swing.JComboBox<Integer> jComboBoxCapIShips;
     private javax.swing.JComboBox<MiningCrystalLevel> jComboBoxCrystal;
     private javax.swing.JComboBox<Integer> jComboBoxDroneCount;
