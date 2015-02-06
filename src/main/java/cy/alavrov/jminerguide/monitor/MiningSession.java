@@ -38,7 +38,8 @@ import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
 public class MiningSession {
     private final IEVEWindow window;
     private volatile SessionCharacter character;    
-
+    private volatile float usedCargo;  
+    
     public MiningSession(IEVEWindow window) {
         this.window = window;
     }
@@ -68,14 +69,26 @@ public class MiningSession {
         window.update();
     }
     
+    /**
+     * Switches to the session's EVE window.
+     */
     public void switchToWindow() {
         window.makeActive();
     }
     
+    /**
+     * Returns session's character.
+     * @return 
+     */
     public SessionCharacter getSessionCharacter() {
         return character;
     }
 
+    /**
+     * Creates session's character from the generic character.
+     * @param character
+     * @param dCont 
+     */
     public void createSessionCharacter(EVECharacter character, DataContainer dCont) {                       
         if (character == null) return;
         
@@ -83,6 +96,11 @@ public class MiningSession {
         this.character = schar;
     }        
     
+    /**
+     * Updates session character's ship.
+     * Does nothing, if there's no session character.
+     * @param ship 
+     */
     public void updateCharacherShip(Ship ship) {
         if (ship == null || character == null) return;
         
@@ -90,6 +108,11 @@ public class MiningSession {
         this.character = schar;
     }
     
+    /**
+     * Updates session character's booster char.
+     * Does nothing, if there's no session character.
+     * @param booster 
+     */
     public void updateCharacherBooster(EVECharacter booster) {
         if (booster == null || character == null) return;
         
@@ -97,6 +120,11 @@ public class MiningSession {
         this.character = schar;
     }
     
+    /**
+     * Updates session character's booster ship.
+     * Does nothing, if there's no session character.
+     * @param boosterShip
+     */
     public void updateCharacherBoosterShip(BoosterShip boosterShip) {
         if (boosterShip == null || character == null) return;
         
@@ -104,10 +132,37 @@ public class MiningSession {
         this.character = schar;
     }
     
+    /**
+     * Sets, if the session character's booster char actually uses booster ship, or not.
+     * Does nothing, if there's no session character.
+     * @param what
+     */
     public void updateCharacherUsingBoosterShip(boolean what) {
         if (character == null) return;
         
         SessionCharacter schar = new SessionCharacter(character, what);
         this.character = schar;
+    }
+    
+    /**
+     * Returns used cargo, rounded down.
+     * @return 
+     */
+    public float getUsedCargo() {
+        return usedCargo;
+    }
+    
+    /**
+     * Sets used cargo.
+     * @param amt used cargo, in m3. Can't be more, than ship's ore hold.
+     */
+    public void setUsedCargo(float amt) {      
+        int maxCargo = 0;
+        if (character != null) {
+            maxCargo = character.getStats().getOreHold();
+        }
+        if (amt > maxCargo) amt = maxCargo;
+        
+        usedCargo = amt;
     }
 }

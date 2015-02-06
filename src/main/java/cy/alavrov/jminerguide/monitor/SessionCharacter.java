@@ -47,9 +47,7 @@ public class SessionCharacter {
     private final boolean useBoosterShip;
     private final CalculatedStats stats;    
     
-    public SessionCharacter(EVECharacter character, DataContainer dCont) {
-
-        
+    public SessionCharacter(EVECharacter character, DataContainer dCont) {       
         CharacterContainer cCont = dCont.getCharacterContainer();
         ShipContainer sCont = dCont.getShipContainer();
         BoosterShipContainer bCont = dCont.getBoosterShipContainer();

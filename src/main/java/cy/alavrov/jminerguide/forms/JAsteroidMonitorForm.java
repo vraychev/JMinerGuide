@@ -35,6 +35,7 @@ import cy.alavrov.jminerguide.monitor.MiningSession;
 import cy.alavrov.jminerguide.monitor.MiningSessionMonitor;
 import cy.alavrov.jminerguide.monitor.SessionCharacter;
 import cy.alavrov.jminerguide.monitor.UpdateWindowTask;
+import cy.alavrov.jminerguide.util.IntegerDocumentFilter;
 import cy.alavrov.jminerguide.util.winmanager.IWindowManager;
 import java.awt.Component;
 import java.awt.Container;
@@ -43,11 +44,15 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import javax.swing.text.AbstractDocument;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 
 /**
  * Asteroid harvesting monitor and EVE instance selector.
@@ -55,6 +60,14 @@ import javax.swing.JButton;
  */
 public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private final static int WINDOW_LOSS_TIMEOUT = 500;
+    
+    private final static DecimalFormat fmt = new DecimalFormat("0.##");
+    private final static PeriodFormatter minutesAndSeconds = new PeriodFormatterBuilder()
+     .printZeroAlways()
+     .appendMinutes()
+     .appendSeparator(":")
+     .appendSeconds()
+     .toFormatter();
     
     private final MainFrame parent;
     private final DataContainer dCont;
@@ -84,6 +97,9 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
         this.setTitle("Asteroid Monitor");        
         initComponents();
+        
+        AbstractDocument idDoc = ((AbstractDocument)jTextFieldHold.getDocument());
+        idDoc.setDocumentFilter(new IntegerDocumentFilter());
         
         this.parent = parent;
         this.dCont = dCont;
@@ -138,7 +154,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     if (curchar == null) {
                         disableMonitorPanel();
                     } else {
-                        loadCharacterData(curchar);
+                        loadCharacterData(session);
                     }
                 }
             }                        
@@ -159,10 +175,12 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
     }
     
-    private void loadCharacterData(SessionCharacter character) {
+    private void loadCharacterData(MiningSession session) {
         if (!jPanelSetup.getComponent(0).isEnabled()) {
             enableSubcomponents(jPanelSetup, true);
         }
+        
+        SessionCharacter character = session.getSessionCharacter();
         
         Ship ship = character.getShip();
         jComboBoxShip.setSelectedItem(ship);
@@ -183,12 +201,16 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
         
         CalculatedStats stats = character.getStats();
-        updateCharacterStats(stats);
+        updateCharacterStats(session);
     }
     
-    private void updateCharacterStats(CalculatedStats stats) {
+    private void updateCharacterStats(MiningSession session) {
+        SessionCharacter character = session.getSessionCharacter();
+        if (character == null) return;
+        
+        CalculatedStats stats = character.getStats();
         jLabelStats.setText(stats.getTurretYield()+" m3 / "+stats.getTurretCycle()+" sec / turret");
-        jLabelHoldStats.setText("0 / "+stats.getOreHold()+" m3");
+        jLabelHoldStats.setText(fmt.format(session.getUsedCargo())+" / "+stats.getOreHold()+" m3");
     }
     
     /**
@@ -251,9 +273,9 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jComboBoxBooster = new javax.swing.JComboBox<EVECharacter>();
         jLabelStats = new javax.swing.JLabel();
         jLabelHoldStats = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jTextField1 = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
+        jButtonResetOreHold = new javax.swing.JButton();
+        jTextFieldHold = new javax.swing.JTextField();
+        jButtonSetOreHold = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
@@ -299,12 +321,22 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
 
         jLabelHoldStats.setText("00000 / 00000 m3");
 
-        jButton1.setText("Reset");
+        jButtonResetOreHold.setText("Reset");
+        jButtonResetOreHold.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonResetOreHoldActionPerformed(evt);
+            }
+        });
 
-        jTextField1.setText("0");
+        jTextFieldHold.setText("0");
 
-        jButton2.setText("Set");
-        jButton2.setActionCommand("");
+        jButtonSetOreHold.setText("Set");
+        jButtonSetOreHold.setActionCommand("");
+        jButtonSetOreHold.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonSetOreHoldActionPerformed(evt);
+            }
+        });
 
         jButton3.setText("Load Scan");
 
@@ -390,11 +422,11 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
                                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jTextFieldHold, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton2)
+                                .addComponent(jButtonSetOreHold)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton1))
+                                .addComponent(jButtonResetOreHold))
                             .addComponent(jButton9, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addGroup(jPanelSetupLayout.createSequentialGroup()
                         .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -449,9 +481,9 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     .addComponent(jLabelHoldStats))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2)
+                    .addComponent(jButtonResetOreHold)
+                    .addComponent(jTextFieldHold, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonSetOreHold)
                     .addComponent(jLabel6))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -552,12 +584,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         if (currentSession != null) {
             currentSession.updateCharacherShip(ship);
-            SessionCharacter curchar = currentSession.getSessionCharacter();
-            
-            if (curchar != null) {
-                CalculatedStats stats = currentSession.getSessionCharacter().getStats();
-                updateCharacterStats(stats);
-            }
+            updateCharacterStats(currentSession);
         }
         
         processEvents = true;
@@ -570,12 +597,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
         if (currentSession != null) {
             currentSession.updateCharacherBooster(booster);
-            SessionCharacter curchar = currentSession.getSessionCharacter();
-            
-            if (curchar != null) {
-                CalculatedStats stats = currentSession.getSessionCharacter().getStats();
-                updateCharacterStats(stats);
-            }
+            updateCharacterStats(currentSession);
         }
         
         processEvents = true;
@@ -587,13 +609,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         
         BoosterShip bShip = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
         if (currentSession != null) {
-            currentSession.updateCharacherBoosterShip(bShip);
-            SessionCharacter curchar = currentSession.getSessionCharacter();
-            
-            if (curchar != null) {
-                CalculatedStats stats = currentSession.getSessionCharacter().getStats();
-                updateCharacterStats(stats);
-            }
+            currentSession.updateCharacherBoosterShip(bShip);            
+            updateCharacterStats(currentSession);            
         }
         
         processEvents = true;
@@ -614,17 +631,54 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     if (jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(false);
                 }
                 
-                CalculatedStats stats = currentSession.getSessionCharacter().getStats();
-                updateCharacterStats(stats);
+                updateCharacterStats(currentSession);
             }
         }
         
         processEvents = true;
     }//GEN-LAST:event_jCheckBoxUseBoosterShipItemStateChanged
 
+    private void jButtonSetOreHoldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSetOreHoldActionPerformed
+        if (!processEvents) return;
+        processEvents = false;
+        
+        if (currentSession != null) {
+            String hold = jTextFieldHold.getText();
+            int newHoldSize;
+            try {
+                newHoldSize = Integer.decode(hold);
+            } catch (NumberFormatException e) {
+                newHoldSize = 0;
+            }
+
+            SessionCharacter curchar = currentSession.getSessionCharacter();
+            if (curchar != null) {
+                int maxHoldSize = curchar.getStats().getOreHold();
+                if (newHoldSize > maxHoldSize) newHoldSize = maxHoldSize;
+            } else {
+                newHoldSize = 0;
+            }
+            
+            currentSession.setUsedCargo(newHoldSize);
+            updateCharacterStats(currentSession);
+        }
+        
+        processEvents = true;
+    }//GEN-LAST:event_jButtonSetOreHoldActionPerformed
+
+    private void jButtonResetOreHoldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonResetOreHoldActionPerformed
+        if (!processEvents) return;
+        processEvents = false;
+        
+        if (currentSession != null) {
+            currentSession.setUsedCargo(0);
+            updateCharacterStats(currentSession);
+        }
+        
+        processEvents = true;
+    }//GEN-LAST:event_jButtonResetOreHoldActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
@@ -633,6 +687,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JButton jButton8;
     private javax.swing.JButton jButton9;
     private javax.swing.JButton jButtonClose;
+    private javax.swing.JButton jButtonResetOreHold;
+    private javax.swing.JButton jButtonSetOreHold;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox2;
     private javax.swing.JCheckBox jCheckBoxUseBoosterShip;
@@ -651,6 +707,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanelSetup;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextFieldHold;
     // End of variables declaration//GEN-END:variables
 }
