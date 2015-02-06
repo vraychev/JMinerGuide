@@ -377,6 +377,10 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxShip.setSelectedItem(ship);
     }
 
+    public void setSelectedBoosterShip(BoosterShip ship) {
+        jComboBoxBoosterShip.setSelectedItem(ship);
+    }
+
     public void loadSelectedShip() {
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
 
@@ -422,6 +426,7 @@ public final class MainFrame extends javax.swing.JFrame {
     public void loadSelectedBoosterShip() {
         BoosterShip ship = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
 
+        dCont.getBoosterShipContainer().setSelectedBoosterShip(ship.getName());
         BoosterHull hull = ship.getHull();
         jComboBoxBoosterHull.setSelectedItem(hull);
         
@@ -455,7 +460,11 @@ public final class MainFrame extends javax.swing.JFrame {
         if (usingBooster) {
             jComboBoxBoosterShip.setEnabled(true);
             jButtonBoosterShipAdd.setEnabled(true);
-            jButtonBoosterShipRemove.setEnabled(true);
+            if (dCont.getBoosterShipContainer().getBoosterShipCount() < 2) {
+                jButtonBoosterShipRemove.setEnabled(false);
+            } else {
+                jButtonBoosterShipRemove.setEnabled(true);
+            }
             jButtonBoosterShipRename.setEnabled(true);
             
             jComboBoxBoosterHull.setEnabled(true);
@@ -1423,11 +1432,32 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jLabelLinkOptimalBonus.setText("0%");
 
+        jComboBoxBoosterShip.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxBoosterShipItemStateChanged(evt);
+            }
+        });
+
         jButtonBoosterShipAdd.setText("Add");
+        jButtonBoosterShipAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonBoosterShipAddActionPerformed(evt);
+            }
+        });
 
         jButtonBoosterShipRemove.setText("Remove");
+        jButtonBoosterShipRemove.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonBoosterShipRemoveActionPerformed(evt);
+            }
+        });
 
         jButtonBoosterShipRename.setText("Rename");
+        jButtonBoosterShipRename.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonBoosterShipRenameActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -2693,6 +2723,42 @@ public final class MainFrame extends javax.swing.JFrame {
         monitorForm.setVisible(true);
         this.setVisible(false);
     }//GEN-LAST:event_jButtonAsteroidMonitorActionPerformed
+
+    private void jButtonBoosterShipAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBoosterShipAddActionPerformed
+        JNewBoosterShipDialog dlg = new JNewBoosterShipDialog(this, dCont.getBoosterShipContainer());
+
+        dlg.setLocationRelativeTo(MainFrame.this);
+        dlg.setVisible(true);
+    }//GEN-LAST:event_jButtonBoosterShipAddActionPerformed
+
+    private void jButtonBoosterShipRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBoosterShipRemoveActionPerformed
+        BoosterShip bship = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
+        if (bship == null || dCont.getBoosterShipContainer().getBoosterShipCount() < 2) return;
+        JRemoveBoosterShipDialog dlg = new JRemoveBoosterShipDialog(this, bship, dCont.getBoosterShipContainer());
+
+        dlg.setLocationRelativeTo(MainFrame.this);
+        dlg.setVisible(true);
+    }//GEN-LAST:event_jButtonBoosterShipRemoveActionPerformed
+
+    private void jButtonBoosterShipRenameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBoosterShipRenameActionPerformed
+        BoosterShip ship = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
+        if (ship == null) return;
+        JChangeBoosterShipNameDialog dlg = new JChangeBoosterShipNameDialog(this, ship, dCont.getBoosterShipContainer());
+
+        dlg.setLocationRelativeTo(MainFrame.this);
+        dlg.setVisible(true);
+    }//GEN-LAST:event_jButtonBoosterShipRenameActionPerformed
+
+    private void jComboBoxBoosterShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxBoosterShipItemStateChanged
+        if (!processEvents) return;
+
+        processEvents = false;
+
+        loadSelectedBoosterShip();
+
+        recalculateStats();
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxBoosterShipItemStateChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

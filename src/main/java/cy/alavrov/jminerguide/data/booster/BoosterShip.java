@@ -96,6 +96,8 @@ public class BoosterShip {
         synchronized(blocker) {
             Element root = new Element("booster");        
             
+            root.addContent(new Element("name").setText(name));
+            
             root.addContent(new Element("hull")
                     .setAttribute("id", String.valueOf(hull.getID()))
                     .setAttribute("deployed", String.valueOf(deployed))
