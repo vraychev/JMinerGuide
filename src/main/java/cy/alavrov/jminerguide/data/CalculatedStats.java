@@ -30,7 +30,7 @@ import cy.alavrov.jminerguide.data.booster.ForemanLink;
 import cy.alavrov.jminerguide.data.ship.HarvestUpgrade;
 import cy.alavrov.jminerguide.data.ship.Hull;
 import cy.alavrov.jminerguide.data.ship.MiningDrone;
-import cy.alavrov.jminerguide.data.ship.OreType;
+import cy.alavrov.jminerguide.data.harvestable.HarvestableType;
 import cy.alavrov.jminerguide.data.ship.Rig;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.data.ship.Turret;
@@ -182,7 +182,7 @@ public class CalculatedStats {
                 }
                 
                 if (turret.isUsingCrystals()) {
-                    if (turret.getOreType() == OreType.MERCOXIT && mercoxit) {
+                    if (turret.getHarvestableType() == HarvestableType.MERCOXIT && mercoxit) {
                         actualTurretYield = actualTurretYield * ship.getTurretCrystal().getMercMod();
                         actualTurretYield = actualTurretYield * (1 + 0.01f*ship.getRig1().getMercoxitYieldBonus());
                         actualTurretYield = actualTurretYield * (1 + 0.01f*ship.getRig2().getMercoxitYieldBonus());
@@ -264,9 +264,9 @@ public class CalculatedStats {
         turretM3S = combinedTurretYield/turretCycle;
         
         MiningDrone drone = ship.getDrone();
-        if (turret.getOreType() == OreType.GAS || 
-                turret.getOreType() == OreType.ICE ||
-                (turret.getOreType() == OreType.MERCOXIT && mercoxit) ||
+        if (turret.getHarvestableType() == HarvestableType.GAS || 
+                turret.getHarvestableType() == HarvestableType.ICE ||
+                (turret.getHarvestableType() == HarvestableType.MERCOXIT && mercoxit) ||
                 drone == MiningDrone.NOTHING) {
             droneYield = 0; 
             combinedDroneYield = 0;

@@ -38,7 +38,7 @@ import cy.alavrov.jminerguide.data.ship.HarvestUpgrade;
 import cy.alavrov.jminerguide.data.ship.Hull;
 import cy.alavrov.jminerguide.data.ship.MiningCrystalLevel;
 import cy.alavrov.jminerguide.data.ship.MiningDrone;
-import cy.alavrov.jminerguide.data.ship.OreType;
+import cy.alavrov.jminerguide.data.harvestable.HarvestableType;
 import cy.alavrov.jminerguide.data.ship.Rig;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.data.ship.ShipContainer;
@@ -141,7 +141,7 @@ public final class MainFrame extends javax.swing.JFrame {
         
         Turret turret = ship.getTurret();
         boolean isMerco = false;
-        if (turret.getOreType() == OreType.MERCOXIT) {
+        if (turret.getHarvestableType() == HarvestableType.MERCOXIT) {
             if (!jCheckBoxStatsMerco.isEnabled()) jCheckBoxStatsMerco.setEnabled(true);
             isMerco = jCheckBoxStatsMerco.isSelected();
         } else {

@@ -25,6 +25,7 @@
  */
 package cy.alavrov.jminerguide.data.ship;
 
+import cy.alavrov.jminerguide.data.harvestable.HarvestableType;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,59 +36,59 @@ import java.util.Map;
  */
 public enum Turret {
     CIVILIANMINER("Civilian Miner", 
-            3651, TurretType.MININGLASER, false, OreType.ORE, 30, 60, 10000),
+            3651, TurretType.MININGLASER, false, HarvestableType.ORE, 30, 60, 10000),
     MINERI("Miner I", 
-            483, TurretType.MININGLASER, false, OreType.ORE, 40, 60, 10000),
+            483, TurretType.MININGLASER, false, HarvestableType.ORE, 40, 60, 10000),
     GAUSSIAN("EP-S Gaussian Scoped Mining Laser", 
-            5239, TurretType.MININGLASER, false, OreType.ORE, 50, 60, 16000),
+            5239, TurretType.MININGLASER, false, HarvestableType.ORE, 50, 60, 16000),
     PARTICLEBORE("Particle Bore Compact Mining Laser", 
-            5245, TurretType.MININGLASER, false, OreType.ORE, 50, 60, 11000),
+            5245, TurretType.MININGLASER, false, HarvestableType.ORE, 50, 60, 11000),
     MINERII("Miner II", 
-            482, TurretType.MININGLASER, false, OreType.ORE, 60, 60, 12000),    
+            482, TurretType.MININGLASER, false, HarvestableType.ORE, 60, 60, 12000),    
     SINGLEDIODE("Single Diode Basic Mining Laser", 
-            5233, TurretType.MININGLASER, false, OreType.ORE, 25, 60, 11000),
+            5233, TurretType.MININGLASER, false, HarvestableType.ORE, 25, 60, 11000),
     GALLENTEMINING("Gallente Mining Laser", 
-            21841, TurretType.MININGLASER, false, OreType.ORE, 45, 60, 10000),
+            21841, TurretType.MININGLASER, false, HarvestableType.ORE, 45, 60, 10000),
     OREMINER("ORE Miner", 
-            28750, TurretType.MININGLASER, false, OreType.ORE, 65, 60, 16000),
+            28750, TurretType.MININGLASER, false, HarvestableType.ORE, 65, 60, 16000),
         
     
     DEEPCORE("Deep Core Mining Laser I", 
-            12108, TurretType.MININGLASER, false, OreType.MERCOXIT, 40, 60, 5000),
+            12108, TurretType.MININGLASER, false, HarvestableType.MERCOXIT, 40, 60, 5000),
     DEEPCOREII("Modulated Deep Core Miner II", 
-            18068, TurretType.MININGLASER, true, OreType.MERCOXIT, 120, 180, 10000),
+            18068, TurretType.MININGLASER, true, HarvestableType.MERCOXIT, 120, 180, 10000),
     OREDEEPCORE("ORE Deep Core Mining Laser", 
-            28748, TurretType.MININGLASER, false, OreType.MERCOXIT, 40, 60, 7000),
+            28748, TurretType.MININGLASER, false, HarvestableType.MERCOXIT, 40, 60, 7000),
     
     
     GASHARVESTERI("Gas Cloud Harvester I", 
-            25266, TurretType.GASHARVESTER, false, OreType.GAS, 10, 30, 1500),
+            25266, TurretType.GASHARVESTER, false, HarvestableType.GAS, 10, 30, 1500),
     CROPGASHARVESTER("'Crop' Gas Cloud Harvester", 
-            25540, TurretType.GASHARVESTER, false, OreType.GAS, 10, 30, 1500),
+            25540, TurretType.GASHARVESTER, false, HarvestableType.GAS, 10, 30, 1500),
     PLOWGASHARVESTER("'Plow' Gas Cloud Harvester", 
-            25542, TurretType.GASHARVESTER, false, OreType.GAS, 10, 30, 1500),
+            25542, TurretType.GASHARVESTER, false, HarvestableType.GAS, 10, 30, 1500),
     GASHARVESTERII("Gas Cloud Harvester II", 
-            25812, TurretType.GASHARVESTER, false, OreType.GAS, 20, 40, 1500),
+            25812, TurretType.GASHARVESTER, false, HarvestableType.GAS, 20, 40, 1500),
     SYNDICATEGASHARVESTER("Syndicate Gas Cloud Harvester", 
-            28788, TurretType.GASHARVESTER, false, OreType.GAS, 10, 30, 1500),
+            28788, TurretType.GASHARVESTER, false, HarvestableType.GAS, 10, 30, 1500),
     
     
     STRIPMINERI("Strip Miner I", 
-            17482, TurretType.STRIPMINER, false, OreType.ORE, 540, 180, 15000),
+            17482, TurretType.STRIPMINER, false, HarvestableType.ORE, 540, 180, 15000),
     STRIPMINERII("Modulated Strip Miner II", 
-            17912, TurretType.STRIPMINER, true, OreType.ORE, 360, 180, 15000),
+            17912, TurretType.STRIPMINER, true, HarvestableType.ORE, 360, 180, 15000),
     DEEPCORESTRIPMINER("Modulated Deep Core Strip Miner II", 
-            24305, TurretType.STRIPMINER, true, OreType.MERCOXIT, 250, 180, 15000),
+            24305, TurretType.STRIPMINER, true, HarvestableType.MERCOXIT, 250, 180, 15000),
     ORESTRIPMINER("ORE Strip Miner", 
-            28754, TurretType.STRIPMINER, false, OreType.ORE, 540, 180, 17),
+            28754, TurretType.STRIPMINER, false, HarvestableType.ORE, 540, 180, 17),
     
     
     ICEHARVESTERI("Ice Harvester I", 
-            16278, TurretType.ICEHARVESTER, false, OreType.ICE, 1000, 300, 10000),
+            16278, TurretType.ICEHARVESTER, false, HarvestableType.ICE, 1000, 300, 10000),
     ICEHARVESTERII("Ice Harvester II", 
-            22229, TurretType.ICEHARVESTER, false, OreType.ICE, 1000, 250, 10000),
+            22229, TurretType.ICEHARVESTER, false, HarvestableType.ICE, 1000, 250, 10000),
     OREICEHARVESTER("ORE Ice Harvester", 
-            28752, TurretType.ICEHARVESTER, false, OreType.ICE, 1000, 250, 12000);
+            28752, TurretType.ICEHARVESTER, false, HarvestableType.ICE, 1000, 250, 12000);
     
     public final static Turret[] smallTurrets = {
         CIVILIANMINER, MINERI, GAUSSIAN,
@@ -116,19 +117,19 @@ public enum Turret {
     private final int id;
     private final TurretType type;
     private final boolean usesCrystals;
-    private final OreType oreType;
+    private final HarvestableType harvestableType;
     private final int baseYield;
     private final int cycleDuration;
     private final int optimalRange;
     
     
     Turret(String name, int id, TurretType type, boolean usesCrystals,
-            OreType oreType, int baseYield, int cycleDuration, int optimalRange) {
+            HarvestableType harvestableType, int baseYield, int cycleDuration, int optimalRange) {
         this.name = name;
         this.id = id;
         this.type = type;
         this.usesCrystals = usesCrystals;
-        this.oreType = oreType;
+        this.harvestableType = harvestableType;
         this.baseYield = baseYield;
         this.cycleDuration = cycleDuration;
         this.optimalRange = optimalRange;
@@ -167,11 +168,11 @@ public enum Turret {
     }
     
     /**
-     * Returns ore type the turret is harvesting (basic ores, ores+mercoxit, ice, gas)
+     * Returns harvestable type the turret is harvesting (basic ores, ores+mercoxit, ice, gas)
      * @return 
      */
-    public OreType getOreType() {
-        return oreType;
+    public HarvestableType getHarvestableType() {
+        return harvestableType;
     }
     
     /**

@@ -23,15 +23,36 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package cy.alavrov.jminerguide.data.ship;
+package cy.alavrov.jminerguide.data.harvestable;
 
 /**
- *
+ * Something harvestable.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public enum OreType {
-    ORE,
-    MERCOXIT,
-    ICE,
-    GAS
+public interface IHarvestable {
+
+    /**
+     * Name of harvestable as it seen ingame.
+     * @return 
+     */
+    public String getName();    
+    
+    /**
+     * Type of basic harvestable.
+     * Most ores are subtypes of a basic type.
+     * @return 
+     */
+    public BasicHarvestable getBasicHarvestable();
+    
+    /**
+     * True, if this is high-yield ore.
+     * @return 
+     */
+    public boolean isHighYield();
+    
+    /**
+     * True, if this a quest objective harvestable (and so, can't be reprocessed or used).
+     * @return 
+     */
+    public boolean isQuest();
 }
