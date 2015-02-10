@@ -30,33 +30,46 @@ package cy.alavrov.jminerguide.data.harvestable;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public enum MissionHarvestables implements IHarvestable{
-    BANIDINE("Banidine", BasicHarvestable.VELDSPAR),
-    LYAVITE("Lyavite", BasicHarvestable.KERNITE),
-    AUGUMENE("Augumene", BasicHarvestable.PYROXERES),
-    MERCIUM("Mercium", BasicHarvestable.OMBER),
-    PITHIX("Pithix", BasicHarvestable.JASPET),
-    GREENARISITE("Green Arisite", BasicHarvestable.GNEISS),
-    OERYL("Oeryl", BasicHarvestable.DARKOCHRE),
-    GEODITE("Geodite", BasicHarvestable.CROKITE),
-    POLYGYPSUM("Polygypsum", BasicHarvestable.ARKONOR),
+    BANIDINE("Banidine", 28617, BasicHarvestable.VELDSPAR),
+    AUGUMENE("Augumene", 28618, BasicHarvestable.PYROXERES),
+    MERCIUM("Mercium", 28619, BasicHarvestable.OMBER),
+    LYAVITE("Lyavite", 28620, BasicHarvestable.KERNITE),
+    PITHIX("Pithix", 28621, BasicHarvestable.JASPET),
+    GREENARISITE("Green Arisite", 28622, BasicHarvestable.GNEISS),
+    OERYL("Oeryl", 28623, BasicHarvestable.DARKOCHRE),
+    GEODITE("Geodite", 28624, BasicHarvestable.CROKITE),
+    POLYGYPSUM("Polygypsum", 28625, BasicHarvestable.ARKONOR),
+    ZUTHRINE("Zuthrine", 28626, BasicHarvestable.MERCOXIT), // because we can!
+        
+    AZUREICE("Azure Ice", 28627, BasicHarvestable.BLUEICE),
+    CRYSTALLINEICICLE("Crystalline Icicle", 28628, BasicHarvestable.CLEARICICLE),
+        
+    GAMBOGECYTOSEROCIN("Gamboge Cytoserocin", 28629, BasicHarvestable.CYTOSEROCIN),
+    CHARTREUSECYTOSEROCIN("Chartreuse Cytoserocin", 28630, BasicHarvestable.CYTOSEROCIN);
     
-    CRYSTALLINEICICLE("Crystalline Icicle", BasicHarvestable.CLEARICICLE),
-    AZUREICE("Azure Ice", BasicHarvestable.BLUEICE),
-    
-    CHARTREUSECYTOSEROCIN("Chartreuse Cytoserocin", BasicHarvestable.CYTOSEROCIN),
-    GAMBOGECYTOSEROCIN("Gamboge Cytoserocin", BasicHarvestable.CYTOSEROCIN);
-
     private final String name;
+    private final int id;
     private final BasicHarvestable basicType;
 
-    private MissionHarvestables(String name, BasicHarvestable basicType) {
+    private MissionHarvestables(String name, int id, BasicHarvestable basicType) {
         this.name = name;
         this.basicType = basicType;
+        this.id = id;
     }        
     
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public int getItemID() {
+        return id;
+    }
+
+    @Override
+    public int getCompressedItemID() {
+        return 0;
     }
 
     @Override

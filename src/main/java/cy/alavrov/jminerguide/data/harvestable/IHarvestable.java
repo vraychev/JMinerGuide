@@ -38,6 +38,19 @@ public interface IHarvestable {
     public String getName();    
     
     /**
+     * Item ID of a harvested product.
+     * @return 
+     */
+    public int getItemID();
+    
+    /**
+     * Item ID of a compressed product.
+     * 0, if there's none.
+     * @return 
+     */
+    public int getCompressedItemID();
+    
+    /**
      * Type of basic harvestable.
      * Most ores are subtypes of a basic type.
      * @return 

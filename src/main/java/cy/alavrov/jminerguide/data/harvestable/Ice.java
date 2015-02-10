@@ -31,37 +31,39 @@ package cy.alavrov.jminerguide.data.harvestable;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public enum Ice implements IHarvestable{
-    CLEARICILE("Clear Icicle", BasicHarvestable.CLEARICICLE, false, 
+    CLEARICILE("Clear Icicle", 16262, 28434, BasicHarvestable.CLEARICICLE, false, 
             50, 25, 1, 300, 0, 0, 0),
-    CLEARICILE_E("Enriched Clear Icicle", BasicHarvestable.CLEARICICLE, true, 
+    CLEARICILE_E("Enriched Clear Icicle", 17978, 28436, BasicHarvestable.CLEARICICLE, true, 
             75, 40, 1, 350, 0, 0, 0),
     
-    WHITEGLAZE("White Glaze", BasicHarvestable.WHITEGLAZE, false, 
+    WHITEGLAZE("White Glaze", 16265, 28444, BasicHarvestable.WHITEGLAZE, false, 
             50, 25, 1, 0, 300, 0, 0),
-    WHITEGLAZE_P("Pristine White Glaze", BasicHarvestable.WHITEGLAZE, true, 
+    WHITEGLAZE_P("Pristine White Glaze", 17976, 28441, BasicHarvestable.WHITEGLAZE, true, 
             75, 40, 1, 0, 350, 0, 0),
     
-    BLUEICE("Blue Ice", BasicHarvestable.BLUEICE, false, 
+    BLUEICE("Blue Ice", 16264, 28433, BasicHarvestable.BLUEICE, false, 
             50, 25, 1, 0, 0, 300, 0),
-    BLUEICE_Е("Thick Blue Ice", BasicHarvestable.BLUEICE, true, 
+    BLUEICE_Е("Thick Blue Ice", 17975, 28443, BasicHarvestable.BLUEICE, true, 
             75, 40, 1, 0, 0, 350, 0),
     
-    GLACIALMASS("Glacial Mass", BasicHarvestable.GLACIALMASS, false, 
+    GLACIALMASS("Glacial Mass", 16263, 28438, BasicHarvestable.GLACIALMASS, false, 
             50, 25, 1, 0, 0, 0, 300),
-    GLACIALMASS_S("Smooth Glacial Mass", BasicHarvestable.GLACIALMASS, true, 
+    GLACIALMASS_S("Smooth Glacial Mass", 17977, 28442, BasicHarvestable.GLACIALMASS, true, 
             75, 40, 1, 0, 0, 0, 350),
     
     
-    GLARECRUST("Glare Crust", BasicHarvestable.GLARECRUST, false, 
+    GLARECRUST("Glare Crust", 16266, 28439, BasicHarvestable.GLARECRUST, false, 
             1000, 500, 25, 0, 0, 0, 0),
-    DARKGLITTER("Dark Glitter", BasicHarvestable.DARKGLITTER, false, 
+    DARKGLITTER("Dark Glitter", 16267, 28435, BasicHarvestable.DARKGLITTER, false, 
             500, 1000, 50, 0, 0, 0, 0),
-    GELIDUS("Gelidus", BasicHarvestable.GELIDUS, false, 
+    GELIDUS("Gelidus", 16268, 28437, BasicHarvestable.GELIDUS, false, 
             250, 500, 75, 0, 0, 0, 0),
-    KRYSTALLOS("Krystallos", BasicHarvestable.KRYSTALLOS, false, 
+    KRYSTALLOS("Krystallos", 16269, 28440, BasicHarvestable.KRYSTALLOS, false, 
             125, 500, 125, 0, 0, 0, 0);
         
     private final String name;
+    private final int id;
+    private final int compressedId;
     private final BasicHarvestable basicType;
     private final boolean highYield;
     
@@ -73,10 +75,12 @@ public enum Ice implements IHarvestable{
     private final int oxygenIsotopes;
     private final int hydrogenIsotopes;
 
-    private Ice(String name, BasicHarvestable basicType, boolean highYield, 
+    private Ice(String name, int id, int compressedId,  BasicHarvestable basicType, boolean highYield, 
             int heavyWater, int liquidOzone, int strontiumClathrates, 
             int heliumIsotopes, int nitrogenIsotopes, int oxygenIsotopes, int hydrogenIsotopes) {
         this.name = name;
+        this.id = id;
+        this.compressedId = compressedId;
         this.basicType = basicType;
         this.highYield = highYield;
         this.heavyWater = heavyWater;
@@ -94,6 +98,16 @@ public enum Ice implements IHarvestable{
     @Override
     public String getName() {
         return name;
+    }    
+
+    @Override
+    public int getItemID() {
+        return id;
+    }
+
+    @Override
+    public int getCompressedItemID() {
+        return compressedId;
     }
 
     @Override
@@ -142,5 +156,5 @@ public enum Ice implements IHarvestable{
     @Override
     public String toString() {
         return name;
-    }        
+    }    
 }

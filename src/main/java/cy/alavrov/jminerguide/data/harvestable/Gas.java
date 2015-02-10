@@ -31,46 +31,57 @@ package cy.alavrov.jminerguide.data.harvestable;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public enum Gas implements IHarvestable{
-    AMBERCYTOSEROCIN("Amber Cytoserocin", BasicHarvestable.CYTOSEROCIN),
-    AZURECYTOSEROCIN("Azure Cytoserocin", BasicHarvestable.CYTOSEROCIN),
-    CELADONCYTOSEROCIN("Celadon Cytoserocin", BasicHarvestable.CYTOSEROCIN),
-    GOLDENCYTOSEROCIN("Golden Cytoserocin", BasicHarvestable.CYTOSEROCIN),
-    LIMECYTOSEROCIN("Lime Cytoserocin", BasicHarvestable.CYTOSEROCIN),
-    MALACHITECYTOSEROCIN("Malachite Cytoserocin", BasicHarvestable.CYTOSEROCIN),
-    VERMILLIONCYTOSEROCIN("Vermillion Cytoserocin", BasicHarvestable.CYTOSEROCIN),
-    VIRIDIANCYTOSEROCIN("Viridian Cytoserocin", BasicHarvestable.CYTOSEROCIN),
+    AMBERCYTOSEROCIN("Amber Cytoserocin", 25268, BasicHarvestable.CYTOSEROCIN),
+    AZURECYTOSEROCIN("Azure Cytoserocin", 25279, BasicHarvestable.CYTOSEROCIN),
+    CELADONCYTOSEROCIN("Celadon Cytoserocin", 25275, BasicHarvestable.CYTOSEROCIN),
+    GOLDENCYTOSEROCIN("Golden Cytoserocin", 25273, BasicHarvestable.CYTOSEROCIN),
+    LIMECYTOSEROCIN("Lime Cytoserocin", 25277, BasicHarvestable.CYTOSEROCIN),
+    MALACHITECYTOSEROCIN("Malachite Cytoserocin", 25276, BasicHarvestable.CYTOSEROCIN),
+    VERMILLIONCYTOSEROCIN("Vermillion Cytoserocin", 25278, BasicHarvestable.CYTOSEROCIN),
+    VIRIDIANCYTOSEROCIN("Viridian Cytoserocin", 25274, BasicHarvestable.CYTOSEROCIN),
 
-    AMBERMYKOSEROCIN("Amber Mykoserocin", BasicHarvestable.MYKOSEROCIN),
-    AZUREMYKOSEROCIN("Azure Mykoserocin", BasicHarvestable.MYKOSEROCIN),
-    CELADONMYKOSEROCIN("Celadon Mykoserocin", BasicHarvestable.MYKOSEROCIN),
-    GOLDENMYKOSEROCIN("Golden Mykoserocin", BasicHarvestable.MYKOSEROCIN),
-    LIMEMYKOSEROCIN("Lime Mykoserocin", BasicHarvestable.MYKOSEROCIN),
-    MALACHITEMYKOSEROCIN("Malachite Mykoserocin", BasicHarvestable.MYKOSEROCIN),
-    VERMILLIONMYKOSEROCIN("Vermillion Mykoserocin", BasicHarvestable.MYKOSEROCIN),
-    VIRIDIANMYKOSEROCIN("Viridian Mykoserocin", BasicHarvestable.MYKOSEROCIN),
+    AMBERMYKOSEROCIN("Amber Mykoserocin", 28694, BasicHarvestable.MYKOSEROCIN),
+    AZUREMYKOSEROCIN("Azure Mykoserocin", 28695, BasicHarvestable.MYKOSEROCIN),
+    CELADONMYKOSEROCIN("Celadon Mykoserocin", 28696, BasicHarvestable.MYKOSEROCIN),
+    GOLDENMYKOSEROCIN("Golden Mykoserocin", 28697, BasicHarvestable.MYKOSEROCIN),
+    LIMEMYKOSEROCIN("Lime Mykoserocin", 28698, BasicHarvestable.MYKOSEROCIN),
+    MALACHITEMYKOSEROCIN("Malachite Mykoserocin", 28699, BasicHarvestable.MYKOSEROCIN),
+    VERMILLIONMYKOSEROCIN("Vermillion Mykoserocin", 28700, BasicHarvestable.MYKOSEROCIN),
+    VIRIDIANMYKOSEROCIN("Viridian Mykoserocin", 28701, BasicHarvestable.MYKOSEROCIN),
 
-    FULLERITEC28("Fullerite-C28", BasicHarvestable.FULLERITEC28),
-    FULLERITEC32("Fullerite-C32", BasicHarvestable.FULLERITEC32),
-    FULLERITEC50("Fullerite-C50", BasicHarvestable.FULLERITEC50),
-    FULLERITEC60("Fullerite-C60", BasicHarvestable.FULLERITEC60),
-    FULLERITEC70("Fullerite-C70", BasicHarvestable.FULLERITEC70),
-    FULLERITEC72("Fullerite-C72", BasicHarvestable.FULLERITEC72),
-    FULLERITEC84("Fullerite-C84", BasicHarvestable.FULLERITEC84),
-    FULLERITEC320("Fullerite-C320", BasicHarvestable.FULLERITEC320),
-    FULLERITEC540("Fullerite-C540", BasicHarvestable.FULLERITEC540);
+    FULLERITEC28("Fullerite-C28", 30375, BasicHarvestable.FULLERITEC28),
+    FULLERITEC32("Fullerite-C32", 30376, BasicHarvestable.FULLERITEC32),
+    FULLERITEC50("Fullerite-C50", 30370, BasicHarvestable.FULLERITEC50),
+    FULLERITEC60("Fullerite-C60", 30371, BasicHarvestable.FULLERITEC60),
+    FULLERITEC70("Fullerite-C70", 30372, BasicHarvestable.FULLERITEC70),
+    FULLERITEC72("Fullerite-C72", 30373, BasicHarvestable.FULLERITEC72),
+    FULLERITEC84("Fullerite-C84", 30374, BasicHarvestable.FULLERITEC84),
+    FULLERITEC320("Fullerite-C320", 30377, BasicHarvestable.FULLERITEC320),
+    FULLERITEC540("Fullerite-C540", 30378, BasicHarvestable.FULLERITEC540);
+            
+    private final String name;
+    private final int id;
+    private final BasicHarvestable basicType;
 
-    private Gas(String name, BasicHarvestable basicType) {
+    private Gas(String name, int id,  BasicHarvestable basicType) {
         this.name = name;
         this.basicType = basicType;
+        this.id = id;
     }
-    
-        
-    private final String name;
-    private final BasicHarvestable basicType;
 
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public int getItemID() {
+        return id;
+    }
+
+    @Override
+    public int getCompressedItemID() {
+        return 0;
     }
 
     @Override
@@ -91,7 +102,5 @@ public enum Gas implements IHarvestable{
     @Override
     public String toString() {
         return name;
-    }
-        
-    
+    }            
 }
