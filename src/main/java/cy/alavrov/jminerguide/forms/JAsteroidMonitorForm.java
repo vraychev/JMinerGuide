@@ -155,6 +155,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                         disableMonitorPanel();
                     } else {
                         loadCharacterData(session);
+                        updateAsteroids(session);
                     }
                 }
             }                        
@@ -256,6 +257,16 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jPanelSelector.validate();
     }
     
+    public void updateAsteroids(MiningSession session) {
+        jTableRoids.setModel(session.getTableModel());
+        
+        jTableRoids.getColumnModel().getColumn(0).setResizable(false);
+        jTableRoids.getColumnModel().getColumn(0).setPreferredWidth(150);
+        jTableRoids.getColumnModel().getColumn(1).setResizable(false);
+        jTableRoids.getColumnModel().getColumn(2).setResizable(false);
+        jTableRoids.getColumnModel().getColumn(3).setResizable(false);
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -280,7 +291,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        jTableRoids = new javax.swing.JTable();
         jButton6 = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
         jButton8 = new javax.swing.JButton();
@@ -339,13 +350,18 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         });
 
         jButton3.setText("Load Scan");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         jButton4.setText("Filters");
 
         jButton5.setText("Clear");
         jButton5.setActionCommand("");
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        jTableRoids.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -368,16 +384,16 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jTable1.setColumnSelectionAllowed(true);
-        jTable1.getTableHeader().setReorderingAllowed(false);
-        jScrollPane1.setViewportView(jTable1);
-        jTable1.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setResizable(false);
-            jTable1.getColumnModel().getColumn(0).setPreferredWidth(150);
-            jTable1.getColumnModel().getColumn(1).setResizable(false);
-            jTable1.getColumnModel().getColumn(2).setResizable(false);
-            jTable1.getColumnModel().getColumn(3).setResizable(false);
+        jTableRoids.setColumnSelectionAllowed(true);
+        jTableRoids.getTableHeader().setReorderingAllowed(false);
+        jScrollPane1.setViewportView(jTableRoids);
+        jTableRoids.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        if (jTableRoids.getColumnModel().getColumnCount() > 0) {
+            jTableRoids.getColumnModel().getColumn(0).setResizable(false);
+            jTableRoids.getColumnModel().getColumn(0).setPreferredWidth(150);
+            jTableRoids.getColumnModel().getColumn(1).setResizable(false);
+            jTableRoids.getColumnModel().getColumn(2).setResizable(false);
+            jTableRoids.getColumnModel().getColumn(3).setResizable(false);
         }
 
         jButton6.setText("1");
@@ -678,6 +694,15 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         processEvents = true;
     }//GEN-LAST:event_jButtonResetOreHoldActionPerformed
 
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        if (currentSession != null) {
+            JLoadScanDialog dlg = new JLoadScanDialog(this, currentSession);
+
+            dlg.setLocationRelativeTo(this);
+            dlg.setVisible(true);
+        }
+    }//GEN-LAST:event_jButton3ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
@@ -706,7 +731,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanelSelector;
     private javax.swing.JPanel jPanelSetup;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTableRoids;
     private javax.swing.JTextField jTextFieldHold;
     // End of variables declaration//GEN-END:variables
 }

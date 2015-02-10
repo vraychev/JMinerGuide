@@ -28,8 +28,14 @@ package cy.alavrov.jminerguide.monitor;
 import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.booster.BoosterShip;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
+import cy.alavrov.jminerguide.data.harvestable.Asteroid;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
 /**
  *
@@ -39,9 +45,11 @@ public class MiningSession {
     private final IEVEWindow window;
     private volatile SessionCharacter character;    
     private volatile float usedCargo;  
+    private volatile CopyOnWriteArrayList<Asteroid> roids;
     
     public MiningSession(IEVEWindow window) {
         this.window = window;
+        this.roids = new CopyOnWriteArrayList<>();
     }
     
     /**
@@ -164,5 +172,86 @@ public class MiningSession {
         if (amt > maxCargo) amt = maxCargo;
         
         usedCargo = amt;
+    }
+    
+    /**
+     * Cleans old asteroid list and loads in a new one.
+     * @param newRoids 
+     */
+    public void clearAndAddRoids(List<Asteroid> newRoids) {
+        CopyOnWriteArrayList<Asteroid> newList = new CopyOnWriteArrayList<>(newRoids);
+        roids = newList;
+    }
+    
+    /**
+     * Adds list of asteroids into the existing one.
+     * @param newRoids 
+     */
+    public void addRoids(List<Asteroid> newRoids) {
+        roids.addAll(newRoids);
+    }
+    
+    public TableModel getTableModel() {
+        return new AsteroidTableModel();
+    }
+    
+    public class AsteroidTableModel extends AbstractTableModel {                
+
+        @Override
+        public int getRowCount() {
+            return roids.size();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return 4;
+        }
+
+        @Override
+        public String getColumnName(int column) {
+            switch (column) {
+                case 0:
+                    return "Type";
+                    
+                case 1:
+                    return "Distance";
+                    
+                case 2:
+                    return "Rem";
+                    
+                case 3:
+                    return "Target";
+                    
+                default:
+                    return "";
+                    
+            }
+        }
+        
+        
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            if (rowIndex >= roids.size() || columnIndex > 3) return null;
+            
+            Asteroid roid = roids.get(rowIndex);
+            switch (columnIndex) {
+                case 0:
+                    return roid;
+                    
+                case 1:
+                    return roid.getDistance();
+                    
+                case 2:
+                    return roid.getRemainingUnits();
+                    
+                case 3:
+                    return ""; // tba
+                    
+                default:
+                    return null;
+                    
+            }
+        }                            
     }
 }
