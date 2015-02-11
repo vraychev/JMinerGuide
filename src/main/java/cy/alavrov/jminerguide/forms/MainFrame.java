@@ -2717,7 +2717,6 @@ public final class MainFrame extends javax.swing.JFrame {
         if (monitorForm == null) {
             monitorForm = new JAsteroidMonitorForm(this, dCont, wManager);
             monitorForm.setLocationRelativeTo(this);
-            monitorForm.setVisible(true);
         }
         
         monitorForm.setVisible(true);

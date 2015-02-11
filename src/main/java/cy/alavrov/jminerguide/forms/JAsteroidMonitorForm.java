@@ -84,6 +84,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private volatile boolean shouldLooseOnTop = false;
     
     private volatile boolean processEvents = false;
+
+    private volatile JLoadScanDialog lsDlog = null;
     
     /**
      * Creates new form JAsteroidMonitorDialog
@@ -139,14 +141,26 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             }
             
             String name = session.getCharacterName();
-            if (name == null) {
+            if (name == null) {                
+                if (lsDlog != null) {
+                    lsDlog.setVisible(false);
+                    lsDlog.dispose();
+                    deleteLoadScanDialog();
+                }
+                
                 if (currentMiner != null) {
                     currentMiner = null;
                     jLabelMinerName.setText("none");
                     disableMonitorPanel();
                 }
             } else {
-                if (!name.equals(currentMiner)) {
+                if (!name.equals(currentMiner)) {                                    
+                    if (lsDlog != null) {
+                        lsDlog.setVisible(false);
+                        lsDlog.dispose();
+                        deleteLoadScanDialog();
+                    }
+                    
                     currentMiner = name;
                     SessionCharacter curchar = session.getSessionCharacter();                    
                     jLabelMinerName.setText(currentMiner + (curchar == null ? "(not found)" : ""));
@@ -245,7 +259,13 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             button.addActionListener(new ActionListener() {
 
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void actionPerformed(ActionEvent e) {                                    
+                    if (lsDlog != null) {
+                        lsDlog.setVisible(false);
+                        lsDlog.dispose();
+                        deleteLoadScanDialog();
+                    }
+                    
                     JAsteroidMonitorForm.this.setAlwaysOnTop(true);
                     session.switchToWindow();
                 }
@@ -265,6 +285,14 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jTableRoids.getColumnModel().getColumn(1).setResizable(false);
         jTableRoids.getColumnModel().getColumn(2).setResizable(false);
         jTableRoids.getColumnModel().getColumn(3).setResizable(false);
+    }
+    
+    /**
+     * Deletes reference to scan loading dialog.
+     * Called when the dialog is closed.
+     */
+    public void deleteLoadScanDialog() {
+        lsDlog = null;
     }
     
     /**
@@ -696,10 +724,13 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         if (currentSession != null) {
-            JLoadScanDialog dlg = new JLoadScanDialog(this, currentSession);
-
-            dlg.setLocationRelativeTo(this);
-            dlg.setVisible(true);
+            
+            if (lsDlog == null) {            
+                lsDlog = new JLoadScanDialog(this, currentSession);
+                lsDlog.setLocationRelativeTo(this);
+            }
+            
+            lsDlog.setVisible(true);
         }
     }//GEN-LAST:event_jButton3ActionPerformed
 

@@ -46,7 +46,7 @@ public class JLoadScanDialog extends javax.swing.JDialog {
      * Creates new form JLoadScanDialog
      */
     public JLoadScanDialog(JAsteroidMonitorForm parent, MiningSession session) {
-        super(parent, true);
+        super(parent, false);
         initComponents();
         
         this.session = session;
@@ -109,9 +109,8 @@ public class JLoadScanDialog extends javax.swing.JDialog {
         jButtonLoadAndAdd = new javax.swing.JButton();
         jButtonCancel = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Load Scan");
-        setModal(true);
 
         jTextAreaScan.setColumns(20);
         jTextAreaScan.setFont(new java.awt.Font("Monospaced", 0, 14)); // NOI18N
@@ -175,6 +174,7 @@ public class JLoadScanDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
+        parent.deleteLoadScanDialog();
         this.setVisible(false);
         this.dispose();
     }//GEN-LAST:event_jButtonCancelActionPerformed
@@ -184,6 +184,7 @@ public class JLoadScanDialog extends javax.swing.JDialog {
         session.clearAndAddRoids(roids);
         parent.updateAsteroids(session);
         
+        parent.deleteLoadScanDialog();
         this.setVisible(false);
         this.dispose();
     }//GEN-LAST:event_jButtonClearAndLoadActionPerformed
@@ -194,8 +195,9 @@ public class JLoadScanDialog extends javax.swing.JDialog {
         session.addRoids(roids);
         parent.updateAsteroids(session);
         
+        parent.deleteLoadScanDialog();
         this.setVisible(false);
-        this.dispose();
+        this.dispose();        
     }//GEN-LAST:event_jButtonLoadAndAddActionPerformed
 
 
