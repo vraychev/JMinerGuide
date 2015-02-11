@@ -154,7 +154,8 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabelYield.setToolTipText(fmt.format(newStats.getTurretYield())+" per turret");
 
         jLabelCycle.setText(fmt.format(newStats.getTurretCycle()));
-        jLabelM3S.setText(fmt.format(newStats.getTurretM3S()));
+        jLabelM3S.setText(fmt.format(newStats.getCombinedTurretM3S()));
+        jLabelM3S.setToolTipText(fmt.format(newStats.getTurretM3S())+" per turret");
 
         jLabelDroneYield.setText(String.valueOf(fmt.format(newStats.getCombinedDroneYield())));
         jLabelDroneYield.setToolTipText(fmt.format(newStats.getDroneYield())+" per drone");

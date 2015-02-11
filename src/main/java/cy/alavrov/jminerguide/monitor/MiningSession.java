@@ -31,7 +31,6 @@ import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.harvestable.Asteroid;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.table.AbstractTableModel;
@@ -246,7 +245,7 @@ public class MiningSession {
                     return roid.getRemainingUnits();
                     
                 case 3:
-                    return ""; // tba
+                    return roid.getTurrets(); // tba
                     
                 default:
                     return null;

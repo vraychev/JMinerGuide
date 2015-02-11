@@ -73,9 +73,14 @@ public class CalculatedStats {
     private final float turretCycle;
     
     /**
-     * Total turret yield per second, in m3/sec.
+     * Individual turret yield per second, in m3/sec.
      */
     private final float turretM3S;
+    
+    /**
+     * Total turret yield per second, in m3/sec.
+     */
+    private final float combinedTurretM3S;
     
     /**
      * Yield of a drone, in m3.
@@ -261,7 +266,8 @@ public class CalculatedStats {
         actualTurretCycle = actualTurretCycle * effectiveCycleModifier;
         turretCycle = actualTurretCycle;
         
-        turretM3S = combinedTurretYield/turretCycle;
+        turretM3S = turretYield/turretCycle;
+        combinedTurretM3S = combinedTurretYield/turretCycle;
         
         MiningDrone drone = ship.getDrone();
         if (turret.getHarvestableType() == HarvestableType.GAS || 
@@ -300,7 +306,7 @@ public class CalculatedStats {
             droneM3S = combinedDroneYield / droneCycle;
         }
                                       
-        float totalM3S = turretM3S + droneM3S;
+        float totalM3S = combinedTurretM3S + droneM3S;
         totalM3H = totalM3S * 60 * 60;
         
         int baseOptimal = turret.getOptimalRange();
@@ -353,11 +359,19 @@ public class CalculatedStats {
     }
 
     /**
-     * Total turret yield per second, in m3/sec.
+     * Total individual yield per second, in m3/sec.
      * @return the turretM3S
      */
     public float getTurretM3S() {
         return turretM3S;
+    }   
+    
+    /**
+     * Total turret yield per second, in m3/sec.
+     * @return the combinedTurretM3S
+     */
+    public float getCombinedTurretM3S() {
+        return combinedTurretM3S;
     }
 
     /**

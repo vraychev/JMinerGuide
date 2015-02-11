@@ -25,6 +25,12 @@
  */
 package cy.alavrov.jminerguide.data.harvestable;
 
+import cy.alavrov.jminerguide.data.CalculatedStats;
+import cy.alavrov.jminerguide.monitor.TurretInstance;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+
 /**
  * Something with harvestable inside. 
  * I.e. asteroid, ice roid or gas cloud.
@@ -34,11 +40,14 @@ public class Asteroid {
     private final IHarvestable harvestable;
     private final int distance;
     private int remaining;    
+        
+    private final HashSet<TurretInstance> turrets;
 
     public Asteroid(IHarvestable harvestable, int distance, int remaining) {
         this.harvestable = harvestable;
         this.distance = distance;
         this.remaining = remaining;
+        this.turrets = new HashSet<>();
     }
  
     public int getDistance() {
@@ -59,15 +68,67 @@ public class Asteroid {
     
     /**
      * Removes some units of harvestable from the asteroid.
-     * @param amount 
+     * @param amount how many units we want to remove 
+     * @return how many was actually removed;
      */
-    public synchronized void removeSomeUnits(int amount) {
-        remaining = remaining - amount;
-        if (remaining < 0) remaining = 0;
+    public synchronized int removeSomeUnits(int amount) {
+        if (remaining == 0) return 0;
+        if (amount > remaining) amount = remaining;
+        
+        remaining = remaining - amount;      
+        
+        return amount;
     }
 
     @Override
     public String toString() {
         return harvestable.getName();
-    }        
+    } 
+    
+    public synchronized void bindTurret(TurretInstance turret) {
+        turrets.add(turret);
+    }
+    
+    public synchronized void unbindTurret(TurretInstance turret) {
+        turrets.remove(turret);
+    }
+    
+    /**
+     * Returns remaining seconds to mine out the asteroid.
+     * If there's no bound turrets, returns 0.
+     * @param stats
+     * @return 
+     */
+    public synchronized int getRemainingSeconds(CalculatedStats stats) {
+        if (turrets.isEmpty()) return 0;
+            
+        float m3s = stats.getTurretM3S() * turrets.size();
+        float volume = harvestable.getBasicHarvestable().getVolume() * remaining;
+        return (int) (volume / m3s);
+    }
+    
+    public synchronized boolean isMined() {
+        return !turrets.isEmpty();
+    }
+    
+    public synchronized String getTurrets() {
+        if (turrets.isEmpty()) return "";
+        
+        ArrayList<Integer> turrIDs = new ArrayList<>();
+        
+        for (TurretInstance turret : turrets) {
+            turrIDs.add(turret.getId());
+        }
+        
+        Collections.sort(turrIDs);
+        String out = "";
+        for (Integer turrID : turrIDs) {
+            if (out.isEmpty()) {
+                out = String.valueOf(turrID);
+            } else {
+                out = out + ", "+turrID;
+            }
+        }
+        return out;
+    }
 }
