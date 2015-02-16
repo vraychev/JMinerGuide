@@ -45,10 +45,17 @@ public class MiningSession {
     private volatile SessionCharacter character;    
     private volatile float usedCargo;  
     private volatile CopyOnWriteArrayList<Asteroid> roids;
+    private final TurretInstance turret1;
+    private final TurretInstance turret2;
+    private final TurretInstance turret3;
     
     public MiningSession(IEVEWindow window) {
         this.window = window;
         this.roids = new CopyOnWriteArrayList<>();
+        
+        turret1 = new TurretInstance(1);
+        turret2 = new TurretInstance(2);
+        turret3 = new TurretInstance(3);
     }
     
     /**
@@ -84,7 +91,7 @@ public class MiningSession {
     }
     
     /**
-     * Returns session's character.
+     * Returns session's character. Can return null.
      * @return 
      */
     public SessionCharacter getSessionCharacter() {
@@ -93,11 +100,16 @@ public class MiningSession {
 
     /**
      * Creates session's character from the generic character.
+     * Resets turrets.
      * @param character
      * @param dCont 
      */
     public void createSessionCharacter(EVECharacter character, DataContainer dCont) {                       
-        if (character == null) return;
+        if (character == null) return;   
+        
+        turret1.unbindAsteroid();
+        turret2.unbindAsteroid();
+        turret3.unbindAsteroid();
         
         SessionCharacter schar = new SessionCharacter(character, dCont);
         this.character = schar;
@@ -106,10 +118,15 @@ public class MiningSession {
     /**
      * Updates session character's ship.
      * Does nothing, if there's no session character.
+     * Resets turrets.
      * @param ship 
      */
     public void updateCharacherShip(Ship ship) {
         if (ship == null || character == null) return;
+        
+        turret1.unbindAsteroid();
+        turret2.unbindAsteroid();
+        turret3.unbindAsteroid();
         
         SessionCharacter schar = new SessionCharacter(character, ship);
         this.character = schar;
@@ -152,7 +169,7 @@ public class MiningSession {
     }
     
     /**
-     * Returns used cargo, rounded down.
+     * Returns used cargo.
      * @return 
      */
     public float getUsedCargo() {
@@ -160,10 +177,26 @@ public class MiningSession {
     }
     
     /**
-     * Sets used cargo.
+     * Returns remaining free cargo.
+     * @return 
+     */
+    public float getRemainingCargo() {
+        if (character == null) return 0;
+        
+        float ret = character.getStats().getOreHold() - usedCargo;
+        if (ret < 0) ret = 0;
+        return ret;
+    }
+    
+    /**
+     * Sets used cargo. Also stops all turrets from working.
      * @param amt used cargo, in m3. Can't be more, than ship's ore hold.
      */
     public void setUsedCargo(float amt) {      
+        turret1.unbindAsteroid();
+        turret2.unbindAsteroid();
+        turret3.unbindAsteroid();
+        
         int maxCargo = 0;
         if (character != null) {
             maxCargo = character.getStats().getOreHold();
@@ -171,6 +204,16 @@ public class MiningSession {
         if (amt > maxCargo) amt = maxCargo;
         
         usedCargo = amt;
+    }
+    
+    private void putToCargo(float amt) {
+        if (character != null) {
+            int maxCargo = character.getStats().getOreHold();
+            float newCargo = usedCargo + amt;
+            if (newCargo > maxCargo) newCargo = maxCargo;
+            
+            usedCargo = newCargo;
+        }
     }
     
     /**
@@ -192,6 +235,86 @@ public class MiningSession {
     
     public TableModel getTableModel() {
         return new AsteroidTableModel();
+    }
+
+    /**
+     * @return the turret1
+     */
+    public TurretInstance getTurret1() {
+        return turret1;
+    }
+
+    /**
+     * @return the turret2
+     */
+    public TurretInstance getTurret2() {
+        return turret2;
+    }
+
+    /**
+     * @return the turret3
+     */
+    public TurretInstance getTurret3() {
+        return turret3;
+    }
+    
+    
+    public void doMining() throws AsteroidMinedException, FullOreHoldException {
+        if (character == null) return;
+        
+        boolean isRoidError = false;
+        AsteroidMinedException roidEx = null;
+        
+        boolean isHoldError = false;
+        FullOreHoldException holdEx = null;
+        
+        // we actually have to make a full calculation cycle before throwing out the exception.
+        
+        try {
+            putToCargo(turret1.mineSome(character.getStats(), getRemainingCargo()));
+        } catch (AsteroidMinedException e) {
+            isRoidError = true;
+            roidEx = e;
+            putToCargo(e.getMinedM3());
+        } catch (FullOreHoldException e) {
+            isHoldError = true;
+            holdEx = e;
+        }
+        
+        try {
+            putToCargo(turret2.mineSome(character.getStats(), getRemainingCargo()));
+        } catch (AsteroidMinedException e) {
+            isRoidError = true;
+            roidEx = e;
+            putToCargo(e.getMinedM3());
+        } catch (FullOreHoldException e) {
+            isHoldError = true;
+            holdEx = e;
+        }
+        
+        try {
+            putToCargo(turret3.mineSome(character.getStats(), getRemainingCargo()));
+        } catch (AsteroidMinedException e) {
+            isRoidError = true;
+            roidEx = e;
+            putToCargo(e.getMinedM3());
+        } catch (FullOreHoldException e) {
+            isHoldError = true;
+            holdEx = e;
+        }
+        
+        if (isHoldError) {
+            // we should unbind all turrets here, because we could get the exception
+            // only on the last turret, for example.
+            turret1.unbindAsteroid();
+            turret2.unbindAsteroid();
+            turret3.unbindAsteroid();
+            throw holdEx;            
+        }
+        
+        if (isRoidError) {
+            throw roidEx;
+        }
     }
     
     public class AsteroidTableModel extends AbstractTableModel {                
@@ -242,7 +365,11 @@ public class MiningSession {
                     return roid.getDistance();
                     
                 case 2:
-                    return roid.getRemainingUnits();
+                    if (character == null) {
+                        return roid.getRemainingUnits();
+                    } else {
+                        return roid.getRemString(character.getStats());
+                    }
                     
                 case 3:
                     return roid.getTurrets(); // tba

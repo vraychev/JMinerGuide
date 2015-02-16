@@ -29,11 +29,14 @@ import cy.alavrov.jminerguide.data.CalculatedStats;
 import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.booster.BoosterShip;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
+import cy.alavrov.jminerguide.data.harvestable.Asteroid;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import cy.alavrov.jminerguide.monitor.MiningSession;
 import cy.alavrov.jminerguide.monitor.MiningSessionMonitor;
+import cy.alavrov.jminerguide.monitor.MiningTask;
 import cy.alavrov.jminerguide.monitor.SessionCharacter;
+import cy.alavrov.jminerguide.monitor.TurretInstance;
 import cy.alavrov.jminerguide.monitor.UpdateWindowTask;
 import cy.alavrov.jminerguide.util.IntegerDocumentFilter;
 import cy.alavrov.jminerguide.util.winmanager.IWindowManager;
@@ -50,6 +53,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import javax.swing.JToggleButton;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.text.AbstractDocument;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
@@ -113,6 +118,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jComboBoxBoosterShip.setModel(dCont.getBoosterShipContainer().getBoosterShipModel());
         
         timer.scheduleWithFixedDelay(new UpdateWindowTask(msMonitor, this), 100, 100, TimeUnit.MILLISECONDS);
+        timer.scheduleAtFixedRate(new MiningTask(msMonitor, this), 1, 1, TimeUnit.SECONDS);
         disableMonitorPanel();
         processEvents = true;
     }
@@ -122,15 +128,17 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         
         MiningSession session = msMonitor.getCurrentSession();
         if (session == null) {            
-            // wait a few milliseconds to lose always on top to combat flickering.
-            if (this.isAlwaysOnTop() && !shouldLooseOnTop) {
-                shouldLooseOnTop = true;
-                loseOnTopAt = System.currentTimeMillis() + WINDOW_LOSS_TIMEOUT;
-            }
-            
-            if (shouldLooseOnTop && loseOnTopAt < System.currentTimeMillis()) {
-                this.setAlwaysOnTop(false);
-                shouldLooseOnTop = false;
+            if (lsDlog == null) { // only hide if we doesn't have load scan dialog open.
+                // wait a few milliseconds to lose always on top to combat flickering.
+                if (this.isAlwaysOnTop() && !shouldLooseOnTop) {
+                    shouldLooseOnTop = true;
+                    loseOnTopAt = System.currentTimeMillis() + WINDOW_LOSS_TIMEOUT;
+                }
+
+                if (shouldLooseOnTop && loseOnTopAt < System.currentTimeMillis()) {
+                    this.setAlwaysOnTop(false);
+                    shouldLooseOnTop = false;
+                }
             }
             
         } else {
@@ -226,6 +234,12 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         CalculatedStats stats = character.getStats();
         jLabelStats.setText(stats.getTurretYield()+" m3 / "+stats.getTurretCycle()+" sec / turret");
         jLabelHoldStats.setText(fmt.format(session.getUsedCargo())+" / "+stats.getOreHold()+" m3");
+        
+        checkTurretButtons();
+    }
+    
+    public void updateCurrentCharacterStats() {
+        if (currentSession != null) updateCharacterStats(currentSession);
     }
     
     /**
@@ -284,7 +298,9 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jTableRoids.getColumnModel().getColumn(0).setPreferredWidth(150);
         jTableRoids.getColumnModel().getColumn(1).setResizable(false);
         jTableRoids.getColumnModel().getColumn(2).setResizable(false);
+        jTableRoids.getColumnModel().getColumn(2).setPreferredWidth(100);
         jTableRoids.getColumnModel().getColumn(3).setResizable(false);
+        jTableRoids.getColumnModel().getColumn(3).setPreferredWidth(50);
     }
     
     /**
@@ -293,6 +309,103 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
      */
     public void deleteLoadScanDialog() {
         lsDlog = null;
+    }
+    
+    /**
+     * Disables all the turret buttons.
+     */
+    public void disableTurretButtons() {
+        disableToggleButton(jToggleButtonTurret1);
+        disableToggleButton(jToggleButtonTurret2);
+        disableToggleButton(jToggleButtonTurret3);
+    }
+        
+    /**
+     * Disables toggle button, if it's enabled, setting it's state to not selected.
+     * @param button 
+     */
+    private void disableToggleButton(JToggleButton button) {
+        if (button.isSelected()) button.setSelected(false);
+        if (button.isEnabled()) button.setEnabled(false);
+    }
+    
+    /**
+     * Enables toggle button, if it's not enabled and sets it's selected state to desired value.
+     * @param button
+     * @param selected 
+     */
+    private void enableToggleButton(JToggleButton button, boolean selected) {
+        if (!button.isEnabled()) button.setEnabled(true);
+        if (button.isSelected() != selected) button.setSelected(selected);
+    }
+    
+    /**
+     * Checks turret buttons, enabling or disabling them as needed.
+     */
+    public void checkTurretButtons() {
+        if (currentSession == null) {
+            disableTurretButtons();
+            return;
+        }
+        
+        SessionCharacter chr = currentSession.getSessionCharacter();
+        if (chr == null) {
+            disableTurretButtons();
+            return;
+        }
+        
+        float holdRem = currentSession.getRemainingCargo();
+        if (holdRem == 0) {
+            disableTurretButtons();
+            return;
+        }
+        
+        Ship ship = chr.getShip();
+        if (ship.getTurretCount() > 3) {
+            disableTurretButtons();
+            return;
+        }
+        
+        if (ship.getTurretCount() > 2) {
+            enableToggleButton(jToggleButtonTurret3, currentSession.getTurret3().isMining());
+        } else {
+            disableToggleButton(jToggleButtonTurret3);
+        }
+        
+        if (ship.getTurretCount() > 1) {
+            enableToggleButton(jToggleButtonTurret2, currentSession.getTurret2().isMining());
+        } else {
+            disableToggleButton(jToggleButtonTurret2);
+        }
+        
+        enableToggleButton(jToggleButtonTurret1, currentSession.getTurret1().isMining());
+    }
+    
+    /**
+     * Returns a currently selected asteroid, or null, if there's none.
+     * @return 
+     */
+    private Asteroid getSelectedAsteroid() {
+        int row = jTableRoids.getSelectedRow();
+        if (row == -1) return null;
+        
+        try {
+            return (Asteroid) jTableRoids.getModel().getValueAt(row, 0);
+        } catch (ClassCastException e) {
+            JMGLogger.logSevere("Unable to get asteroid", e);
+            return null;
+        }
+    }
+    
+    public void notifyTableUpdate() {
+        int row = jTableRoids.getSelectedRow();
+        ((AbstractTableModel)jTableRoids.getModel()).fireTableDataChanged();
+        
+        if (row >= jTableRoids.getRowCount()) row = jTableRoids.getRowCount() - 1;
+        
+        if (row >= 0) {
+            jTableRoids.setRowSelectionInterval(row, row);
+        }
     }
     
     /**
@@ -315,19 +428,19 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jButtonResetOreHold = new javax.swing.JButton();
         jTextFieldHold = new javax.swing.JTextField();
         jButtonSetOreHold = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        jButtonLoadScan = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTableRoids = new javax.swing.JTable();
-        jButton6 = new javax.swing.JButton();
-        jButton7 = new javax.swing.JButton();
-        jButton8 = new javax.swing.JButton();
         jButton9 = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
         jComboBoxBoosterShip = new javax.swing.JComboBox<BoosterShip>();
         jLabel4 = new javax.swing.JLabel();
         jCheckBoxUseBoosterShip = new javax.swing.JCheckBox();
+        jToggleButtonTurret1 = new javax.swing.JToggleButton();
+        jToggleButtonTurret2 = new javax.swing.JToggleButton();
+        jToggleButtonTurret3 = new javax.swing.JToggleButton();
         jPanelSelector = new javax.swing.JPanel();
         jButtonClose = new javax.swing.JButton();
         jLabelMinerName = new javax.swing.JLabel();
@@ -377,10 +490,10 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setText("Load Scan");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        jButtonLoadScan.setText("Load Scan");
+        jButtonLoadScan.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                jButtonLoadScanActionPerformed(evt);
             }
         });
 
@@ -424,12 +537,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             jTableRoids.getColumnModel().getColumn(3).setResizable(false);
         }
 
-        jButton6.setText("1");
-
-        jButton7.setText("2");
-
-        jButton8.setText("3");
-
         jButton9.setText("Cleanup");
 
         jLabel6.setText("Ore Hold");
@@ -448,6 +555,27 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             }
         });
 
+        jToggleButtonTurret1.setText("1");
+        jToggleButtonTurret1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButtonTurret1ActionPerformed(evt);
+            }
+        });
+
+        jToggleButtonTurret2.setText("2");
+        jToggleButtonTurret2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButtonTurret2ActionPerformed(evt);
+            }
+        });
+
+        jToggleButtonTurret3.setText("3");
+        jToggleButtonTurret3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButtonTurret3ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelSetupLayout = new javax.swing.GroupLayout(jPanelSetup);
         jPanelSetup.setLayout(jPanelSetupLayout);
         jPanelSetupLayout.setHorizontalGroup(
@@ -462,7 +590,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                         .addComponent(jLabelHoldStats))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
                                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -471,21 +599,20 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                                 .addComponent(jButtonSetOreHold)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButtonResetOreHold))
-                            .addComponent(jButton9, javax.swing.GroupLayout.Alignment.TRAILING)))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
+                                .addComponent(jToggleButtonTurret1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jToggleButtonTurret2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jToggleButtonTurret3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jButton9))))
                     .addGroup(jPanelSetupLayout.createSequentialGroup()
-                        .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanelSetupLayout.createSequentialGroup()
-                                .addComponent(jButton6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton7)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton8))
-                            .addGroup(jPanelSetupLayout.createSequentialGroup()
-                                .addComponent(jButton3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton4)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton5)))
+                        .addComponent(jButtonLoadScan)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton5)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanelSetupLayout.createSequentialGroup()
                         .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -531,17 +658,17 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     .addComponent(jLabel6))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton3)
+                    .addComponent(jButtonLoadScan)
                     .addComponent(jButton4)
                     .addComponent(jButton5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton6)
-                    .addComponent(jButton7)
-                    .addComponent(jButton8)
-                    .addComponent(jButton9))
+                    .addComponent(jButton9)
+                    .addComponent(jToggleButtonTurret1)
+                    .addComponent(jToggleButtonTurret2)
+                    .addComponent(jToggleButtonTurret3))
                 .addContainerGap())
         );
 
@@ -722,7 +849,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         processEvents = true;
     }//GEN-LAST:event_jButtonResetOreHoldActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+    private void jButtonLoadScanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoadScanActionPerformed
         if (currentSession != null) {
             
             if (lsDlog == null) {            
@@ -732,17 +859,83 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             
             lsDlog.setVisible(true);
         }
-    }//GEN-LAST:event_jButton3ActionPerformed
+    }//GEN-LAST:event_jButtonLoadScanActionPerformed
+
+    private void jToggleButtonTurret1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonTurret1ActionPerformed
+        if (currentSession != null) {
+            SessionCharacter chr = currentSession.getSessionCharacter();
+            if (chr != null) {
+                TurretInstance turret = currentSession.getTurret1();
+                if (turret.isMining()) {
+                    turret.unbindAsteroid();
+                } else {
+                    Asteroid roid = getSelectedAsteroid();
+                    if (roid != null) {
+                        turret.bindAsteroid(roid);
+                    }
+                }   
+                
+                notifyTableUpdate();
+                
+                if (jToggleButtonTurret1.isSelected() != turret.isMining()) {
+                    jToggleButtonTurret1.setSelected(turret.isMining());
+                }
+            }
+        }
+    }//GEN-LAST:event_jToggleButtonTurret1ActionPerformed
+
+    private void jToggleButtonTurret2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonTurret2ActionPerformed
+        if (currentSession != null) {
+            SessionCharacter chr = currentSession.getSessionCharacter();
+            if (chr != null && chr.getShip().getTurretCount() > 1) {
+                TurretInstance turret = currentSession.getTurret2();
+                if (turret.isMining()) {
+                    turret.unbindAsteroid();
+                } else {
+                    Asteroid roid = getSelectedAsteroid();
+                    if (roid != null) {
+                        turret.bindAsteroid(roid);
+                    }
+                }   
+                
+                notifyTableUpdate();
+                
+                if (jToggleButtonTurret2.isSelected() != turret.isMining()) {
+                    jToggleButtonTurret2.setSelected(turret.isMining());
+                }
+            }
+        }
+    }//GEN-LAST:event_jToggleButtonTurret2ActionPerformed
+
+    private void jToggleButtonTurret3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonTurret3ActionPerformed
+        if (currentSession != null) {
+            SessionCharacter chr = currentSession.getSessionCharacter();
+            if (chr != null && chr.getShip().getTurretCount() > 2) {
+                TurretInstance turret = currentSession.getTurret3();
+                if (turret.isMining()) {
+                    turret.unbindAsteroid();
+                } else {
+                    Asteroid roid = getSelectedAsteroid();
+                    if (roid != null) {
+                        turret.bindAsteroid(roid);
+                    }
+                }   
+                
+                notifyTableUpdate();
+                
+                if (jToggleButtonTurret3.isSelected() != turret.isMining()) {
+                    jToggleButtonTurret3.setSelected(turret.isMining());
+                }
+            }
+        }
+    }//GEN-LAST:event_jToggleButtonTurret3ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
-    private javax.swing.JButton jButton7;
-    private javax.swing.JButton jButton8;
     private javax.swing.JButton jButton9;
     private javax.swing.JButton jButtonClose;
+    private javax.swing.JButton jButtonLoadScan;
     private javax.swing.JButton jButtonResetOreHold;
     private javax.swing.JButton jButtonSetOreHold;
     private javax.swing.JCheckBox jCheckBox1;
@@ -764,5 +957,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTableRoids;
     private javax.swing.JTextField jTextFieldHold;
+    private javax.swing.JToggleButton jToggleButtonTurret1;
+    private javax.swing.JToggleButton jToggleButtonTurret2;
+    private javax.swing.JToggleButton jToggleButtonTurret3;
     // End of variables declaration//GEN-END:variables
 }

@@ -30,6 +30,10 @@ import cy.alavrov.jminerguide.monitor.TurretInstance;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import org.joda.time.Period;
+import org.joda.time.Seconds;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 
 /**
  * Something with harvestable inside. 
@@ -37,6 +41,13 @@ import java.util.HashSet;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class Asteroid {
+    private final static PeriodFormatter minutesAndSeconds = new PeriodFormatterBuilder()
+     .printZeroAlways()
+     .appendMinutes()
+     .appendSeparator(":")
+     .appendSeconds()
+     .toFormatter();
+    
     private final IHarvestable harvestable;
     private final int distance;
     private int remaining;    
@@ -105,6 +116,15 @@ public class Asteroid {
         float m3s = stats.getTurretM3S() * turrets.size();
         float volume = harvestable.getBasicHarvestable().getVolume() * remaining;
         return (int) (volume / m3s);
+    }
+    
+    public synchronized String getRemString(CalculatedStats stats) {
+        if (stats == null || turrets.isEmpty()) return String.valueOf(remaining);        
+        
+        Period rem = Seconds.seconds(getRemainingSeconds(stats))
+                        .toStandardDuration().toPeriod();
+        
+        return remaining + " ("+minutesAndSeconds.print(rem)+")";
     }
     
     public synchronized boolean isMined() {

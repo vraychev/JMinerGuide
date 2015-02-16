@@ -30,21 +30,21 @@ package cy.alavrov.jminerguide.monitor;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class AsteroidMinedException extends Exception{
-    private final int minedUnits;
+    private final float minedm3;
     private final TurretInstance turret;
 
-    public AsteroidMinedException(int minedUnits, TurretInstance turret) {
+    public AsteroidMinedException(float minedm3, TurretInstance turret) {
         super();
-        this.minedUnits = minedUnits;
+        this.minedm3 = minedm3;
         this.turret = turret;
     }
 
     /**
-     * How many units was mined at the moment the asteroid was mined out?
+     * How many m3 of ore was mined at the moment the asteroid was mined out?
      * @return 
      */
-    public int getMinedUnits() {
-        return minedUnits;
+    public float getMinedM3() {
+        return minedm3;
     }        
 
     /**

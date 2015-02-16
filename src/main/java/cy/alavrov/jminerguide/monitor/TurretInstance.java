@@ -51,11 +51,11 @@ public class TurretInstance {
      * If there's no asteroid, or the asteroid is empty, does nothing.
      * @param stats
      * @param remainingOreHold how many free space in the hold do we actually have?
-     * @return 
+     * @return m3 of ore removed.
      * @throws FullOreHoldException 
      * @throws AsteroidMinedException 
      */
-    public synchronized int mineSome(CalculatedStats stats, float remainingOreHold) throws FullOreHoldException, AsteroidMinedException {
+    public synchronized float mineSome(CalculatedStats stats, float remainingOreHold) throws FullOreHoldException, AsteroidMinedException {
         if (asteroid == null) return 0;
         if (asteroid.getRemainingUnits() <= 0) {
             unbindAsteroid();
@@ -66,7 +66,7 @@ public class TurretInstance {
             throw new FullOreHoldException(0);
         }
         
-        int ret = 0;
+        int minedUnits = 0;
         
         float m3s = stats.getTurretM3S();
         if (m3s >  remainingOreHold) {
@@ -81,18 +81,18 @@ public class TurretInstance {
             // we'll removed only fully mined units, as you obviously can't mine 1/2 of an unit.
             int toRemove = (int) (m3s / unitVolume);
             // as we can try to mine more, than there are in reality, we do this.
-            ret = asteroid.removeSomeUnits(toRemove);
+            minedUnits = asteroid.removeSomeUnits(toRemove);
                         
             if (asteroid.getRemainingUnits() > 0) {
                 // mined amount, that isn't enough for full unit will be left for the next cycle.
-                minedAmount = minedAmount - ret * unitVolume;
+                minedAmount = minedAmount - minedUnits * unitVolume;
             } else {
                 // if we mined out the asteroid, we may discard leftovers, because there's none actually.                
                 minedAmount = 0;
                 // and unbind the asteroid, because, well.
                 unbindAsteroid();
                 
-                throw new AsteroidMinedException(ret, this);
+                throw new AsteroidMinedException(minedUnits * unitVolume, this);
             }
         } else {
             if (remainingOreHold < unitVolume) { // we can't fit one more unit!
@@ -101,7 +101,7 @@ public class TurretInstance {
             }
         }
         
-        return ret;
+        return minedUnits * unitVolume;
     }
     
     public synchronized void unbindAsteroid() {
