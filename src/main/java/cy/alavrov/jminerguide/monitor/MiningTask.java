@@ -29,8 +29,11 @@ import cy.alavrov.jminerguide.forms.JAsteroidMonitorForm;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.io.InputStream;
 import java.util.List;
-import sun.audio.AudioPlayer;
-import sun.audio.AudioStream;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
 
 /**
  * A task to do mining every second.
@@ -78,8 +81,12 @@ public class MiningTask implements Runnable{
     private void playSound() {
         try {
             InputStream resourceStream = getClass().getClassLoader().getResourceAsStream("ting.wav");
-            AudioStream audioStream = new AudioStream(resourceStream);
-            AudioPlayer.player.start(audioStream);
+            AudioInputStream aStream = AudioSystem.getAudioInputStream(resourceStream);
+            AudioFormat audioFormat = aStream.getFormat();
+            DataLine.Info dataLineInfo = new DataLine.Info(Clip.class, audioFormat);
+            Clip clip = (Clip) AudioSystem.getLine(dataLineInfo);
+            clip.open(aStream);
+            clip.start();
         } catch (Exception e) {
             JMGLogger.logSevere("Unable to play sound", e);
         }
