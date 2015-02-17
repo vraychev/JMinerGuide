@@ -36,7 +36,7 @@ import java.util.Map;
  */
 public enum Turret {
     CIVILIANMINER("Civilian Miner", 
-            3651, TurretType.MININGLASER, false, HarvestableType.ORE, 30, 60, 10000),
+            3651, TurretType.MININGLASER, false, HarvestableType.ORE, 15, 30, 10000),
     MINERI("Miner I", 
             483, TurretType.MININGLASER, false, HarvestableType.ORE, 40, 60, 10000),
     GAUSSIAN("EP-S Gaussian Scoped Mining Laser", 
