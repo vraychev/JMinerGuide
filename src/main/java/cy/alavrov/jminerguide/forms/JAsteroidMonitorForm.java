@@ -49,13 +49,19 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JToggleButton;
+import javax.swing.KeyStroke;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.AbstractDocument;
 import org.joda.time.format.PeriodFormatter;
@@ -124,9 +130,46 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         timer.scheduleWithFixedDelay(new UpdateWindowTask(msMonitor, this), 100, 100, TimeUnit.MILLISECONDS);
         timer.scheduleAtFixedRate(new MiningTask(msMonitor, this), 1, 1, TimeUnit.SECONDS);
         disableMonitorPanel();
+        
+        setTurretKeyBindings(jPanelSetup, JComponent.WHEN_IN_FOCUSED_WINDOW);
+        setTurretKeyBindings(jPanelSelector, JComponent.WHEN_IN_FOCUSED_WINDOW);
+        setTurretKeyBindings(jTableRoids, JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        
         processEvents = true;
     }
 
+    private void setTurretKeyBindings(JComponent component, int condition) {
+        InputMap inputMap = component.getInputMap(condition);
+        ActionMap actMap = component.getActionMap();
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0), "turret1");
+        actMap.put("turret1", new AbstractAction() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                jToggleButtonTurret1ActionPerformed(e);
+            }
+        });
+        
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0), "turret2");
+        actMap.put("turret2", new AbstractAction() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                jToggleButtonTurret2ActionPerformed(e);
+            }
+        });
+        
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0), "turret3");
+        actMap.put("turret3", new AbstractAction() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                jToggleButtonTurret3ActionPerformed(e);
+            }
+        });
+    }
+    
     public void updateCurrentSession() {
         processEvents = false; 
         
@@ -444,6 +487,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         
         if (row >= 0) {
             jTableRoids.setRowSelectionInterval(row, row);
+            jTableRoids.setColumnSelectionInterval(0, 0);
         }
     }
     
@@ -1026,3 +1070,4 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JToggleButton jToggleButtonTurret3;
     // End of variables declaration//GEN-END:variables
 }
+
