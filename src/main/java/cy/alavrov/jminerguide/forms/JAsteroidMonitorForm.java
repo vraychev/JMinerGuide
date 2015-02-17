@@ -33,6 +33,7 @@ import cy.alavrov.jminerguide.data.harvestable.Asteroid;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import cy.alavrov.jminerguide.monitor.MiningSession;
+import cy.alavrov.jminerguide.monitor.MiningSessionButton;
 import cy.alavrov.jminerguide.monitor.MiningSessionMonitor;
 import cy.alavrov.jminerguide.monitor.MiningTask;
 import cy.alavrov.jminerguide.monitor.SessionCharacter;
@@ -133,6 +134,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 if (this.isAlwaysOnTop() && !shouldLooseOnTop) {
                     shouldLooseOnTop = true;
                     loseOnTopAt = System.currentTimeMillis() + WINDOW_LOSS_TIMEOUT;
+                    updateSessionButtons();
                 }
 
                 if (shouldLooseOnTop && loseOnTopAt < System.currentTimeMillis()) {
@@ -160,6 +162,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     currentMiner = null;
                     jLabelMinerName.setText("none");
                     disableMonitorPanel();
+                    updateSessionButtons();
                 }
             } else {
                 if (!name.equals(currentMiner)) {                                    
@@ -179,6 +182,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                         loadCharacterData(session);
                         updateAsteroids(session);
                     }
+                    
+                    updateSessionButtons();
                 }
             }                        
         }
@@ -190,6 +195,23 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
         
         processEvents = true;
+    }
+    
+    /**
+     * Updates session buttons, setting their selected status
+     * and text as needed, according to sessions.
+     */
+    public void updateSessionButtons() {
+        for (Component component : jPanelSelector.getComponents()) {
+            if (component instanceof MiningSessionButton) {
+                MiningSessionButton button = (MiningSessionButton) component;
+                
+                boolean current = button.getMiningSession().equals(currentSession);
+                if (button.isSelected() != current) {
+                    button.setSelected(current);
+                }
+            }
+        }
     }
     
     private void disableMonitorPanel() {
@@ -268,7 +290,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         GridLayout layout = new GridLayout(rows, 2, 2, 2);
         jPanelSelector.setLayout(layout);
         for (final MiningSession session : sessions) {
-            JButton button = new JButton(session.getCharacterName());
+            final MiningSessionButton button = new MiningSessionButton(session, session.getCharacterName());
             
             button.addActionListener(new ActionListener() {
 
@@ -282,6 +304,11 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     
                     JAsteroidMonitorForm.this.setAlwaysOnTop(true);
                     session.switchToWindow();
+                    
+                    boolean current = button.getMiningSession().equals(currentSession);
+                    if (button.isSelected() != current) {
+                        button.setSelected(current);
+                    }
                 }
             });
             

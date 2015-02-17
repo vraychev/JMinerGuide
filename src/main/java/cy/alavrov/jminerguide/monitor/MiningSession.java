@@ -343,6 +343,21 @@ public class MiningSession {
             throw roidEx;
         }
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof MiningSession)) return false;
+        
+        MiningSession other = (MiningSession) obj;
+        return window.equals(other.window);
+    }
+
+    @Override
+    public int hashCode() {
+        return window.hashCode();
+    }
+    
+    
     
     public class AsteroidTableModel extends AbstractTableModel {                
 

@@ -71,6 +71,7 @@ public class MiningTask implements Runnable{
                 public void run(){
                     form.notifyTableUpdate();
                     form.updateCurrentCharacterStats();
+                    form.updateSessionButtons();
                 }
             });
         } catch (Exception e) {

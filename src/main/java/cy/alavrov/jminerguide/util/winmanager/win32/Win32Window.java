@@ -91,7 +91,7 @@ public class Win32Window implements IEVEWindow {
     
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Win32Window)) return false;
+        if (o == null || !(o instanceof Win32Window)) return false;
         Win32Window other = (Win32Window) o;
         return window.equals(other.window);
     }
