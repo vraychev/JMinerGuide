@@ -31,6 +31,7 @@ import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.harvestable.Asteroid;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.table.AbstractTableModel;
@@ -231,6 +232,32 @@ public class MiningSession {
      */
     public void addRoids(List<Asteroid> newRoids) {
         roids.addAll(newRoids);
+    }
+    
+    /**
+     * Cleans up the asteroid list, removing empty ones.
+     */
+    public void cleanupRoids() {
+        List<Asteroid> filtered = new ArrayList<>();
+        for(Asteroid roid : roids) {
+            if(roid.getRemainingUnits() > 0) {
+                filtered.add(roid);
+            }
+        }
+        
+        roids = new CopyOnWriteArrayList<>(filtered);
+    }
+    
+    /**
+     * Clears the asteroid list, leaving it empty.
+     * Also, turns of turrets.
+     */
+    public void clearRoids() {            
+        turret1.unbindAsteroid();
+        turret2.unbindAsteroid();
+        turret3.unbindAsteroid();
+        
+        roids = new CopyOnWriteArrayList<>();
     }
     
     public TableModel getTableModel() {

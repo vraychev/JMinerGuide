@@ -430,10 +430,10 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jButtonSetOreHold = new javax.swing.JButton();
         jButtonLoadScan = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
+        jButtonClearAsteroids = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTableRoids = new javax.swing.JTable();
-        jButton9 = new javax.swing.JButton();
+        jButtonCleanupAsteroids = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
         jComboBoxBoosterShip = new javax.swing.JComboBox<BoosterShip>();
         jLabel4 = new javax.swing.JLabel();
@@ -499,8 +499,13 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
 
         jButton4.setText("Filters");
 
-        jButton5.setText("Clear");
-        jButton5.setActionCommand("");
+        jButtonClearAsteroids.setText("Clear");
+        jButtonClearAsteroids.setActionCommand("");
+        jButtonClearAsteroids.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonClearAsteroidsActionPerformed(evt);
+            }
+        });
 
         jTableRoids.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -537,7 +542,12 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             jTableRoids.getColumnModel().getColumn(3).setResizable(false);
         }
 
-        jButton9.setText("Cleanup");
+        jButtonCleanupAsteroids.setText("Cleanup");
+        jButtonCleanupAsteroids.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonCleanupAsteroidsActionPerformed(evt);
+            }
+        });
 
         jLabel6.setText("Ore Hold");
 
@@ -606,13 +616,13 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jToggleButtonTurret3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jButton9))))
+                                .addComponent(jButtonCleanupAsteroids))))
                     .addGroup(jPanelSetupLayout.createSequentialGroup()
                         .addComponent(jButtonLoadScan)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton5)
+                        .addComponent(jButtonClearAsteroids)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanelSetupLayout.createSequentialGroup()
                         .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -660,12 +670,12 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonLoadScan)
                     .addComponent(jButton4)
-                    .addComponent(jButton5))
+                    .addComponent(jButtonClearAsteroids))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton9)
+                    .addComponent(jButtonCleanupAsteroids)
                     .addComponent(jToggleButtonTurret1)
                     .addComponent(jToggleButtonTurret2)
                     .addComponent(jToggleButtonTurret3))
@@ -930,10 +940,24 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jToggleButtonTurret3ActionPerformed
 
+    private void jButtonClearAsteroidsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearAsteroidsActionPerformed
+        if (currentSession != null) {
+            currentSession.clearRoids();
+            updateAsteroids(currentSession);
+        }
+    }//GEN-LAST:event_jButtonClearAsteroidsActionPerformed
+
+    private void jButtonCleanupAsteroidsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCleanupAsteroidsActionPerformed
+        if (currentSession != null) {
+            currentSession.cleanupRoids();
+            updateAsteroids(currentSession);
+        }
+    }//GEN-LAST:event_jButtonCleanupAsteroidsActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton9;
+    private javax.swing.JButton jButtonCleanupAsteroids;
+    private javax.swing.JButton jButtonClearAsteroids;
     private javax.swing.JButton jButtonClose;
     private javax.swing.JButton jButtonLoadScan;
     private javax.swing.JButton jButtonResetOreHold;
