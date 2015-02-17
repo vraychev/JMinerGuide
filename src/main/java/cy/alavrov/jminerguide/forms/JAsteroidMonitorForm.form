@@ -375,6 +375,9 @@
         </Component>
         <Component class="javax.swing.JToggleButton" name="jToggleButtonTurret1">
           <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Tahoma" size="11" style="1"/>
+            </Property>
             <Property name="text" type="java.lang.String" value="1"/>
           </Properties>
           <Events>
@@ -383,6 +386,9 @@
         </Component>
         <Component class="javax.swing.JToggleButton" name="jToggleButtonTurret2">
           <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Tahoma" size="11" style="1"/>
+            </Property>
             <Property name="text" type="java.lang.String" value="2"/>
           </Properties>
           <Events>
@@ -391,6 +397,9 @@
         </Component>
         <Component class="javax.swing.JToggleButton" name="jToggleButtonTurret3">
           <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Tahoma" size="11" style="1"/>
+            </Property>
             <Property name="text" type="java.lang.String" value="3"/>
           </Properties>
           <Events>

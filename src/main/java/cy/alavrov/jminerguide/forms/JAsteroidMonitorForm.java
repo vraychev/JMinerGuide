@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
-import javax.swing.JButton;
 import javax.swing.JToggleButton;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.AbstractDocument;
@@ -76,6 +75,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
      .appendSeparator(":")
      .appendSeconds()
      .toFormatter();
+    
+    private final static Color darkGreen = new Color(0f, 0.5f, 0f);
     
     private final MainFrame parent;
     private final DataContainer dCont;
@@ -371,7 +372,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (!button.isEnabled()) button.setEnabled(true);
         if (button.isSelected() != selected) button.setSelected(selected);
         if (selected) {
-            button.setForeground(Color.GREEN);
+            button.setForeground(darkGreen);
         } else {
             button.setForeground(Color.RED);
         }
@@ -603,6 +604,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             }
         });
 
+        jToggleButtonTurret1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jToggleButtonTurret1.setText("1");
         jToggleButtonTurret1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -610,6 +612,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             }
         });
 
+        jToggleButtonTurret2.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jToggleButtonTurret2.setText("2");
         jToggleButtonTurret2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -617,6 +620,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             }
         });
 
+        jToggleButtonTurret3.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jToggleButtonTurret3.setText("3");
         jToggleButtonTurret3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
