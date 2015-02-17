@@ -41,8 +41,10 @@ import cy.alavrov.jminerguide.monitor.TurretInstance;
 import cy.alavrov.jminerguide.monitor.UpdateWindowTask;
 import cy.alavrov.jminerguide.util.IntegerDocumentFilter;
 import cy.alavrov.jminerguide.util.winmanager.IWindowManager;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -206,10 +208,13 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             if (component instanceof MiningSessionButton) {
                 MiningSessionButton button = (MiningSessionButton) component;
                 
-                boolean current = button.getMiningSession().equals(currentSession);
+                MiningSession session = button.getMiningSession();
+                boolean current = session.equals(currentSession);
                 if (button.isSelected() != current) {
                     button.setSelected(current);
                 }
+                
+                session.updateButton(button);
             }
         }
     }
@@ -245,7 +250,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             if (jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(false);
         }
         
-        CalculatedStats stats = character.getStats();
         updateCharacterStats(session);
     }
     
@@ -292,6 +296,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         for (final MiningSession session : sessions) {
             final MiningSessionButton button = new MiningSessionButton(session, session.getCharacterName());
             
+            button.setFont(button.getFont().deriveFont(Font.BOLD));
             button.addActionListener(new ActionListener() {
 
                 @Override
@@ -354,6 +359,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private void disableToggleButton(JToggleButton button) {
         if (button.isSelected()) button.setSelected(false);
         if (button.isEnabled()) button.setEnabled(false);
+        button.setForeground(Color.BLACK);
     }
     
     /**
@@ -364,6 +370,11 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private void enableToggleButton(JToggleButton button, boolean selected) {
         if (!button.isEnabled()) button.setEnabled(true);
         if (button.isSelected() != selected) button.setSelected(selected);
+        if (selected) {
+            button.setForeground(Color.GREEN);
+        } else {
+            button.setForeground(Color.RED);
+        }
     }
     
     /**
@@ -627,23 +638,21 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                         .addComponent(jLabelHoldStats))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
-                                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextFieldHold, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonSetOreHold)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonResetOreHold))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
-                                .addComponent(jToggleButtonTurret1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jToggleButtonTurret2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jToggleButtonTurret3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jButtonCleanupAsteroids))))
+                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldHold, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonSetOreHold)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonResetOreHold))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
+                        .addComponent(jToggleButtonTurret1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jToggleButtonTurret2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jToggleButtonTurret3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButtonCleanupAsteroids))
                     .addGroup(jPanelSetupLayout.createSequentialGroup()
                         .addComponent(jButtonLoadScan)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

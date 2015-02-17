@@ -31,17 +31,30 @@ import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.harvestable.Asteroid;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
+import java.awt.Color;
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
+import org.joda.time.Period;
+import org.joda.time.Seconds;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 
 /**
  *
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class MiningSession {
+    private final static PeriodFormatter minutesAndSeconds = new PeriodFormatterBuilder()
+     .printZeroAlways()
+     .appendMinutes()
+     .appendSeparator(":")
+     .appendSeconds()
+     .toFormatter();
+    
     private final IEVEWindow window;
     private volatile SessionCharacter character;    
     private volatile float usedCargo;  
@@ -357,6 +370,65 @@ public class MiningSession {
         return window.hashCode();
     }
     
+    
+    public void updateButton(MiningSessionButton button) {
+        if (character == null) {
+            button.setText(getCharacterName());
+        } else {
+            if (getRemainingCargo() == 0) {
+                button.setFont(button.getFont().deriveFont(Font.BOLD));
+                button.setForeground(Color.RED);
+                button.setText("/!\\ CARGO /!\\");
+            } else {
+                Ship ship = character.getShip();
+                boolean t1isMining = turret1.isMining();
+                // if there is no turret2 on a ship, return true to skip
+                boolean t2isMining = ship.getTurretCount() < 2 || turret2.isMining(); 
+                // if there is no turret3 on a ship, return true to skip
+                boolean t3isMining = ship.getTurretCount() < 3 || turret3.isMining(); 
+                
+                if (!t1isMining || !t2isMining || !t3isMining) {                
+                    button.setForeground(Color.RED);
+                    button.setText("/!\\ TURRET /!\\");
+                } else {
+                    int rem = Integer.MAX_VALUE;
+
+                    // we skip remaining time of 0, as unused turrets return exactly that.
+                    // for mining and used turrets remaining time will be not zero at this point.
+                    
+                    int secs = turret1.getRemainingSeconds(character.getStats());
+                    if (secs > 0 && rem > secs) {
+                        rem = secs;
+                    }
+
+                    secs = turret2.getRemainingSeconds(character.getStats());
+                    if (secs > 0 && rem > secs) {
+                        rem = secs;
+                    }
+
+                    secs = turret3.getRemainingSeconds(character.getStats());
+                    if (secs > 0 && rem > secs) {
+                        rem = secs;
+                    }
+
+                    int cycle = (int) character.getStats().getTurretCycle();
+                    float remcycles = rem /(float)cycle;
+                    
+                    Period remPeriod = Seconds.seconds(rem)
+                        .toStandardDuration().toPeriod();
+                                        
+                    button.setText(character.getCharacter().getName() 
+                            + " ("+minutesAndSeconds.print(remPeriod)+")");
+                    if (remcycles > 1) {
+                        button.setForeground(Color.BLACK);
+                    } else {
+                        button.setForeground(new Color(1 - remcycles, 0, 0));
+                    }
+                }
+            }
+            
+        }
+    }
     
     
     public class AsteroidTableModel extends AbstractTableModel {                
