@@ -25,6 +25,10 @@
  */
 package cy.alavrov.jminerguide.data.harvestable;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Basic harvestable types.
  * Basically, volume and type.
@@ -72,6 +76,17 @@ public enum BasicHarvestable {
     
     private final float volume;
     private final HarvestableType type;
+    
+    public final static Map<String, BasicHarvestable> nameMap;
+    
+    static {
+        HashMap<String, BasicHarvestable> out = new HashMap<>();
+        for (BasicHarvestable hv : values()) {
+            out.put(hv.name(), hv);
+        }
+        
+        nameMap = Collections.unmodifiableMap(out);
+    }
 
     private BasicHarvestable(float volume, HarvestableType type) {
         this.volume = volume;

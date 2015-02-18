@@ -28,6 +28,8 @@ package cy.alavrov.jminerguide.data.character;
 
 import cy.alavrov.jminerguide.App;
 import cy.alavrov.jminerguide.data.DataContainer;
+import cy.alavrov.jminerguide.data.harvestable.BasicHarvestable;
+import cy.alavrov.jminerguide.data.harvestable.HarvestableType;
 import cy.alavrov.jminerguide.data.implant.Implant;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import cy.alavrov.jminerguide.util.HTTPClient;
@@ -36,6 +38,7 @@ import java.io.StringReader;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.apache.http.client.methods.HttpGet;
@@ -90,6 +93,8 @@ public class EVECharacter {
     private volatile String monitorBoosterShip;
     private volatile boolean monitorUseBoosterShip = false;
     
+    private final HashSet<BasicHarvestable> roidFilter;
+    
     private volatile boolean hidden;
     
     /**
@@ -109,6 +114,13 @@ public class EVECharacter {
         this.slot8 = Implant.NOTHING;
         this.slot10 = Implant.NOTHING;
         hidden = false;
+        
+        this.roidFilter = new HashSet<>();
+        for (BasicHarvestable hv : BasicHarvestable.values()) {
+            if (hv.getType() == HarvestableType.ORE || hv.getType() == HarvestableType.MERCOXIT) {
+                roidFilter.add(hv);
+            }
+        }
     }
     
     /**
@@ -133,6 +145,7 @@ public class EVECharacter {
         this.slot7 = Implant.NOTHING;
         this.slot8 = Implant.NOTHING;
         this.slot10 = Implant.NOTHING;
+        this.roidFilter = new HashSet<>();
         
         // skills and implants on the other hand are expendable.
         // they can be pulled via API anyway.
@@ -182,7 +195,29 @@ public class EVECharacter {
             monitorUseBoosterShip = "true".equals(monitorConf.getChildText("useboostership"));
         } catch (NullPointerException e) {
             JMGLogger.logWarning("Unable to load monitor settings for "+name, e);
-        }                
+        }      
+        
+        Element roidFilters = root.getChild("asteroidfilter");
+        
+        try {
+            String filters = roidFilters.getText().toUpperCase();
+            String[] filterArr = filters.split("[,]");
+            for (String oreName : filterArr) {
+                BasicHarvestable hv = BasicHarvestable.nameMap.get(oreName);
+                if (hv != null && (
+                        hv.getType() == HarvestableType.ORE || 
+                        hv.getType() == HarvestableType.MERCOXIT)) {
+                    roidFilter.add(hv);
+                }
+            }
+        } catch (NullPointerException e) {
+            JMGLogger.logWarning("Unable to load roid filters for "+name, e);
+            for (BasicHarvestable hv : BasicHarvestable.values()) {
+                if (hv.getType() == HarvestableType.ORE || hv.getType() == HarvestableType.MERCOXIT) {
+                    roidFilter.add(hv);
+                }
+            }
+        }  
         
         this.skills = newSkills;
         this.parentKey = parentKey;                
@@ -240,6 +275,18 @@ public class EVECharacter {
             useBShipElem.setText(String.valueOf(monitorUseBoosterShip));
             monitorConf.addContent(useBShipElem);
             root.addContent(monitorConf);
+            
+            Element roidFilterElem = new Element("asteroidfilter");
+            String filterStr = "";
+            for (BasicHarvestable hv : roidFilter) {
+                if (filterStr.isEmpty()) {
+                    filterStr = hv.name();
+                } else {
+                    filterStr = filterStr + ","+ hv.name();
+                }
+            }
+            roidFilterElem.setText(filterStr);
+            root.addContent(roidFilterElem);
             
             return root;
         }
@@ -741,4 +788,36 @@ public class EVECharacter {
             this.monitorUseBoosterShip = monitorUseBoosterShip;
         }
     }        
+
+    /**
+     * Returns a copy of asteroid filter.
+     * If you want to change something, you shouldn't come here, look at 
+     * addHarvestableToFilter and removeHarvestableFromFilter methods.
+     * @return 
+     */
+    public HashSet<BasicHarvestable> getAsteroidFilter() {
+        synchronized(blocker) {
+            return (HashSet<BasicHarvestable>) roidFilter.clone();
+        }
+    }     
+    
+    /**
+     * Adds BasicHarvestable to asteroid filter.
+     * @param type 
+     */
+    public void addHarvestableToFilter(BasicHarvestable type) {
+        synchronized(blocker) {
+            roidFilter.add(type);
+        }
+    }  
+    
+    /**
+     * Removes BasicHarvestable from asteroid filter.
+     * @param type 
+     */
+    public void removeHarvestableFromFilter(BasicHarvestable type) {
+        synchronized(blocker) {
+            roidFilter.remove(type);
+        }
+    }
 }

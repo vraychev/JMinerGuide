@@ -45,7 +45,8 @@ public class SessionCharacter {
     private final BoosterShip boosterShip;
     private final BoosterShip noBoosterShip;
     private final boolean useBoosterShip;
-    private final CalculatedStats stats;    
+    private final CalculatedStats stats; 
+    private final CalculatedStats statsMercoxit;    
     
     public SessionCharacter(EVECharacter character, DataContainer dCont) {       
         CharacterContainer cCont = dCont.getCharacterContainer();
@@ -77,6 +78,11 @@ public class SessionCharacter {
         
         stats = newStats;
         
+        CalculatedStats newMercoStats = new CalculatedStats(character, booster, ship, 
+                useBoosterShip ? boosterShip : noBoosterShip, true);
+        
+        statsMercoxit = newMercoStats;
+        
         this.character = character; 
     }
     
@@ -92,6 +98,12 @@ public class SessionCharacter {
                 useBoosterShip ? boosterShip : noBoosterShip, false);
         
         stats = newStats;
+        
+        CalculatedStats newMercoStats = new CalculatedStats(character, booster, ship, 
+                useBoosterShip ? boosterShip : noBoosterShip, true);
+        
+        statsMercoxit = newMercoStats;
+        
         character.setMonitorShip(newShip.getName());
     }
     
@@ -107,6 +119,11 @@ public class SessionCharacter {
                 useBoosterShip ? boosterShip : noBoosterShip, false);
         
         stats = newStats;
+        
+        CalculatedStats newMercoStats = new CalculatedStats(character, booster, ship, 
+                useBoosterShip ? boosterShip : noBoosterShip, true);
+        
+        statsMercoxit = newMercoStats;
         character.setMonitorBooster(newBooster.getName());
     }
             
@@ -122,6 +139,11 @@ public class SessionCharacter {
                 useBoosterShip ? boosterShip : noBoosterShip, false);
         
         stats = newStats;
+        
+        CalculatedStats newMercoStats = new CalculatedStats(character, booster, ship, 
+                useBoosterShip ? boosterShip : noBoosterShip, true);
+        
+        statsMercoxit = newMercoStats;
         character.setMonitorBoosterShip(newBoosterShip.getName());
     }
             
@@ -137,6 +159,11 @@ public class SessionCharacter {
                 useBoosterShip ? boosterShip : noBoosterShip, false);
         
         stats = newStats;
+        
+        CalculatedStats newMercoStats = new CalculatedStats(character, booster, ship, 
+                useBoosterShip ? boosterShip : noBoosterShip, true);
+        
+        statsMercoxit = newMercoStats;
         character.setMonitorUseBoosterShip(doUseBoosterShip);
     }
 
@@ -162,5 +189,9 @@ public class SessionCharacter {
     
     public CalculatedStats getStats() {
         return stats;
+    }        
+
+    public CalculatedStats getStatsMercoxit() {
+        return statsMercoxit;
     }        
 }

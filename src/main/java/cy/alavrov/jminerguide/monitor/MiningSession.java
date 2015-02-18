@@ -29,12 +29,14 @@ import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.booster.BoosterShip;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.harvestable.Asteroid;
+import cy.alavrov.jminerguide.data.harvestable.BasicHarvestable;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
@@ -235,7 +237,17 @@ public class MiningSession {
      * @param newRoids 
      */
     public void clearAndAddRoids(List<Asteroid> newRoids) {
-        CopyOnWriteArrayList<Asteroid> newList = new CopyOnWriteArrayList<>(newRoids);
+        if (character == null) return;
+        
+        List<Asteroid> filtered = new ArrayList<>();
+        Set<BasicHarvestable> filter = character.getCharacter().getAsteroidFilter();
+        for (Asteroid roid : newRoids) {
+            if (filter.contains(roid.getHarvestable().getBasicHarvestable())) {
+                filtered.add(roid);
+            }
+        }
+        
+        CopyOnWriteArrayList<Asteroid> newList = new CopyOnWriteArrayList<>(filtered);
         roids = newList;
     }
     
@@ -244,7 +256,17 @@ public class MiningSession {
      * @param newRoids 
      */
     public void addRoids(List<Asteroid> newRoids) {
-        roids.addAll(newRoids);
+        if (character == null) return;
+        
+        List<Asteroid> filtered = new ArrayList<>();
+        Set<BasicHarvestable> filter = character.getCharacter().getAsteroidFilter();
+        for (Asteroid roid : newRoids) {
+            if (filter.contains(roid.getHarvestable().getBasicHarvestable())) {
+                filtered.add(roid);
+            }
+        }
+        
+        roids.addAll(filtered);
     }
     
     /**
@@ -311,7 +333,7 @@ public class MiningSession {
         // we actually have to make a full calculation cycle before throwing out the exception.
         
         try {
-            putToCargo(turret1.mineSome(character.getStats(), getRemainingCargo()));
+            putToCargo(turret1.mineSome(character.getStats(), character.getStatsMercoxit(), getRemainingCargo()));
         } catch (AsteroidMinedException e) {
             isRoidError = true;
             roidEx = e;
@@ -322,7 +344,7 @@ public class MiningSession {
         }
         
         try {
-            putToCargo(turret2.mineSome(character.getStats(), getRemainingCargo()));
+            putToCargo(turret2.mineSome(character.getStats(), character.getStatsMercoxit(), getRemainingCargo()));
         } catch (AsteroidMinedException e) {
             isRoidError = true;
             roidEx = e;
@@ -333,7 +355,7 @@ public class MiningSession {
         }
         
         try {
-            putToCargo(turret3.mineSome(character.getStats(), getRemainingCargo()));
+            putToCargo(turret3.mineSome(character.getStats(), character.getStatsMercoxit(), getRemainingCargo()));
         } catch (AsteroidMinedException e) {
             isRoidError = true;
             roidEx = e;

@@ -27,6 +27,7 @@ package cy.alavrov.jminerguide.monitor;
 
 import cy.alavrov.jminerguide.data.CalculatedStats;
 import cy.alavrov.jminerguide.data.harvestable.Asteroid;
+import cy.alavrov.jminerguide.data.harvestable.HarvestableType;
 
 /**
  * Instance of a virtual turret, mining something.
@@ -49,13 +50,14 @@ public class TurretInstance {
     /**
      * Mines something from the bound asteroid, according to stats.
      * If there's no asteroid, or the asteroid is empty, does nothing.
-     * @param stats
+     * @param stats stats for mining generic ore
+     * @param mercoStats stats for mining mercoxit
      * @param remainingOreHold how many free space in the hold do we actually have?
      * @return m3 of ore removed.
      * @throws FullOreHoldException 
      * @throws AsteroidMinedException 
      */
-    public synchronized float mineSome(CalculatedStats stats, float remainingOreHold) throws FullOreHoldException, AsteroidMinedException {
+    public synchronized float mineSome(CalculatedStats stats, CalculatedStats mercoStats, float remainingOreHold) throws FullOreHoldException, AsteroidMinedException {
         if (asteroid == null) return 0;
         if (asteroid.getRemainingUnits() <= 0) {
             unbindAsteroid();
@@ -68,7 +70,13 @@ public class TurretInstance {
         
         int minedUnits = 0;
         
-        float m3s = stats.getTurretM3S();
+        float m3s = 0;
+        if (asteroid.getHarvestable().getBasicHarvestable().getType() == HarvestableType.MERCOXIT) {
+            m3s = mercoStats.getTurretM3S();
+        } else {
+            m3s = stats.getTurretM3S();
+        }
+        
         if (m3s >  remainingOreHold) {
             // we shouldn't mine more, than free space in the hold.
             m3s =  remainingOreHold;
