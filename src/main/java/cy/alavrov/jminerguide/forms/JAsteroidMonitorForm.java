@@ -581,6 +581,11 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         });
 
         jButton4.setText("Filters");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
 
         jButtonClearAsteroids.setText("Clear");
         jButtonClearAsteroids.setActionCommand("");
@@ -1037,6 +1042,15 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             updateAsteroids(currentSession);
         }
     }//GEN-LAST:event_jButtonCleanupAsteroidsActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        if (currentSession != null && currentSession.getSessionCharacter() != null) {
+            JAsteroidFilterDialog dlog = new JAsteroidFilterDialog(this, currentSession.getSessionCharacter().getCharacter());
+            dlog.setLocationRelativeTo(this);            
+            
+            dlog.setVisible(true);
+        }
+    }//GEN-LAST:event_jButton4ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton4;

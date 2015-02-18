@@ -25,18 +25,48 @@
  */
 package cy.alavrov.jminerguide.forms;
 
+import cy.alavrov.jminerguide.data.character.EVECharacter;
+import cy.alavrov.jminerguide.data.harvestable.BasicHarvestable;
+import java.awt.Frame;
+import java.util.Set;
+
 /**
  *
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class JAsteroidFilterDialog extends javax.swing.JDialog {
+    private final EVECharacter character;
 
     /**
      * Creates new form JAsteroidFilterDialog
      */
-    public JAsteroidFilterDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public JAsteroidFilterDialog(Frame parent, EVECharacter character) {
+        super(parent, true);
         initComponents();
+        
+        this.character = character;
+        this.setTitle("Select Ores - " + character.getName());
+        reloadFilterState();
+    }
+    
+    private void reloadFilterState() {        
+        Set<BasicHarvestable> filters = character.getAsteroidFilter();
+        jCheckBoxArkonor.setSelected(filters.contains(BasicHarvestable.ARKONOR));
+        jCheckBoxBistot.setSelected(filters.contains(BasicHarvestable.BISTOT));
+        jCheckBoxCrokite.setSelected(filters.contains(BasicHarvestable.CROKITE));
+        jCheckBoxDarkOchre.setSelected(filters.contains(BasicHarvestable.DARKOCHRE));
+        jCheckBoxGneiss.setSelected(filters.contains(BasicHarvestable.GNEISS));
+        jCheckBoxHedbergite.setSelected(filters.contains(BasicHarvestable.HEDBERGITE));
+        jCheckBoxHemorphite.setSelected(filters.contains(BasicHarvestable.HEMORPHITE));
+        jCheckBoxJaspet.setSelected(filters.contains(BasicHarvestable.JASPET));
+        jCheckBoxKernite.setSelected(filters.contains(BasicHarvestable.KERNITE));
+        jCheckBoxMercoxit.setSelected(filters.contains(BasicHarvestable.MERCOXIT));
+        jCheckBoxOmber.setSelected(filters.contains(BasicHarvestable.OMBER));
+        jCheckBoxPlagioclase.setSelected(filters.contains(BasicHarvestable.PLAGIOCLASE));
+        jCheckBoxPyroxeres.setSelected(filters.contains(BasicHarvestable.PYROXERES));
+        jCheckBoxScordite.setSelected(filters.contains(BasicHarvestable.SCORDITE));
+        jCheckBoxSpodumain.setSelected(filters.contains(BasicHarvestable.SPODUMAIN));
+        jCheckBoxVeldspar.setSelected(filters.contains(BasicHarvestable.VELDSPAR));
     }
 
     /**
@@ -76,6 +106,7 @@ public class JAsteroidFilterDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Select Ores");
+        setModal(true);
 
         jLabel1.setText("HiSec Ores");
 
@@ -83,21 +114,51 @@ public class JAsteroidFilterDialog extends javax.swing.JDialog {
         jPanel1.setLayout(new java.awt.GridLayout(2, 3));
 
         jCheckBoxVeldspar.setText("Veldspar");
+        jCheckBoxVeldspar.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxVeldsparItemStateChanged(evt);
+            }
+        });
         jPanel1.add(jCheckBoxVeldspar);
 
         jCheckBoxScordite.setText("Scordite");
+        jCheckBoxScordite.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxScorditeItemStateChanged(evt);
+            }
+        });
         jPanel1.add(jCheckBoxScordite);
 
         jCheckBoxPyroxeres.setText("Pyroxeres");
+        jCheckBoxPyroxeres.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxPyroxeresItemStateChanged(evt);
+            }
+        });
         jPanel1.add(jCheckBoxPyroxeres);
 
         jCheckBoxPlagioclase.setText("Plagioclase");
+        jCheckBoxPlagioclase.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxPlagioclaseItemStateChanged(evt);
+            }
+        });
         jPanel1.add(jCheckBoxPlagioclase);
 
         jCheckBoxOmber.setText("Omber");
+        jCheckBoxOmber.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxOmberItemStateChanged(evt);
+            }
+        });
         jPanel1.add(jCheckBoxOmber);
 
         jCheckBoxKernite.setText("Kernite");
+        jCheckBoxKernite.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxKerniteItemStateChanged(evt);
+            }
+        });
         jPanel1.add(jCheckBoxKernite);
 
         jLabel2.setText("LowSec Ores");
@@ -105,12 +166,27 @@ public class JAsteroidFilterDialog extends javax.swing.JDialog {
         jPanel2.setLayout(new java.awt.GridLayout(1, 3));
 
         jCheckBoxJaspet.setText("Jaspet");
+        jCheckBoxJaspet.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxJaspetItemStateChanged(evt);
+            }
+        });
         jPanel2.add(jCheckBoxJaspet);
 
         jCheckBoxHemorphite.setText("Hemorphite");
+        jCheckBoxHemorphite.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxHemorphiteItemStateChanged(evt);
+            }
+        });
         jPanel2.add(jCheckBoxHemorphite);
 
         jCheckBoxHedbergite.setText("Hedbergite");
+        jCheckBoxHedbergite.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxHedbergiteItemStateChanged(evt);
+            }
+        });
         jPanel2.add(jCheckBoxHedbergite);
 
         jLabel3.setText("NullSec Ores");
@@ -118,31 +194,81 @@ public class JAsteroidFilterDialog extends javax.swing.JDialog {
         jPanel3.setLayout(new java.awt.GridLayout(3, 3));
 
         jCheckBoxGneiss.setText("Gneiss");
+        jCheckBoxGneiss.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxGneissItemStateChanged(evt);
+            }
+        });
         jPanel3.add(jCheckBoxGneiss);
 
         jCheckBoxDarkOchre.setText("Dark Ochre");
+        jCheckBoxDarkOchre.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxDarkOchreItemStateChanged(evt);
+            }
+        });
         jPanel3.add(jCheckBoxDarkOchre);
 
         jCheckBoxCrokite.setText("Crokite");
+        jCheckBoxCrokite.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxCrokiteItemStateChanged(evt);
+            }
+        });
         jPanel3.add(jCheckBoxCrokite);
 
         jCheckBoxSpodumain.setText("Spodumain");
+        jCheckBoxSpodumain.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxSpodumainItemStateChanged(evt);
+            }
+        });
         jPanel3.add(jCheckBoxSpodumain);
 
         jCheckBoxBistot.setText("Bistot");
+        jCheckBoxBistot.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxBistotItemStateChanged(evt);
+            }
+        });
         jPanel3.add(jCheckBoxBistot);
 
         jCheckBoxArkonor.setText("Arkonor");
+        jCheckBoxArkonor.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxArkonorItemStateChanged(evt);
+            }
+        });
         jPanel3.add(jCheckBoxArkonor);
 
         jCheckBoxMercoxit.setText("Mercoxit");
+        jCheckBoxMercoxit.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxMercoxitItemStateChanged(evt);
+            }
+        });
         jPanel3.add(jCheckBoxMercoxit);
 
         jButtonClose.setText("Close");
+        jButtonClose.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonCloseActionPerformed(evt);
+            }
+        });
 
         jButtonAll.setText("All");
+        jButtonAll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAllActionPerformed(evt);
+            }
+        });
 
         jButtonNone.setText("None");
+        jButtonNone.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonNoneActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -194,47 +320,147 @@ public class JAsteroidFilterDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(JAsteroidFilterDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(JAsteroidFilterDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(JAsteroidFilterDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(JAsteroidFilterDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+    private void jButtonNoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNoneActionPerformed
+        character.clearAsteroidFilter();
+        reloadFilterState();
+    }//GEN-LAST:event_jButtonNoneActionPerformed
 
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                JAsteroidFilterDialog dialog = new JAsteroidFilterDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
+    private void jButtonAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAllActionPerformed
+        character.allOnAsteroidFilter();
+        reloadFilterState();
+    }//GEN-LAST:event_jButtonAllActionPerformed
+
+    private void jButtonCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCloseActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_jButtonCloseActionPerformed
+
+    private void jCheckBoxVeldsparItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxVeldsparItemStateChanged
+        if (jCheckBoxVeldspar.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.VELDSPAR);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.VELDSPAR);
+        }
+    }//GEN-LAST:event_jCheckBoxVeldsparItemStateChanged
+
+    private void jCheckBoxScorditeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxScorditeItemStateChanged
+        if (jCheckBoxScordite.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.SCORDITE);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.SCORDITE);
+        }
+    }//GEN-LAST:event_jCheckBoxScorditeItemStateChanged
+
+    private void jCheckBoxPyroxeresItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxPyroxeresItemStateChanged
+        if (jCheckBoxPyroxeres.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.PYROXERES);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.PYROXERES);
+        }
+    }//GEN-LAST:event_jCheckBoxPyroxeresItemStateChanged
+
+    private void jCheckBoxPlagioclaseItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxPlagioclaseItemStateChanged
+        if (jCheckBoxPlagioclase.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.PLAGIOCLASE);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.PLAGIOCLASE);
+        }
+    }//GEN-LAST:event_jCheckBoxPlagioclaseItemStateChanged
+
+    private void jCheckBoxOmberItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxOmberItemStateChanged
+        if (jCheckBoxOmber.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.OMBER);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.OMBER);
+        }
+    }//GEN-LAST:event_jCheckBoxOmberItemStateChanged
+
+    private void jCheckBoxKerniteItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxKerniteItemStateChanged
+        if (jCheckBoxKernite.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.KERNITE);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.KERNITE);
+        }
+    }//GEN-LAST:event_jCheckBoxKerniteItemStateChanged
+
+    private void jCheckBoxJaspetItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxJaspetItemStateChanged
+        if (jCheckBoxJaspet.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.JASPET);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.JASPET);
+        }
+    }//GEN-LAST:event_jCheckBoxJaspetItemStateChanged
+
+    private void jCheckBoxHemorphiteItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxHemorphiteItemStateChanged
+        if (jCheckBoxHemorphite.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.HEMORPHITE);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.HEMORPHITE);
+        }
+    }//GEN-LAST:event_jCheckBoxHemorphiteItemStateChanged
+
+    private void jCheckBoxHedbergiteItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxHedbergiteItemStateChanged
+        if (jCheckBoxHedbergite.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.HEDBERGITE);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.HEDBERGITE);
+        }
+    }//GEN-LAST:event_jCheckBoxHedbergiteItemStateChanged
+
+    private void jCheckBoxGneissItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxGneissItemStateChanged
+        if (jCheckBoxGneiss.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.GNEISS);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.GNEISS);
+        }
+    }//GEN-LAST:event_jCheckBoxGneissItemStateChanged
+
+    private void jCheckBoxDarkOchreItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxDarkOchreItemStateChanged
+        if (jCheckBoxDarkOchre.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.DARKOCHRE);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.DARKOCHRE);
+        }
+    }//GEN-LAST:event_jCheckBoxDarkOchreItemStateChanged
+
+    private void jCheckBoxCrokiteItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxCrokiteItemStateChanged
+        if (jCheckBoxCrokite.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.CROKITE);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.CROKITE);
+        }
+    }//GEN-LAST:event_jCheckBoxCrokiteItemStateChanged
+
+    private void jCheckBoxSpodumainItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxSpodumainItemStateChanged
+        if (jCheckBoxSpodumain.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.SPODUMAIN);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.SPODUMAIN);
+        }
+    }//GEN-LAST:event_jCheckBoxSpodumainItemStateChanged
+
+    private void jCheckBoxBistotItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxBistotItemStateChanged
+        if (jCheckBoxBistot.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.BISTOT);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.BISTOT);
+        }
+    }//GEN-LAST:event_jCheckBoxBistotItemStateChanged
+
+    private void jCheckBoxArkonorItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxArkonorItemStateChanged
+        if (jCheckBoxArkonor.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.ARKONOR);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.ARKONOR);
+        }
+    }//GEN-LAST:event_jCheckBoxArkonorItemStateChanged
+
+    private void jCheckBoxMercoxitItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxMercoxitItemStateChanged
+        if (jCheckBoxMercoxit.isSelected()) {
+            character.addHarvestableToFilter(BasicHarvestable.MERCOXIT);
+        } else {
+            character.removeHarvestableFromFilter(BasicHarvestable.MERCOXIT);
+        }
+    }//GEN-LAST:event_jCheckBoxMercoxitItemStateChanged
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonAll;

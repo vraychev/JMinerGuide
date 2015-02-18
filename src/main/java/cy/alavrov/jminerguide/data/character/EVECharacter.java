@@ -116,11 +116,7 @@ public class EVECharacter {
         hidden = false;
         
         this.roidFilter = new HashSet<>();
-        for (BasicHarvestable hv : BasicHarvestable.values()) {
-            if (hv.getType() == HarvestableType.ORE || hv.getType() == HarvestableType.MERCOXIT) {
-                roidFilter.add(hv);
-            }
-        }
+        allOnAsteroidFilter();
     }
     
     /**
@@ -211,12 +207,8 @@ public class EVECharacter {
                 }
             }
         } catch (NullPointerException e) {
-            JMGLogger.logWarning("Unable to load roid filters for "+name, e);
-            for (BasicHarvestable hv : BasicHarvestable.values()) {
-                if (hv.getType() == HarvestableType.ORE || hv.getType() == HarvestableType.MERCOXIT) {
-                    roidFilter.add(hv);
-                }
-            }
+            JMGLogger.logWarning("Unable to load roid filters for "+name, e);            
+            allOnAsteroidFilter();
         }  
         
         this.skills = newSkills;
@@ -818,6 +810,22 @@ public class EVECharacter {
     public void removeHarvestableFromFilter(BasicHarvestable type) {
         synchronized(blocker) {
             roidFilter.remove(type);
+        }
+    }
+    
+    public void clearAsteroidFilter() {
+        synchronized(blocker) {
+            roidFilter.clear();
+        }
+    }
+    
+    public final void allOnAsteroidFilter() {
+        synchronized(blocker) {
+            for (BasicHarvestable hv : BasicHarvestable.values()) {
+                if (hv.getType() == HarvestableType.ORE || hv.getType() == HarvestableType.MERCOXIT) {
+                    roidFilter.add(hv);
+                }
+            }
         }
     }
 }
