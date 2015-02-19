@@ -140,7 +140,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         setTurretKeyBindings(jPanelSetup, JComponent.WHEN_IN_FOCUSED_WINDOW);
         setTurretKeyBindings(jPanelSelector, JComponent.WHEN_IN_FOCUSED_WINDOW);
         setTurretKeyBindings(jTableRoids, JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        
+                        
         processEvents = true;
     }
 
@@ -187,6 +187,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     shouldLooseOnTop = true;
                     loseOnTopAt = System.currentTimeMillis() + WINDOW_LOSS_TIMEOUT;
                     updateSessionButtons();
+                    updateTimerButtons();
                 }
 
                 if (shouldLooseOnTop && loseOnTopAt < System.currentTimeMillis()) {
@@ -215,6 +216,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     jLabelMinerName.setText("none");
                     disableMonitorPanel();
                     updateSessionButtons();
+                    updateTimerButtons();
                 }
             } else {
                 if (!name.equals(currentMiner)) {                                    
@@ -236,6 +238,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     }
                     
                     updateSessionButtons();
+                    updateTimerButtons();
                 }
             }                        
         }

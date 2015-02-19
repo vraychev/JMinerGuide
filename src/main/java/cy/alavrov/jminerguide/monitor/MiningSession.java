@@ -33,7 +33,6 @@ import cy.alavrov.jminerguide.data.harvestable.BasicHarvestable;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
 import java.awt.Color;
-import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -466,7 +465,7 @@ public class MiningSession {
                 
                 if (timer != null) {
                     secs = timer.getRemainingSeconds();
-                    if (secs > 0 && rem > secs) {
+                    if (rem > secs) {
                         rem = secs;
                     }
                 }
