@@ -31,6 +31,8 @@ import cy.alavrov.jminerguide.data.harvestable.IHarvestable;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import cy.alavrov.jminerguide.monitor.MiningSession;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -38,6 +40,15 @@ import java.util.List;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class JLoadScanDialog extends javax.swing.JDialog {
+    private final static Comparator<Asteroid> distanceComparator = new Comparator<Asteroid>() {
+
+        @Override
+        public int compare(Asteroid o1, Asteroid o2) {
+            return Integer.valueOf(o1.getDistance()).compareTo(o2.getDistance());
+        }
+    };
+    
+    private volatile static boolean sortSelected = true;
 
     private final MiningSession session;
     private final JAsteroidMonitorForm parent;
@@ -51,6 +62,7 @@ public class JLoadScanDialog extends javax.swing.JDialog {
         
         this.session = session;
         this.parent = parent;
+        this.jCheckBoxSort.setSelected(sortSelected);
     }
 
     /**
@@ -91,6 +103,10 @@ public class JLoadScanDialog extends javax.swing.JDialog {
             }
         }
         
+        if (jCheckBoxSort.isSelected()) {
+            Collections.sort(out, distanceComparator);
+        }
+        
         return out;
     }
     
@@ -108,6 +124,7 @@ public class JLoadScanDialog extends javax.swing.JDialog {
         jButtonClearAndLoad = new javax.swing.JButton();
         jButtonLoadAndAdd = new javax.swing.JButton();
         jButtonCancel = new javax.swing.JButton();
+        jCheckBoxSort = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Load Scan");
@@ -138,6 +155,14 @@ public class JLoadScanDialog extends javax.swing.JDialog {
             }
         });
 
+        jCheckBoxSort.setText("Sort");
+        jCheckBoxSort.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+        jCheckBoxSort.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxSortItemStateChanged(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -147,12 +172,15 @@ public class JLoadScanDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jButtonClearAndLoad)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButtonLoadAndAdd))
-                            .addComponent(jButtonCancel))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jButtonCancel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jCheckBoxSort)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -166,7 +194,9 @@ public class JLoadScanDialog extends javax.swing.JDialog {
                     .addComponent(jButtonClearAndLoad)
                     .addComponent(jButtonLoadAndAdd))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButtonCancel)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonCancel)
+                    .addComponent(jCheckBoxSort))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -200,11 +230,16 @@ public class JLoadScanDialog extends javax.swing.JDialog {
         this.dispose();        
     }//GEN-LAST:event_jButtonLoadAndAddActionPerformed
 
+    private void jCheckBoxSortItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxSortItemStateChanged
+        sortSelected = jCheckBoxSort.isSelected();
+    }//GEN-LAST:event_jCheckBoxSortItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonCancel;
     private javax.swing.JButton jButtonClearAndLoad;
     private javax.swing.JButton jButtonLoadAndAdd;
+    private javax.swing.JCheckBox jCheckBoxSort;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextAreaScan;
     // End of variables declaration//GEN-END:variables
