@@ -37,6 +37,7 @@ import javax.sound.sampled.DataLine;
 
 /**
  * A task to do mining every second.
+ * Also checks timers.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class MiningTask implements Runnable{
@@ -64,6 +65,18 @@ public class MiningTask implements Runnable{
                         }
                     });
                 }
+                
+                MiningTimer timer = session.getTimer();
+                if (timer != null && timer.isFinished() && !timer.wasAlarm()) {
+                    timer.markAlarm();
+                    java.awt.EventQueue.invokeLater(new Runnable() {
+                        @Override
+                        public void run(){
+                                form.setAlwaysOnTop(true);
+                                playSound();
+                        }
+                    });
+                }
             }
 
             java.awt.EventQueue.invokeLater(new Runnable() {
@@ -72,6 +85,7 @@ public class MiningTask implements Runnable{
                     form.notifyTableUpdate();
                     form.updateCurrentCharacterStats();
                     form.updateSessionButtons();
+                    form.updateTimerButtons();
                     
                     form.pack();
                 }

@@ -64,6 +64,7 @@ public class MiningSession {
     private final TurretInstance turret1;
     private final TurretInstance turret2;
     private final TurretInstance turret3;
+    private volatile MiningTimer timer;
     
     public MiningSession(IEVEWindow window) {
         this.window = window;
@@ -391,64 +392,99 @@ public class MiningSession {
     public int hashCode() {
         return window.hashCode();
     }
+
+    public MiningTimer getTimer() {
+        return timer;
+    }
     
+    /**
+     * Starts a new timer.
+     * Will not do anything, if there is no character, or old timer doesn't finished.
+     * @param seconds 
+     */
+    public void newTimer(int seconds) {
+        if (character == null) return;
+        if (timer != null && !timer.isFinished()) return;
+        timer = new MiningTimer(seconds);
+    }
     
+    public void stopTimer() {
+        timer = null;
+    }
+    
+    /**
+     * Updates corresponding session button with actual information, based
+     * on the session state.
+     * @param button 
+     */
     public void updateButton(MiningSessionButton button) {
         if (character == null) {
             button.setText(getCharacterName());
         } else {
             if (getRemainingCargo() == 0) {
-                button.setFont(button.getFont().deriveFont(Font.BOLD));
                 button.setForeground(Color.RED);
                 button.setText("/!\\ CARGO /!\\");
-            } else {
-                Ship ship = character.getShip();
-                boolean t1isMining = turret1.isMining();
-                // if there is no turret2 on a ship, return true to skip
-                boolean t2isMining = ship.getTurretCount() < 2 || turret2.isMining(); 
-                // if there is no turret3 on a ship, return true to skip
-                boolean t3isMining = ship.getTurretCount() < 3 || turret3.isMining(); 
-                
-                if (!t1isMining || !t2isMining || !t3isMining) {                
-                    button.setForeground(Color.RED);
-                    button.setText("/!\\ TURRET /!\\");
-                } else {
-                    int rem = Integer.MAX_VALUE;
-
-                    // we skip remaining time of 0, as unused turrets return exactly that.
-                    // for mining and used turrets remaining time will be not zero at this point.
-                    
-                    int secs = turret1.getRemainingSeconds(character.getStats());
-                    if (secs > 0 && rem > secs) {
-                        rem = secs;
-                    }
-
-                    secs = turret2.getRemainingSeconds(character.getStats());
-                    if (secs > 0 && rem > secs) {
-                        rem = secs;
-                    }
-
-                    secs = turret3.getRemainingSeconds(character.getStats());
-                    if (secs > 0 && rem > secs) {
-                        rem = secs;
-                    }
-
-                    int cycle = (int) character.getStats().getTurretCycle();
-                    float remcycles = rem /(float)cycle;
-                    
-                    Period remPeriod = Seconds.seconds(rem)
-                        .toStandardDuration().toPeriod();
-                                        
-                    button.setText(character.getCharacter().getName() 
-                            + " ("+minutesAndSeconds.print(remPeriod)+")");
-                    if (remcycles > 1) {
-                        button.setForeground(Color.BLACK);
-                    } else {
-                        button.setForeground(new Color(1 - remcycles, 0, 0));
-                    }
-                }
+                return;
+            } 
+            
+            if (timer != null && timer.isFinished()) {
+                button.setForeground(Color.RED);
+                button.setText("/!\\ TIMER /!\\");
+                return;
             }
             
+            Ship ship = character.getShip();
+            boolean t1isMining = turret1.isMining();
+            // if there is no turret2 on a ship, return true to skip
+            boolean t2isMining = ship.getTurretCount() < 2 || turret2.isMining(); 
+            // if there is no turret3 on a ship, return true to skip
+            boolean t3isMining = ship.getTurretCount() < 3 || turret3.isMining(); 
+
+            if (timer == null && (!t1isMining || !t2isMining || !t3isMining)) {                
+                button.setForeground(Color.RED);
+                button.setText("/!\\ TURRET /!\\");
+            } else {
+                int rem = Integer.MAX_VALUE;
+
+                // we skip remaining time of 0, as unused turrets return exactly that.
+                // for mining and used turrets remaining time will be not zero at this point.
+
+                int secs = turret1.getRemainingSeconds(character.getStats());
+                if (secs > 0 && rem > secs) {
+                    rem = secs;
+                }
+
+                secs = turret2.getRemainingSeconds(character.getStats());
+                if (secs > 0 && rem > secs) {
+                    rem = secs;
+                }
+
+                secs = turret3.getRemainingSeconds(character.getStats());
+                if (secs > 0 && rem > secs) {
+                    rem = secs;
+                }
+                
+                if (timer != null) {
+                    secs = timer.getRemainingSeconds();
+                    if (secs > 0 && rem > secs) {
+                        rem = secs;
+                    }
+                }
+
+                int cycle = (int) character.getStats().getTurretCycle();
+                float remcycles = rem /(float)cycle;
+
+                Period remPeriod = Seconds.seconds(rem)
+                    .toStandardDuration().toPeriod();
+
+                button.setText(character.getCharacter().getName() 
+                        + " ("+minutesAndSeconds.print(remPeriod)+")");
+                if (remcycles > 1) {
+                    button.setForeground(Color.BLACK);
+                } else {
+                    button.setForeground(new Color(1 - remcycles, 0, 0));
+                }
+            }           
         }
     }
     

@@ -36,6 +36,7 @@ import cy.alavrov.jminerguide.monitor.MiningSession;
 import cy.alavrov.jminerguide.monitor.MiningSessionButton;
 import cy.alavrov.jminerguide.monitor.MiningSessionMonitor;
 import cy.alavrov.jminerguide.monitor.MiningTask;
+import cy.alavrov.jminerguide.monitor.MiningTimer;
 import cy.alavrov.jminerguide.monitor.SessionCharacter;
 import cy.alavrov.jminerguide.monitor.TurretInstance;
 import cy.alavrov.jminerguide.monitor.UpdateWindowTask;
@@ -64,6 +65,8 @@ import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.AbstractDocument;
+import org.joda.time.Period;
+import org.joda.time.Seconds;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
@@ -116,6 +119,9 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         initComponents();
         
         AbstractDocument idDoc = ((AbstractDocument)jTextFieldHold.getDocument());
+        idDoc.setDocumentFilter(new IntegerDocumentFilter());
+        
+        idDoc = ((AbstractDocument)jTextFieldCustomTimer.getDocument());
         idDoc.setDocumentFilter(new IntegerDocumentFilter());
         
         this.parent = parent;
@@ -241,6 +247,45 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
         
         processEvents = true;
+    }
+    
+    private void disableTimerButtons() {
+        if (jButton15sec.isEnabled()) jButton15sec.setEnabled(false);
+        if (jButton30sec.isEnabled()) jButton30sec.setEnabled(false);
+        if (jButton1min.isEnabled()) jButton1min.setEnabled(false);
+        if (jButton2min.isEnabled()) jButton2min.setEnabled(false);
+        if (jButtonCustomTimer.isEnabled()) jButtonCustomTimer.setEnabled(false);
+        if (jTextFieldCustomTimer.isEnabled()) jTextFieldCustomTimer.setEnabled(false);        
+    }
+    
+    private void enableTimerButtons() {
+        if (!jButton15sec.isEnabled()) jButton15sec.setEnabled(true);
+        if (!jButton30sec.isEnabled()) jButton30sec.setEnabled(true);
+        if (!jButton1min.isEnabled()) jButton1min.setEnabled(true);
+        if (!jButton2min.isEnabled()) jButton2min.setEnabled(true);
+        if (!jButtonCustomTimer.isEnabled()) jButtonCustomTimer.setEnabled(true);
+        if (!jTextFieldCustomTimer.isEnabled()) jTextFieldCustomTimer.setEnabled(true);   
+    }
+    
+    public void updateTimerButtons() {
+        if (currentSession == null || currentSession.getSessionCharacter() == null) {
+            disableTimerButtons();
+            jLabelTimer.setText("0:00");
+            return;
+        }
+        
+        MiningTimer mTimer = currentSession.getTimer();
+        if (mTimer == null || mTimer.isFinished()) {
+            enableTimerButtons();
+            jLabelTimer.setText("0:00");
+            return;
+        }
+        
+        disableTimerButtons();
+        Period remPeriod = Seconds.seconds(mTimer.getRemainingSeconds())
+                    .toStandardDuration().toPeriod();
+
+        jLabelTimer.setText(minutesAndSeconds.print(remPeriod));        
     }
     
     /**
@@ -512,7 +557,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jTextFieldHold = new javax.swing.JTextField();
         jButtonSetOreHold = new javax.swing.JButton();
         jButtonLoadScan = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        jButtonFilters = new javax.swing.JButton();
         jButtonClearAsteroids = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTableRoids = new javax.swing.JTable();
@@ -524,6 +569,15 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jToggleButtonTurret1 = new javax.swing.JToggleButton();
         jToggleButtonTurret2 = new javax.swing.JToggleButton();
         jToggleButtonTurret3 = new javax.swing.JToggleButton();
+        jLabel5 = new javax.swing.JLabel();
+        jButton15sec = new javax.swing.JButton();
+        jButton30sec = new javax.swing.JButton();
+        jButton1min = new javax.swing.JButton();
+        jButton2min = new javax.swing.JButton();
+        jButtonStopTimer = new javax.swing.JButton();
+        jTextFieldCustomTimer = new javax.swing.JTextField();
+        jButtonCustomTimer = new javax.swing.JButton();
+        jLabelTimer = new javax.swing.JLabel();
         jPanelSelector = new javax.swing.JPanel();
         jButtonClose = new javax.swing.JButton();
         jLabelMinerName = new javax.swing.JLabel();
@@ -580,10 +634,10 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             }
         });
 
-        jButton4.setText("Filters");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
+        jButtonFilters.setText("Filters");
+        jButtonFilters.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
+                jButtonFiltersActionPerformed(evt);
             }
         });
 
@@ -677,6 +731,55 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             }
         });
 
+        jLabel5.setText("Timers");
+
+        jButton15sec.setText("15s");
+        jButton15sec.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton15secActionPerformed(evt);
+            }
+        });
+
+        jButton30sec.setText("30s");
+        jButton30sec.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton30secActionPerformed(evt);
+            }
+        });
+
+        jButton1min.setText("1m");
+        jButton1min.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1minActionPerformed(evt);
+            }
+        });
+
+        jButton2min.setText("2m");
+        jButton2min.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2minActionPerformed(evt);
+            }
+        });
+
+        jButtonStopTimer.setText("Stop");
+        jButtonStopTimer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonStopTimerActionPerformed(evt);
+            }
+        });
+
+        jTextFieldCustomTimer.setText("0");
+
+        jButtonCustomTimer.setText("Custom");
+        jButtonCustomTimer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonCustomTimerActionPerformed(evt);
+            }
+        });
+
+        jLabelTimer.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabelTimer.setText("0:0");
+
         javax.swing.GroupLayout jPanelSetupLayout = new javax.swing.GroupLayout(jPanelSetup);
         jPanelSetup.setLayout(jPanelSetupLayout);
         jPanelSetupLayout.setHorizontalGroup(
@@ -689,30 +792,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                         .addComponent(jLabelStats)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabelHoldStats))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldHold, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonSetOreHold)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonResetOreHold))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
-                        .addComponent(jToggleButtonTurret1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jToggleButtonTurret2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jToggleButtonTurret3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButtonCleanupAsteroids))
-                    .addGroup(jPanelSetupLayout.createSequentialGroup()
-                        .addComponent(jButtonLoadScan)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonClearAsteroids)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanelSetupLayout.createSequentialGroup()
                         .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 55, Short.MAX_VALUE)
@@ -725,7 +804,53 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                             .addGroup(jPanelSetupLayout.createSequentialGroup()
                                 .addComponent(jComboBoxBoosterShip, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jCheckBoxUseBoosterShip)))))
+                                .addComponent(jCheckBoxUseBoosterShip))))
+                    .addGroup(jPanelSetupLayout.createSequentialGroup()
+                        .addComponent(jToggleButtonTurret1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jToggleButtonTurret2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jToggleButtonTurret3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButtonCleanupAsteroids))
+                    .addGroup(jPanelSetupLayout.createSequentialGroup()
+                        .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanelSetupLayout.createSequentialGroup()
+                                .addComponent(jButtonLoadScan)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonFilters)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonClearAsteroids))
+                            .addComponent(jLabel5))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanelSetupLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldHold, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonSetOreHold)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonResetOreHold))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
+                        .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanelSetupLayout.createSequentialGroup()
+                                .addComponent(jButton15sec)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton30sec)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton1min)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton2min)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(jPanelSetupLayout.createSequentialGroup()
+                                .addComponent(jTextFieldCustomTimer)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonCustomTimer)
+                                .addGap(13, 13, 13)))
+                        .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabelTimer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButtonStopTimer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanelSetupLayout.setVerticalGroup(
@@ -758,17 +883,31 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonLoadScan)
-                    .addComponent(jButton4)
+                    .addComponent(jButtonFilters)
                     .addComponent(jButtonClearAsteroids))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButtonCleanupAsteroids)
                     .addComponent(jToggleButtonTurret1)
                     .addComponent(jToggleButtonTurret2)
-                    .addComponent(jToggleButtonTurret3))
-                .addContainerGap())
+                    .addComponent(jToggleButtonTurret3)
+                    .addComponent(jButtonCleanupAsteroids))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton15sec)
+                    .addComponent(jButton30sec)
+                    .addComponent(jButton1min)
+                    .addComponent(jButton2min)
+                    .addComponent(jButtonStopTimer))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextFieldCustomTimer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonCustomTimer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabelTimer))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanelSelectorLayout = new javax.swing.GroupLayout(jPanelSelector);
@@ -779,7 +918,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         );
         jPanelSelectorLayout.setVerticalGroup(
             jPanelSelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 64, Short.MAX_VALUE)
+            .addGap(0, 89, Short.MAX_VALUE)
         );
 
         jButtonClose.setText("Close");
@@ -847,71 +986,149 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         parent.deleteMonitorForm();
     }//GEN-LAST:event_jButtonCloseActionPerformed
 
-    private void jComboBoxShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxShipItemStateChanged
-        if (!processEvents) return;
-        processEvents = false;
-        
-        Ship ship = (Ship) jComboBoxShip.getSelectedItem();
+    private void jToggleButtonTurret3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonTurret3ActionPerformed
         if (currentSession != null) {
-            currentSession.updateCharacherShip(ship);
-            updateCharacterStats(currentSession);
-        }
-        
-        processEvents = true;
-    }//GEN-LAST:event_jComboBoxShipItemStateChanged
+            SessionCharacter chr = currentSession.getSessionCharacter();
+            if (chr != null && chr.getShip().getTurretCount() > 2) {
+                TurretInstance turret = currentSession.getTurret3();
+                if (turret.isMining()) {
+                    turret.unbindAsteroid();
+                } else {
+                    Asteroid roid = getSelectedAsteroid();
+                    if (roid != null) {
+                        turret.bindAsteroid(roid);
+                    }
+                }
 
-    private void jComboBoxBoosterItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxBoosterItemStateChanged
-        if (!processEvents) return;
-        processEvents = false;
-        
-        EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
-        if (currentSession != null) {
-            currentSession.updateCharacherBooster(booster);
-            updateCharacterStats(currentSession);
-        }
-        
-        processEvents = true;
-    }//GEN-LAST:event_jComboBoxBoosterItemStateChanged
+                notifyTableUpdate();
 
-    private void jComboBoxBoosterShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxBoosterShipItemStateChanged
-        if (!processEvents) return;
-        processEvents = false;
-        
-        BoosterShip bShip = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
-        if (currentSession != null) {
-            currentSession.updateCharacherBoosterShip(bShip);            
-            updateCharacterStats(currentSession);            
+                if (jToggleButtonTurret3.isSelected() != turret.isMining()) {
+                    jToggleButtonTurret3.setSelected(turret.isMining());
+                }
+            }
         }
-        
-        processEvents = true;
-    }//GEN-LAST:event_jComboBoxBoosterShipItemStateChanged
+    }//GEN-LAST:event_jToggleButtonTurret3ActionPerformed
+
+    private void jToggleButtonTurret2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonTurret2ActionPerformed
+        if (currentSession != null) {
+            SessionCharacter chr = currentSession.getSessionCharacter();
+            if (chr != null && chr.getShip().getTurretCount() > 1) {
+                TurretInstance turret = currentSession.getTurret2();
+                if (turret.isMining()) {
+                    turret.unbindAsteroid();
+                } else {
+                    Asteroid roid = getSelectedAsteroid();
+                    if (roid != null) {
+                        turret.bindAsteroid(roid);
+                    }
+                }
+
+                notifyTableUpdate();
+
+                if (jToggleButtonTurret2.isSelected() != turret.isMining()) {
+                    jToggleButtonTurret2.setSelected(turret.isMining());
+                }
+            }
+        }
+    }//GEN-LAST:event_jToggleButtonTurret2ActionPerformed
+
+    private void jToggleButtonTurret1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonTurret1ActionPerformed
+        if (currentSession != null) {
+            SessionCharacter chr = currentSession.getSessionCharacter();
+            if (chr != null) {
+                TurretInstance turret = currentSession.getTurret1();
+                if (turret.isMining()) {
+                    turret.unbindAsteroid();
+                } else {
+                    Asteroid roid = getSelectedAsteroid();
+                    if (roid != null) {
+                        turret.bindAsteroid(roid);
+                    }
+                }
+
+                notifyTableUpdate();
+
+                if (jToggleButtonTurret1.isSelected() != turret.isMining()) {
+                    jToggleButtonTurret1.setSelected(turret.isMining());
+                }
+            }
+        }
+    }//GEN-LAST:event_jToggleButtonTurret1ActionPerformed
 
     private void jCheckBoxUseBoosterShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxUseBoosterShipItemStateChanged
         if (!processEvents) return;
         processEvents = false;
-                
+
         if (currentSession != null) {
             currentSession.updateCharacherUsingBoosterShip(jCheckBoxUseBoosterShip.isSelected());
             SessionCharacter curchar = currentSession.getSessionCharacter();
-            
+
             if (curchar != null) {
                 if (jCheckBoxUseBoosterShip.isSelected()) {
                     if (!jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(true);
                 } else {
                     if (jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(false);
                 }
-                
+
                 updateCharacterStats(currentSession);
             }
         }
-        
+
         processEvents = true;
     }//GEN-LAST:event_jCheckBoxUseBoosterShipItemStateChanged
+
+    private void jComboBoxBoosterShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxBoosterShipItemStateChanged
+        if (!processEvents) return;
+        processEvents = false;
+
+        BoosterShip bShip = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
+        if (currentSession != null) {
+            currentSession.updateCharacherBoosterShip(bShip);
+            updateCharacterStats(currentSession);
+        }
+
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxBoosterShipItemStateChanged
+
+    private void jButtonCleanupAsteroidsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCleanupAsteroidsActionPerformed
+        if (currentSession != null) {
+            currentSession.cleanupRoids();
+            updateAsteroids(currentSession);
+        }
+    }//GEN-LAST:event_jButtonCleanupAsteroidsActionPerformed
+
+    private void jButtonClearAsteroidsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearAsteroidsActionPerformed
+        if (currentSession != null) {
+            currentSession.clearRoids();
+            updateAsteroids(currentSession);
+        }
+    }//GEN-LAST:event_jButtonClearAsteroidsActionPerformed
+
+    private void jButtonFiltersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFiltersActionPerformed
+        if (currentSession != null && currentSession.getSessionCharacter() != null) {
+            JAsteroidFilterDialog dlog = new JAsteroidFilterDialog(this, currentSession.getSessionCharacter().getCharacter());
+            dlog.setLocationRelativeTo(this);
+
+            dlog.setVisible(true);
+        }
+    }//GEN-LAST:event_jButtonFiltersActionPerformed
+
+    private void jButtonLoadScanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoadScanActionPerformed
+        if (currentSession != null) {
+
+            if (lsDlog == null) {
+                lsDlog = new JLoadScanDialog(this, currentSession);
+                lsDlog.setLocationRelativeTo(this);
+            }
+
+            lsDlog.setVisible(true);
+        }
+    }//GEN-LAST:event_jButtonLoadScanActionPerformed
 
     private void jButtonSetOreHoldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSetOreHoldActionPerformed
         if (!processEvents) return;
         processEvents = false;
-        
+
         if (currentSession != null) {
             String hold = jTextFieldHold.getText();
             int newHoldSize;
@@ -928,138 +1145,113 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             } else {
                 newHoldSize = 0;
             }
-            
+
             currentSession.setUsedCargo(newHoldSize);
             updateCharacterStats(currentSession);
         }
-        
+
         processEvents = true;
     }//GEN-LAST:event_jButtonSetOreHoldActionPerformed
 
     private void jButtonResetOreHoldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonResetOreHoldActionPerformed
         if (!processEvents) return;
         processEvents = false;
-        
+
         if (currentSession != null) {
             currentSession.setUsedCargo(0);
             updateCharacterStats(currentSession);
         }
-        
+
         processEvents = true;
     }//GEN-LAST:event_jButtonResetOreHoldActionPerformed
 
-    private void jButtonLoadScanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoadScanActionPerformed
-        if (currentSession != null) {
-            
-            if (lsDlog == null) {            
-                lsDlog = new JLoadScanDialog(this, currentSession);
-                lsDlog.setLocationRelativeTo(this);
-            }
-            
-            lsDlog.setVisible(true);
-        }
-    }//GEN-LAST:event_jButtonLoadScanActionPerformed
+    private void jComboBoxBoosterItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxBoosterItemStateChanged
+        if (!processEvents) return;
+        processEvents = false;
 
-    private void jToggleButtonTurret1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonTurret1ActionPerformed
+        EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
         if (currentSession != null) {
-            SessionCharacter chr = currentSession.getSessionCharacter();
-            if (chr != null) {
-                TurretInstance turret = currentSession.getTurret1();
-                if (turret.isMining()) {
-                    turret.unbindAsteroid();
-                } else {
-                    Asteroid roid = getSelectedAsteroid();
-                    if (roid != null) {
-                        turret.bindAsteroid(roid);
-                    }
-                }   
-                
-                notifyTableUpdate();
-                
-                if (jToggleButtonTurret1.isSelected() != turret.isMining()) {
-                    jToggleButtonTurret1.setSelected(turret.isMining());
-                }
-            }
+            currentSession.updateCharacherBooster(booster);
+            updateCharacterStats(currentSession);
         }
-    }//GEN-LAST:event_jToggleButtonTurret1ActionPerformed
 
-    private void jToggleButtonTurret2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonTurret2ActionPerformed
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxBoosterItemStateChanged
+
+    private void jComboBoxShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxShipItemStateChanged
+        if (!processEvents) return;
+        processEvents = false;
+
+        Ship ship = (Ship) jComboBoxShip.getSelectedItem();
         if (currentSession != null) {
-            SessionCharacter chr = currentSession.getSessionCharacter();
-            if (chr != null && chr.getShip().getTurretCount() > 1) {
-                TurretInstance turret = currentSession.getTurret2();
-                if (turret.isMining()) {
-                    turret.unbindAsteroid();
-                } else {
-                    Asteroid roid = getSelectedAsteroid();
-                    if (roid != null) {
-                        turret.bindAsteroid(roid);
-                    }
-                }   
-                
-                notifyTableUpdate();
-                
-                if (jToggleButtonTurret2.isSelected() != turret.isMining()) {
-                    jToggleButtonTurret2.setSelected(turret.isMining());
-                }
-            }
+            currentSession.updateCharacherShip(ship);
+            updateCharacterStats(currentSession);
         }
-    }//GEN-LAST:event_jToggleButtonTurret2ActionPerformed
 
-    private void jToggleButtonTurret3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonTurret3ActionPerformed
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxShipItemStateChanged
+
+    private void jButton15secActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton15secActionPerformed
         if (currentSession != null) {
-            SessionCharacter chr = currentSession.getSessionCharacter();
-            if (chr != null && chr.getShip().getTurretCount() > 2) {
-                TurretInstance turret = currentSession.getTurret3();
-                if (turret.isMining()) {
-                    turret.unbindAsteroid();
-                } else {
-                    Asteroid roid = getSelectedAsteroid();
-                    if (roid != null) {
-                        turret.bindAsteroid(roid);
-                    }
-                }   
-                
-                notifyTableUpdate();
-                
-                if (jToggleButtonTurret3.isSelected() != turret.isMining()) {
-                    jToggleButtonTurret3.setSelected(turret.isMining());
-                }
+            currentSession.newTimer(15);
+            updateTimerButtons();
+        }
+    }//GEN-LAST:event_jButton15secActionPerformed
+
+    private void jButton30secActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton30secActionPerformed
+        if (currentSession != null) {
+            currentSession.newTimer(30);
+            updateTimerButtons();
+        }
+    }//GEN-LAST:event_jButton30secActionPerformed
+
+    private void jButton1minActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1minActionPerformed
+        if (currentSession != null) {
+            currentSession.newTimer(60);
+            updateTimerButtons();
+        }
+    }//GEN-LAST:event_jButton1minActionPerformed
+
+    private void jButton2minActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2minActionPerformed
+        if (currentSession != null) {
+            currentSession.newTimer(120);
+            updateTimerButtons();
+        }
+    }//GEN-LAST:event_jButton2minActionPerformed
+
+    private void jButtonCustomTimerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCustomTimerActionPerformed
+        if (currentSession != null) {            
+            try {
+                int secs = Integer.parseInt(jTextFieldCustomTimer.getText(), 10);
+                currentSession.newTimer(secs);
+                updateTimerButtons();
+            } catch (NumberFormatException | NullPointerException e) {
+                // do nothing
             }
         }
-    }//GEN-LAST:event_jToggleButtonTurret3ActionPerformed
+    }//GEN-LAST:event_jButtonCustomTimerActionPerformed
 
-    private void jButtonClearAsteroidsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearAsteroidsActionPerformed
-        if (currentSession != null) {
-            currentSession.clearRoids();
-            updateAsteroids(currentSession);
+    private void jButtonStopTimerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonStopTimerActionPerformed
+        if (currentSession != null) { 
+            currentSession.stopTimer();
+            updateTimerButtons();
         }
-    }//GEN-LAST:event_jButtonClearAsteroidsActionPerformed
-
-    private void jButtonCleanupAsteroidsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCleanupAsteroidsActionPerformed
-        if (currentSession != null) {
-            currentSession.cleanupRoids();
-            updateAsteroids(currentSession);
-        }
-    }//GEN-LAST:event_jButtonCleanupAsteroidsActionPerformed
-
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        if (currentSession != null && currentSession.getSessionCharacter() != null) {
-            JAsteroidFilterDialog dlog = new JAsteroidFilterDialog(this, currentSession.getSessionCharacter().getCharacter());
-            dlog.setLocationRelativeTo(this);            
-            
-            dlog.setVisible(true);
-        }
-    }//GEN-LAST:event_jButton4ActionPerformed
+    }//GEN-LAST:event_jButtonStopTimerActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton15sec;
+    private javax.swing.JButton jButton1min;
+    private javax.swing.JButton jButton2min;
+    private javax.swing.JButton jButton30sec;
     private javax.swing.JButton jButtonCleanupAsteroids;
     private javax.swing.JButton jButtonClearAsteroids;
     private javax.swing.JButton jButtonClose;
+    private javax.swing.JButton jButtonCustomTimer;
+    private javax.swing.JButton jButtonFilters;
     private javax.swing.JButton jButtonLoadScan;
     private javax.swing.JButton jButtonResetOreHold;
     private javax.swing.JButton jButtonSetOreHold;
+    private javax.swing.JButton jButtonStopTimer;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox2;
     private javax.swing.JCheckBox jCheckBoxUseBoosterShip;
@@ -1070,14 +1262,17 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabelHoldStats;
     private javax.swing.JLabel jLabelMinerName;
     private javax.swing.JLabel jLabelStats;
+    private javax.swing.JLabel jLabelTimer;
     private javax.swing.JPanel jPanelSelector;
     private javax.swing.JPanel jPanelSetup;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTableRoids;
+    private javax.swing.JTextField jTextFieldCustomTimer;
     private javax.swing.JTextField jTextFieldHold;
     private javax.swing.JToggleButton jToggleButtonTurret1;
     private javax.swing.JToggleButton jToggleButtonTurret2;
