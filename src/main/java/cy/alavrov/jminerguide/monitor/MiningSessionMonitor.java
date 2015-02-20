@@ -139,4 +139,26 @@ public class MiningSessionMonitor {
         }
         return out;
     }
+    
+    /**
+     * Returns true, if current window belongs to the asteroid monitor.
+     * @return 
+     */
+    public boolean isMonitorWindow() {
+        return wManager.isMonitorWindow();
+    }
+    
+    /**
+     * Minimizes monitor window.
+     */
+    public void minimizeMonitorWindow() {
+        wManager.minimizeMonitorWindow();
+    }
+    
+    /**
+     * Restores monitor window, de-minimizing it if possible.
+     */
+    public void restoreMonitorWindow() {
+        wManager.restoreMonitorWindow();
+    }
 }

@@ -27,10 +27,8 @@ package cy.alavrov.jminerguide.util.winmanager.win32;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.ptr.PointerByReference;
-import com.sun.jna.win32.StdCallLibrary;
 import cy.alavrov.jminerguide.util.api.win32.Kernel32;
 import cy.alavrov.jminerguide.util.api.win32.Psapi;
 import cy.alavrov.jminerguide.util.api.win32.User32;
@@ -40,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Windows32 window manager implementation.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class Win32WindowManager implements IWindowManager {
@@ -49,7 +47,7 @@ public class Win32WindowManager implements IWindowManager {
     @Override
     public IEVEWindow getCurrentEVEWindow() {
         HWND handle = User32.GetForegroundWindow();
-        if (isEVEWindow(handle)) {
+        if (isDesiredWindow(handle, "EVE", "exefile.exe")) {
             return new Win32Window(handle);
         }
         
@@ -63,7 +61,7 @@ public class Win32WindowManager implements IWindowManager {
         User32.EnumWindows(new User32.WndEnumProc() {
             @Override
             public boolean callback(HWND hWnd, int lParam) {
-                if (isEVEWindow(hWnd)) {
+                if (isDesiredWindow(hWnd, "EVE", "exefile.exe")) {
                     out.add(new Win32Window(hWnd));
                 }
                 
@@ -75,18 +73,21 @@ public class Win32WindowManager implements IWindowManager {
     }
     
     /**
-     * Returns true, if the handle belongs to the EVE Online window.
-     * EVE Online window must be created by exefile.exe and it's title start 
+     * Returns true, if the window handle belongs to the executable with a given name, and
+     * window's title starts with the given string.
+     * When checking for EVE Online window, it must be created by exefile.exe and it's title should start 
      * with "EVE"
-     * @param handle
+     * @param handle handle to the window
+     * @param titleStartsWith window's title should start with this
+     * @param exename executable name, *converted to lowercase*, should be exactly this
      * @return 
      */
-    private boolean isEVEWindow(HWND handle) {
+    private boolean isDesiredWindow(HWND handle, String titleStartsWith, String exename) {
         if (handle != null) {
             char[] buffer = new char[1024];
             int res = User32.GetWindowTextW(handle, buffer, buffer.length);
             String curTitle = Native.toString(buffer);
-            if (res != 0 && !curTitle.isEmpty() && curTitle.startsWith("EVE")) {                
+            if (res != 0 && !curTitle.isEmpty() && curTitle.startsWith(titleStartsWith)) {                
                 PointerByReference pointer = new PointerByReference();
                 User32.GetWindowThreadProcessId(handle, pointer);
                 Pointer process = Kernel32.OpenProcess(Kernel32.PROCESS_QUERY_INFORMATION | Kernel32.PROCESS_VM_READ, false, pointer.getValue());
@@ -94,13 +95,75 @@ public class Win32WindowManager implements IWindowManager {
                 res = Psapi.GetModuleBaseNameW(process, null, buffer, 1024);
                 if (res != 0) {
                     String exeName = Native.toString(buffer);           
-                    return exeName.toLowerCase().equals("exefile.exe");                                              
+                    return exeName.toLowerCase().equals(exename);                                              
                 }
             }
         }
         
         return false;
     }       
-        
     
+    /**
+     * Returns true, if the window handle belongs to the executable with a given pid, and
+     * window's title starts with the given string.
+     * @param handle handle to the window
+     * @param titleStartsWith window's title should start with this
+     * @param pid process's id
+     * @return 
+     */
+    private boolean isDesiredWindow(HWND handle, String titleStartsWith, Pointer pid) {
+        if (handle != null) {
+            char[] buffer = new char[1024];
+            int res = User32.GetWindowTextW(handle, buffer, buffer.length);
+            String curTitle = Native.toString(buffer);
+            if (res != 0 && !curTitle.isEmpty() && curTitle.startsWith(titleStartsWith)) {                
+                PointerByReference pointer = new PointerByReference();
+                User32.GetWindowThreadProcessId(handle, pointer);
+                return (pointer.getValue().equals(pid));
+            }
+        }
+        
+        return false;
+    } 
+
+    @Override
+    public boolean isMonitorWindow() {
+        HWND handle = User32.GetForegroundWindow();
+        return isDesiredWindow(handle, "Asteroid Monitor", "java.exe");
+    }
+
+    @Override
+    public void minimizeMonitorWindow() {
+        HWND handle = getMonitorWindow();
+        User32.ShowWindow(handle, User32.SW_MINIMIZE);
+    }
+
+    @Override
+    public void restoreMonitorWindow() {
+        HWND handle = getMonitorWindow();
+        User32.ShowWindow(handle, User32.SW_RESTORE);
+    }
+        
+    private HWND getMonitorWindow() {
+        final Pointer pid = Kernel32.GetCurrentProcessId();
+        
+        final List<HWND> out = new ArrayList<>();
+        
+        User32.EnumWindows(new User32.WndEnumProc() {
+            @Override
+            public boolean callback(HWND hWnd, int lParam) {
+                if (isDesiredWindow(hWnd, "Asteroid Monitor", pid)) {
+                    out.add(hWnd);
+                }
+                
+                return true;
+            }
+        }, 0);
+        
+        if (out.isEmpty()) {
+            return null;
+        } else {
+            return out.get(0);
+        }
+    }
 }

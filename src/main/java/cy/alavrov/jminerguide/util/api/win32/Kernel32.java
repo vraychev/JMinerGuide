@@ -38,6 +38,8 @@ public class Kernel32 {
     }
     public static int PROCESS_QUERY_INFORMATION = 0x0400;
     public static int PROCESS_VM_READ = 0x0010;
+    
     public static native int GetLastError();
     public static native Pointer OpenProcess(int dwDesiredAccess, boolean bInheritHandle, Pointer pointer);
+    public static native Pointer GetCurrentProcessId();
 }

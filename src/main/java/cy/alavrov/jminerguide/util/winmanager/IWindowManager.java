@@ -37,5 +37,27 @@ public interface IWindowManager {
      * @return 
      */
     public IEVEWindow getCurrentEVEWindow();
+    
+    /**
+     * Returns a list of all EVE windows. 
+     * Can be empty, if there's none.
+     * @return 
+     */
     public List<IEVEWindow> getEVEWindowList();
+    
+    /**
+     * Returns true, if the current window belongs to the asteroid monitor.
+     * @return 
+     */
+    public boolean isMonitorWindow();
+    
+    /**
+     * Minimizes monitor window.
+     */
+    public void minimizeMonitorWindow();
+    
+    /**
+     * Restores monitor window.
+     */
+    public void restoreMonitorWindow();
 }

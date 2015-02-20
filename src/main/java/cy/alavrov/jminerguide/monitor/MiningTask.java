@@ -43,6 +43,7 @@ import javax.sound.sampled.DataLine;
 public class MiningTask implements Runnable{
     private final MiningSessionMonitor msMonitor;
     private final JAsteroidMonitorForm form;
+    private volatile MiningSession lastCurrentSession;
 
     public MiningTask(MiningSessionMonitor msMonitor, JAsteroidMonitorForm form) {
         this.msMonitor = msMonitor;
@@ -52,6 +53,9 @@ public class MiningTask implements Runnable{
     @Override
     public void run() {
         try {
+            MiningSession curSession = msMonitor.getCurrentSession();
+            if (curSession != null) lastCurrentSession = curSession;
+            
             List<MiningSession> sessions = msMonitor.getSessions();
             for (MiningSession session : sessions) {
                 try {
@@ -67,15 +71,26 @@ public class MiningTask implements Runnable{
                 }
                 
                 MiningTimer timer = session.getTimer();
-                if (timer != null && timer.isFinished() && !timer.wasAlarm()) {
-                    timer.markAlarm();
-                    java.awt.EventQueue.invokeLater(new Runnable() {
-                        @Override
-                        public void run(){
-                                form.setAlwaysOnTop(true);
-                                playSound();
-                        }
-                    });
+                if (timer != null && timer.isFinished()) {
+                    if (!timer.wasAlarm()) {
+                        timer.markAlarm();
+                        java.awt.EventQueue.invokeLater(new Runnable() {
+                            @Override
+                            public void run(){
+                                    msMonitor.restoreMonitorWindow();
+                                    form.setAlwaysOnTop(true);
+                                    playSound();
+                            }
+                        });
+                    }
+                    
+                    if ( // either we switched off from right window to the monitor
+                            ((session.equals(lastCurrentSession) && msMonitor.isMonitorWindow()) || 
+                            // or we in the right window.
+                            (session.equals(curSession))) 
+                            && timer.isOkToClear()) {
+                        session.stopTimer();
+                    }
                 }
             }
 

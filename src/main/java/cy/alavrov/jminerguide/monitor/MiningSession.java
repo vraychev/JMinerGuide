@@ -404,7 +404,7 @@ public class MiningSession {
     public void newTimer(int seconds) {
         if (character == null) return;
         if (timer != null && !timer.isFinished()) return;
-        timer = new MiningTimer(seconds);
+        timer = new MiningTimer(seconds, 5); // preferences tba
     }
     
     public void stopTimer() {

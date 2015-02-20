@@ -31,17 +31,24 @@ package cy.alavrov.jminerguide.monitor;
  */
 public class MiningTimer {
     private final long endAt;
+    private final long clearAt;
     private volatile boolean wasAlarm;
     
-    public MiningTimer(int seconds) {
+    public MiningTimer(int seconds, int secondsToClear) {
         long now = System.currentTimeMillis();
         long duration = seconds * 1000; // seconds to millis
+        long clearDuration = secondsToClear * 1000; // same
         endAt = now + duration;
+        clearAt = now + duration + clearDuration;
         wasAlarm = false;
     }
-    
+        
     public boolean isFinished() {
         return System.currentTimeMillis() >= endAt;
+    }
+    
+    public boolean isOkToClear() {
+        return System.currentTimeMillis() >= clearAt;
     }
     
     public int getRemainingSeconds() {        

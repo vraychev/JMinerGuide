@@ -38,11 +38,17 @@ public class User32 {
     static { 
         Native.register("user32"); 
     }
+    
+    public static int SW_HIDE = 0;
+    public static int SW_MINIMIZE = 6;
+    public static int SW_RESTORE = 9;
+    
     public static native int GetWindowThreadProcessId(HWND hWnd, PointerByReference pref);
     public static native HWND GetForegroundWindow();
     public static native int GetWindowTextW(HWND hWnd, char[] lpString, int nMaxCount);
     public static native boolean EnumWindows (WndEnumProc wndenumproc, int lParam);
     public static native boolean SetForegroundWindow(HWND hWnd);
+    public static native boolean ShowWindow(HWND hWnd, int nCmdShow);
     
     public static interface WndEnumProc extends StdCallLibrary.StdCallCallback {
         boolean callback (HWND hWnd, int lParam);
