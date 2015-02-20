@@ -420,7 +420,8 @@ public class MiningSession {
         if (character == null) {
             button.setText(getCharacterName());
         } else {
-            if (getRemainingCargo() == 0) {
+            EVECharacter eveChr = character.getCharacter();
+            if (!eveChr.isMonitorIgnore() && getRemainingCargo() < 1) {
                 button.setForeground(Color.RED);
                 button.setText("/!\\ CARGO /!\\");
                 return;
@@ -439,7 +440,7 @@ public class MiningSession {
             // if there is no turret3 on a ship, return true to skip
             boolean t3isMining = ship.getTurretCount() < 3 || turret3.isMining(); 
 
-            if (timer == null && (!t1isMining || !t2isMining || !t3isMining)) {                
+            if (!eveChr.isMonitorIgnore() && timer == null && (!t1isMining || !t2isMining || !t3isMining)) {                
                 button.setForeground(Color.RED);
                 button.setText("/!\\ TURRET /!\\");
             } else {
@@ -470,18 +471,23 @@ public class MiningSession {
                     }
                 }
 
-                int cycle = (int) character.getStats().getTurretCycle();
-                float remcycles = rem /(float)cycle;
-
-                Period remPeriod = Seconds.seconds(rem)
-                    .toStandardDuration().toPeriod();
-
-                button.setText(character.getCharacter().getName() 
-                        + " ("+minutesAndSeconds.print(remPeriod)+")");
-                if (remcycles > 1) {
+                if (eveChr.isMonitorIgnore() && rem == Integer.MAX_VALUE) {
                     button.setForeground(Color.BLACK);
+                    button.setText(character.getCharacter().getName());
                 } else {
-                    button.setForeground(new Color(1 - remcycles, 0, 0));
+                    int cycle = (int) character.getStats().getTurretCycle();
+                    float remcycles = rem /(float)cycle;
+
+                    Period remPeriod = Seconds.seconds(rem)
+                        .toStandardDuration().toPeriod();
+
+                    button.setText(character.getCharacter().getName() 
+                            + " ("+minutesAndSeconds.print(remPeriod)+")");
+                    if (remcycles > 1) {
+                        button.setForeground(Color.BLACK);
+                    } else {
+                        button.setForeground(new Color(1 - remcycles, 0, 0));
+                    }
                 }
             }           
         }

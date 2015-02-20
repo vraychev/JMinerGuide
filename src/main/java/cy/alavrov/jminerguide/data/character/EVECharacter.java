@@ -96,6 +96,7 @@ public class EVECharacter {
     private final HashSet<BasicHarvestable> roidFilter;
     
     private volatile boolean hidden;
+    private volatile boolean monitorIgnore;
     
     /**
      * Constructor for a new character.
@@ -114,6 +115,7 @@ public class EVECharacter {
         this.slot8 = Implant.NOTHING;
         this.slot10 = Implant.NOTHING;
         hidden = false;
+        monitorIgnore = false;
         
         this.roidFilter = new HashSet<>();
         allOnAsteroidFilter();
@@ -138,6 +140,13 @@ public class EVECharacter {
             hidden = false;
         }
         
+        try {
+            attr = root.getAttribute("monitorignore");
+            monitorIgnore = attr.getBooleanValue();
+        } catch (Exception e) {
+            monitorIgnore = false;
+        }
+            
         this.slot7 = Implant.NOTHING;
         this.slot8 = Implant.NOTHING;
         this.slot10 = Implant.NOTHING;
@@ -224,6 +233,7 @@ public class EVECharacter {
             Element root = new Element("character");
             root.setAttribute(new Attribute("id", String.valueOf(id)));    
             root.setAttribute(new Attribute("hidden", String.valueOf(hidden)));    
+            root.setAttribute(new Attribute("monitorignore", String.valueOf(monitorIgnore)));    
             root.addContent(new Element("name").setText(name));
 
             Element skillSet = new Element("skills");
@@ -781,6 +791,26 @@ public class EVECharacter {
         }
     }        
 
+    /**
+     * Returns true, if character's mining status is ignored in the asteroid monitor.
+     * @return 
+     */
+    public boolean isMonitorIgnore() {
+        synchronized(blocker) {
+            return monitorIgnore;
+        }
+    }
+
+    /**
+     * Sets if character's mining status should be ignored in the asteroid monitor.
+     * @param monitorIgnore 
+     */
+    public void setMonitorIgnore(boolean monitorIgnore) {
+        synchronized(blocker) {
+            this.monitorIgnore = monitorIgnore;
+        }
+    }
+        
     /**
      * Returns a copy of asteroid filter.
      * If you want to change something, you shouldn't come here, look at 

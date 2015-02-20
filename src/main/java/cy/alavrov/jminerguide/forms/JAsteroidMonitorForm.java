@@ -204,6 +204,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             shouldLooseOnTop = false;
             if (!this.isAlwaysOnTop()) {
                 this.setAlwaysOnTop(true);
+                msMonitor.restoreMonitorWindow();
+                currentSession.switchToWindow();
             }
             
             String name = session.getCharacterName();
@@ -318,12 +320,16 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (jPanelSetup.getComponent(0).isEnabled()) {
             enableSubcomponents(jPanelSetup, false);
         }
+        
+        if (jCheckBoxCharacterIgnore.isEnabled()) jCheckBoxCharacterIgnore.setEnabled(false);
     }
     
     private void loadCharacterData(MiningSession session) {
         if (!jPanelSetup.getComponent(0).isEnabled()) {
             enableSubcomponents(jPanelSetup, true);
         }
+        
+        if (!jCheckBoxCharacterIgnore.isEnabled()) jCheckBoxCharacterIgnore.setEnabled(true);
         
         SessionCharacter character = session.getSessionCharacter();
         
@@ -345,12 +351,14 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             if (jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(false);
         }
         
+        jCheckBoxCharacterIgnore.setSelected(character.getCharacter().isMonitorIgnore());
+        
         updateCharacterStats(session);
     }
     
     private void updateCharacterStats(MiningSession session) {
         SessionCharacter character = session.getSessionCharacter();
-        if (character == null) return;
+        if (character == null) return;                
         
         CalculatedStats stats = character.getStats();
         jLabelStats.setText(stats.getTurretYield()+" m3 / "+stats.getTurretCycle()+" sec / turret");
@@ -587,7 +595,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jPanelSelector = new javax.swing.JPanel();
         jButtonClose = new javax.swing.JButton();
         jLabelMinerName = new javax.swing.JLabel();
-        jCheckBox1 = new javax.swing.JCheckBox();
+        jCheckBoxCharacterIgnore = new javax.swing.JCheckBox();
         jCheckBox2 = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -936,8 +944,13 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
 
         jLabelMinerName.setText("none");
 
-        jCheckBox1.setText("Ignore");
-        jCheckBox1.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+        jCheckBoxCharacterIgnore.setText("Ignore");
+        jCheckBoxCharacterIgnore.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+        jCheckBoxCharacterIgnore.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxCharacterIgnoreItemStateChanged(evt);
+            }
+        });
 
         jCheckBox2.setText("Popup On Alerts");
 
@@ -955,7 +968,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabelMinerName)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jCheckBox1))
+                        .addComponent(jCheckBoxCharacterIgnore))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jCheckBox2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -969,7 +982,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(jLabelMinerName)
-                    .addComponent(jCheckBox1))
+                    .addComponent(jCheckBoxCharacterIgnore))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanelSetup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1244,6 +1257,15 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButtonStopTimerActionPerformed
 
+    private void jCheckBoxCharacterIgnoreItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxCharacterIgnoreItemStateChanged
+        if (currentSession != null) { 
+            SessionCharacter character = currentSession.getSessionCharacter();
+            if (character != null) {
+                character.getCharacter().setMonitorIgnore(jCheckBoxCharacterIgnore.isSelected());
+            }
+        }
+    }//GEN-LAST:event_jCheckBoxCharacterIgnoreItemStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton15sec;
     private javax.swing.JButton jButton1min;
@@ -1258,8 +1280,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JButton jButtonResetOreHold;
     private javax.swing.JButton jButtonSetOreHold;
     private javax.swing.JButton jButtonStopTimer;
-    private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox2;
+    private javax.swing.JCheckBox jCheckBoxCharacterIgnore;
     private javax.swing.JCheckBox jCheckBoxUseBoosterShip;
     private javax.swing.JComboBox<EVECharacter> jComboBoxBooster;
     private javax.swing.JComboBox<BoosterShip> jComboBoxBoosterShip;

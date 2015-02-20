@@ -57,15 +57,18 @@ public class MiningTask implements Runnable{
             if (curSession != null) lastCurrentSession = curSession;
             
             List<MiningSession> sessions = msMonitor.getSessions();
-            for (MiningSession session : sessions) {
+            for (final MiningSession session : sessions) {
                 try {
                     session.doMining();
                 } catch (AsteroidMinedException | FullOreHoldException e) {
                     java.awt.EventQueue.invokeLater(new Runnable() {
                         @Override
                         public void run(){
+                            SessionCharacter chr = session.getSessionCharacter();
+                            if (chr != null && !chr.getCharacter().isMonitorIgnore()) {
                                 form.setAlwaysOnTop(true);
                                 playSound();
+                            }
                         }
                     });
                 }
@@ -77,9 +80,9 @@ public class MiningTask implements Runnable{
                         java.awt.EventQueue.invokeLater(new Runnable() {
                             @Override
                             public void run(){
-                                    msMonitor.restoreMonitorWindow();
-                                    form.setAlwaysOnTop(true);
-                                    playSound();
+                                msMonitor.restoreMonitorWindow();
+                                form.setAlwaysOnTop(true);
+                                playSound();
                             }
                         });
                     }
