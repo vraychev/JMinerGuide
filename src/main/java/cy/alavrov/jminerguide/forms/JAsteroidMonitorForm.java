@@ -187,7 +187,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     shouldLooseOnTop = true;
                     loseOnTopAt = System.currentTimeMillis() + WINDOW_LOSS_TIMEOUT;
                     updateSessionButtons();
-                    updateTimerButtons();
+                    updateTimerLabel();
                 }
 
                 if (shouldLooseOnTop && loseOnTopAt < System.currentTimeMillis()) {
@@ -221,7 +221,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     jLabelMinerName.setText("none");
                     disableMonitorPanel();
                     updateSessionButtons();
-                    updateTimerButtons();
+                    updateTimerLabel();
                 }
             } else {
                 if (!name.equals(currentMiner)) {                                    
@@ -243,7 +243,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     }
                     
                     updateSessionButtons();
-                    updateTimerButtons();
+                    updateTimerLabel();
                 }
             }                        
         }
@@ -257,39 +257,18 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         processEvents = true;
     }
     
-    private void disableTimerButtons() {
-        if (jButton15sec.isEnabled()) jButton15sec.setEnabled(false);
-        if (jButton30sec.isEnabled()) jButton30sec.setEnabled(false);
-        if (jButton1min.isEnabled()) jButton1min.setEnabled(false);
-        if (jButton2min.isEnabled()) jButton2min.setEnabled(false);
-        if (jButtonCustomTimer.isEnabled()) jButtonCustomTimer.setEnabled(false);
-        if (jTextFieldCustomTimer.isEnabled()) jTextFieldCustomTimer.setEnabled(false);        
-    }
-    
-    private void enableTimerButtons() {
-        if (!jButton15sec.isEnabled()) jButton15sec.setEnabled(true);
-        if (!jButton30sec.isEnabled()) jButton30sec.setEnabled(true);
-        if (!jButton1min.isEnabled()) jButton1min.setEnabled(true);
-        if (!jButton2min.isEnabled()) jButton2min.setEnabled(true);
-        if (!jButtonCustomTimer.isEnabled()) jButtonCustomTimer.setEnabled(true);
-        if (!jTextFieldCustomTimer.isEnabled()) jTextFieldCustomTimer.setEnabled(true);   
-    }
-    
-    public void updateTimerButtons() {
+    public void updateTimerLabel() {
         if (currentSession == null || currentSession.getSessionCharacter() == null) {
-            disableTimerButtons();
             jLabelTimer.setText("0:00");
             return;
         }
         
         MiningTimer mTimer = currentSession.getTimer();
         if (mTimer == null || mTimer.isFinished()) {
-            enableTimerButtons();
             jLabelTimer.setText("0:00");
             return;
         }
         
-        disableTimerButtons();
         Period remPeriod = Seconds.seconds(mTimer.getRemainingSeconds())
                     .toStandardDuration().toPeriod();
 
@@ -1213,28 +1192,28 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private void jButton15secActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton15secActionPerformed
         if (currentSession != null) {
             currentSession.newTimer(15);
-            updateTimerButtons();
+            updateTimerLabel();
         }
     }//GEN-LAST:event_jButton15secActionPerformed
 
     private void jButton30secActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton30secActionPerformed
         if (currentSession != null) {
             currentSession.newTimer(30);
-            updateTimerButtons();
+            updateTimerLabel();
         }
     }//GEN-LAST:event_jButton30secActionPerformed
 
     private void jButton1minActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1minActionPerformed
         if (currentSession != null) {
             currentSession.newTimer(60);
-            updateTimerButtons();
+            updateTimerLabel();
         }
     }//GEN-LAST:event_jButton1minActionPerformed
 
     private void jButton2minActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2minActionPerformed
         if (currentSession != null) {
             currentSession.newTimer(120);
-            updateTimerButtons();
+            updateTimerLabel();
         }
     }//GEN-LAST:event_jButton2minActionPerformed
 
@@ -1243,7 +1222,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             try {
                 int secs = Integer.parseInt(jTextFieldCustomTimer.getText(), 10);
                 currentSession.newTimer(secs);
-                updateTimerButtons();
+                updateTimerLabel();
             } catch (NumberFormatException | NullPointerException e) {
                 // do nothing
             }
@@ -1253,7 +1232,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private void jButtonStopTimerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonStopTimerActionPerformed
         if (currentSession != null) { 
             currentSession.stopTimer();
-            updateTimerButtons();
+            updateTimerLabel();
         }
     }//GEN-LAST:event_jButtonStopTimerActionPerformed
 

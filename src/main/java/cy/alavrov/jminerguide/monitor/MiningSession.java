@@ -398,12 +398,11 @@ public class MiningSession {
     
     /**
      * Starts a new timer.
-     * Will not do anything, if there is no character, or old timer doesn't finished.
+     * Will not do anything, if there is no character.
      * @param seconds 
      */
     public void newTimer(int seconds) {
         if (character == null) return;
-        if (timer != null && !timer.isFinished()) return;
         timer = new MiningTimer(seconds, 5); // preferences tba
     }
     

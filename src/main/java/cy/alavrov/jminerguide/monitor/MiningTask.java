@@ -103,7 +103,7 @@ public class MiningTask implements Runnable{
                     form.notifyTableUpdate();
                     form.updateCurrentCharacterStats();
                     form.updateSessionButtons();
-                    form.updateTimerButtons();
+                    form.updateTimerLabel();
                     
                     form.pack();
                 }
