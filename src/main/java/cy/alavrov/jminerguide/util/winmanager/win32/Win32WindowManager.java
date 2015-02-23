@@ -193,10 +193,4 @@ public class Win32WindowManager implements IWindowManager {
             return out.get(0);
         }
     }
-
-    @Override
-    public void setCurrentWindowForeground() {
-        HWND handle = User32.GetForegroundWindow();
-        User32.ShowWindow(handle, User32.SW_SHOW);
-    }
 }

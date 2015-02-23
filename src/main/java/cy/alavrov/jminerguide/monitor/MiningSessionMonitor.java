@@ -161,8 +161,4 @@ public class MiningSessionMonitor {
     public void restoreMonitorWindow() {
         wManager.restoreMonitorWindow();
     }
-    
-    public void setCurrentWindowForeground() {
-        wManager.setCurrentWindowForeground();
-    }
 }

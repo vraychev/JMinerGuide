@@ -46,7 +46,7 @@ public interface IWindowManager {
     public List<IEVEWindow> getEVEWindowList();
     
     /**
-     * Returns true, if the current window belongs to the asteroid monitor.
+     * Returns true, if the current window belongs to the asteroid monitor or a system task.
      * @return 
      */
     public boolean isMonitorOrSystemWindow();
@@ -59,10 +59,5 @@ public interface IWindowManager {
     /**
      * Restores monitor window.
      */
-    public void restoreMonitorWindow();
-    
-    /**
-     * Restores monitor window.
-     */
-    public void setCurrentWindowForeground();
+    public void restoreMonitorWindow();    
 }
