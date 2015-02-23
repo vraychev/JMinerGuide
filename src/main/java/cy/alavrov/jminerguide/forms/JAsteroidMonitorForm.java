@@ -32,6 +32,7 @@ import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.harvestable.Asteroid;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.log.JMGLogger;
+import cy.alavrov.jminerguide.monitor.AsteroidMonitorSettings;
 import cy.alavrov.jminerguide.monitor.MiningSession;
 import cy.alavrov.jminerguide.monitor.MiningSessionButton;
 import cy.alavrov.jminerguide.monitor.MiningSessionMonitor;
@@ -92,6 +93,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private final DataContainer dCont;
     private final IWindowManager wManager;
     private final MiningSessionMonitor msMonitor;
+    private final AsteroidMonitorSettings settings;
     
     private final ScheduledThreadPoolExecutor timer = new ScheduledThreadPoolExecutor(2);
     
@@ -118,6 +120,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
         this.setTitle("Asteroid Monitor");        
         initComponents();
+        
+        settings = new AsteroidMonitorSettings(dCont.getPath());
         
         AbstractDocument idDoc = ((AbstractDocument)jTextFieldHold.getDocument());
         idDoc.setDocumentFilter(new IntegerDocumentFilter());
@@ -531,6 +535,10 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             jTableRoids.setColumnSelectionInterval(0, 0);
         }
     }
+
+    public AsteroidMonitorSettings getSettings() {
+        return settings;
+    }        
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -1194,28 +1202,28 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
 
     private void jButton15secActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton15secActionPerformed
         if (currentSession != null) {
-            currentSession.newTimer(15);
+            currentSession.newTimer(15, settings.getTimerAlertRemoveTimeout());
             updateTimerLabel();
         }
     }//GEN-LAST:event_jButton15secActionPerformed
 
     private void jButton30secActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton30secActionPerformed
         if (currentSession != null) {
-            currentSession.newTimer(30);
+            currentSession.newTimer(30, settings.getTimerAlertRemoveTimeout());
             updateTimerLabel();
         }
     }//GEN-LAST:event_jButton30secActionPerformed
 
     private void jButton1minActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1minActionPerformed
         if (currentSession != null) {
-            currentSession.newTimer(60);
+            currentSession.newTimer(60, settings.getTimerAlertRemoveTimeout());
             updateTimerLabel();
         }
     }//GEN-LAST:event_jButton1minActionPerformed
 
     private void jButton2minActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2minActionPerformed
         if (currentSession != null) {
-            currentSession.newTimer(120);
+            currentSession.newTimer(120, settings.getTimerAlertRemoveTimeout());
             updateTimerLabel();
         }
     }//GEN-LAST:event_jButton2minActionPerformed
@@ -1224,7 +1232,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (currentSession != null) {            
             try {
                 int secs = Integer.parseInt(jTextFieldCustomTimer.getText(), 10);
-                currentSession.newTimer(secs);
+                currentSession.newTimer(secs, settings.getTimerAlertRemoveTimeout());
                 updateTimerLabel();
             } catch (NumberFormatException | NullPointerException e) {
                 // do nothing

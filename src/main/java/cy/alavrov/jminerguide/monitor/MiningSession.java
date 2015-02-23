@@ -419,9 +419,9 @@ public class MiningSession {
      * Will not do anything, if there is no character.
      * @param seconds 
      */
-    public void newTimer(int seconds) {
+    public void newTimer(int seconds, int secondsToClear) {
         if (character == null) return;
-        timer = new MiningTimer(seconds, 5); // preferences tba
+        timer = new MiningTimer(seconds, secondsToClear);
     }
     
     public void stopTimer() {

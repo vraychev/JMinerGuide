@@ -111,4 +111,8 @@ public class DataContainer {
     public void startAPILoader(Runnable loader) {
         pool.submit(loader);
     }      
+
+    public String getPath() {
+        return path;
+    }        
 }

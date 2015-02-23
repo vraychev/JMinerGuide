@@ -55,6 +55,7 @@ public class MiningTask implements Runnable{
         try {
             MiningSession curSession = msMonitor.getCurrentSession();
             if (curSession != null) lastCurrentSession = curSession;
+            final AsteroidMonitorSettings settings = form.getSettings();
             
             List<MiningSession> sessions = msMonitor.getSessions();
             for (final MiningSession session : sessions) {
@@ -66,8 +67,13 @@ public class MiningTask implements Runnable{
                         public void run(){
                             SessionCharacter chr = session.getSessionCharacter();
                             if (chr != null && !chr.getCharacter().isMonitorIgnore()) {
-                                form.setAlwaysOnTop(true);
-                                playSound();
+                                if (settings.isPopupOnAlert()) {
+                                    msMonitor.restoreMonitorWindow();                                    
+                                    form.setAlwaysOnTop(true);
+                                }
+                                if (settings.isSoundOnAlert()) {
+                                    playSound();
+                                }
                             }
                         }
                     });
@@ -80,9 +86,13 @@ public class MiningTask implements Runnable{
                         java.awt.EventQueue.invokeLater(new Runnable() {
                             @Override
                             public void run(){
-                                msMonitor.restoreMonitorWindow();
-                                form.setAlwaysOnTop(true);
-                                playSound();
+                                if (settings.isPopupOnAlert()) {
+                                    msMonitor.restoreMonitorWindow();
+                                    form.setAlwaysOnTop(true);
+                                }
+                                if (settings.isSoundOnAlert()) {
+                                    playSound();
+                                }
                             }
                         });
                     }
