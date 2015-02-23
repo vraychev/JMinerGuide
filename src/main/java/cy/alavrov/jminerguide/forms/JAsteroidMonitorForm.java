@@ -586,7 +586,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jButtonClose = new javax.swing.JButton();
         jLabelMinerName = new javax.swing.JLabel();
         jCheckBoxCharacterIgnore = new javax.swing.JCheckBox();
-        jCheckBox2 = new javax.swing.JCheckBox();
+        jButtonSettings = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
@@ -942,7 +942,12 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             }
         });
 
-        jCheckBox2.setText("Popup On Alerts");
+        jButtonSettings.setText("Settings");
+        jButtonSettings.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonSettingsActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -960,7 +965,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jCheckBoxCharacterIgnore))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jCheckBox2)
+                        .addComponent(jButtonSettings)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButtonClose)))
                 .addContainerGap())
@@ -980,7 +985,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonClose)
-                    .addComponent(jCheckBox2))
+                    .addComponent(jButtonSettings))
                 .addContainerGap())
         );
 
@@ -1256,6 +1261,13 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jCheckBoxCharacterIgnoreItemStateChanged
 
+    private void jButtonSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSettingsActionPerformed
+        JAsteroidMonitorSettingsDialog dlog = new JAsteroidMonitorSettingsDialog(this, settings);
+        dlog.setLocationRelativeTo(this);
+
+        dlog.setVisible(true);
+    }//GEN-LAST:event_jButtonSettingsActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton15sec;
     private javax.swing.JButton jButton1min;
@@ -1269,8 +1281,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JButton jButtonLoadScan;
     private javax.swing.JButton jButtonResetOreHold;
     private javax.swing.JButton jButtonSetOreHold;
+    private javax.swing.JButton jButtonSettings;
     private javax.swing.JButton jButtonStopTimer;
-    private javax.swing.JCheckBox jCheckBox2;
     private javax.swing.JCheckBox jCheckBoxCharacterIgnore;
     private javax.swing.JCheckBox jCheckBoxUseBoosterShip;
     private javax.swing.JComboBox<EVECharacter> jComboBoxBooster;

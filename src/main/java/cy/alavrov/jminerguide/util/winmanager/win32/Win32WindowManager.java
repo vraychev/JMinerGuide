@@ -156,7 +156,8 @@ public class Win32WindowManager implements IWindowManager {
     @Override
     public boolean isMonitorOrSystemWindow() {
         HWND handle = User32.GetForegroundWindow();        
-        return isDesiredWindow(handle, "Asteroid Monitor", "java.exe") || isSystemWindow(handle);
+        final Pointer pid = Kernel32.GetCurrentProcessId();
+        return isDesiredWindow(handle, "", pid) || isSystemWindow(handle);
     }
 
     @Override
