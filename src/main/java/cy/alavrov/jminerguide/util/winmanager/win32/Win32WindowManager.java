@@ -127,13 +127,9 @@ public class Win32WindowManager implements IWindowManager {
     } 
     
     /**
-     * Returns true, if the window handle belongs to the executable with a given name, and
-     * window's title starts with the given string.
-     * When checking for EVE Online window, it must be created by exefile.exe and it's title should start 
-     * with "EVE"
+     * Returns true, if the window handle belongs to the system process.
+     * Basically, we're catching task switching and taskbar mouseovers here.     
      * @param handle handle to the window
-     * @param titleStartsWith window's title should start with this
-     * @param exename executable name, *converted to lowercase*, should be exactly this
      * @return 
      */
     private boolean isSystemWindow(HWND handle) {
