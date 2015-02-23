@@ -234,21 +234,46 @@ public class MiningSession {
     
     /**
      * Cleans old asteroid list and loads in a new one.
+     * Unbinds all turrets in the process.
      * @param newRoids 
      */
     public void clearAndAddRoids(List<Asteroid> newRoids) {
         if (character == null) return;
-        
+        turret1.unbindAsteroid();
+        turret2.unbindAsteroid();
+        turret3.unbindAsteroid();
+                
+        Set<BasicHarvestable> filter = character.getCharacter().getAsteroidFilter();                
+        roids = new CopyOnWriteArrayList<>(filterRoids(newRoids, filter));
+    }
+    
+    /**
+     * Filters given list of asteroids against a filter set.
+     * Only asteroids with basic harvestables in a filter set will get through.
+     * @param unfiltered
+     * @param filter
+     * @return 
+     */
+    private List<Asteroid> filterRoids(List<Asteroid> unfiltered, Set<BasicHarvestable> filter) {
         List<Asteroid> filtered = new ArrayList<>();
-        Set<BasicHarvestable> filter = character.getCharacter().getAsteroidFilter();
-        for (Asteroid roid : newRoids) {
+        for (Asteroid roid : unfiltered) {
             if (filter.contains(roid.getHarvestable().getBasicHarvestable())) {
                 filtered.add(roid);
             }
         }
+        return filtered;
+    }
+    
+    /**
+     * Resets cargohold, stops turrets and loads in an asteroid list.
+     * @param newRoids 
+     */
+    public void resetAndAddRoids(List<Asteroid> newRoids) {
+        if (character == null) return;
         
-        CopyOnWriteArrayList<Asteroid> newList = new CopyOnWriteArrayList<>(filtered);
-        roids = newList;
+        setUsedCargo(0);
+        Set<BasicHarvestable> filter = character.getCharacter().getAsteroidFilter();                
+        roids = new CopyOnWriteArrayList<>(filterRoids(newRoids, filter));
     }
     
     /**
@@ -258,15 +283,8 @@ public class MiningSession {
     public void addRoids(List<Asteroid> newRoids) {
         if (character == null) return;
         
-        List<Asteroid> filtered = new ArrayList<>();
-        Set<BasicHarvestable> filter = character.getCharacter().getAsteroidFilter();
-        for (Asteroid roid : newRoids) {
-            if (filter.contains(roid.getHarvestable().getBasicHarvestable())) {
-                filtered.add(roid);
-            }
-        }
-        
-        roids.addAll(filtered);
+        Set<BasicHarvestable> filter = character.getCharacter().getAsteroidFilter();                
+        roids.addAll(filterRoids(newRoids, filter));
     }
     
     /**

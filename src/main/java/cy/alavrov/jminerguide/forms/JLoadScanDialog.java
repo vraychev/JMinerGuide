@@ -125,6 +125,7 @@ public class JLoadScanDialog extends javax.swing.JDialog {
         jButtonLoadAndAdd = new javax.swing.JButton();
         jButtonCancel = new javax.swing.JButton();
         jCheckBoxSort = new javax.swing.JCheckBox();
+        jButtonResetAndLoad = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Load Scan");
@@ -163,6 +164,13 @@ public class JLoadScanDialog extends javax.swing.JDialog {
             }
         });
 
+        jButtonResetAndLoad.setText("Reset and Load");
+        jButtonResetAndLoad.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonResetAndLoadActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -170,29 +178,29 @@ public class JLoadScanDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jButtonClearAndLoad, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jButtonResetAndLoad)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonLoadAndAdd, javax.swing.GroupLayout.DEFAULT_SIZE, 103, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jButtonClearAndLoad)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonLoadAndAdd))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jButtonCancel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jCheckBoxSort)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(jButtonCancel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jCheckBoxSort)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 269, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButtonClearAndLoad)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButtonClearAndLoad)
-                    .addComponent(jButtonLoadAndAdd))
+                    .addComponent(jButtonLoadAndAdd)
+                    .addComponent(jButtonResetAndLoad))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonCancel)
@@ -211,6 +219,7 @@ public class JLoadScanDialog extends javax.swing.JDialog {
 
     private void jButtonClearAndLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearAndLoadActionPerformed
         List<Asteroid> roids = parseScan(jTextAreaScan.getText());     
+        
         session.clearAndAddRoids(roids);
         parent.updateAsteroids(session);
         
@@ -234,11 +243,23 @@ public class JLoadScanDialog extends javax.swing.JDialog {
         sortSelected = jCheckBoxSort.isSelected();
     }//GEN-LAST:event_jCheckBoxSortItemStateChanged
 
+    private void jButtonResetAndLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonResetAndLoadActionPerformed
+        List<Asteroid> roids = parseScan(jTextAreaScan.getText()); 
+        
+        session.resetAndAddRoids(roids);
+        parent.updateAsteroids(session);
+        
+        parent.deleteLoadScanDialog();
+        this.setVisible(false);
+        this.dispose();
+    }//GEN-LAST:event_jButtonResetAndLoadActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonCancel;
     private javax.swing.JButton jButtonClearAndLoad;
     private javax.swing.JButton jButtonLoadAndAdd;
+    private javax.swing.JButton jButtonResetAndLoad;
     private javax.swing.JCheckBox jCheckBoxSort;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextAreaScan;
