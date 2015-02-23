@@ -49,7 +49,7 @@ public interface IWindowManager {
      * Returns true, if the current window belongs to the asteroid monitor.
      * @return 
      */
-    public boolean isMonitorWindow();
+    public boolean isMonitorOrSystemWindow();
     
     /**
      * Minimizes monitor window.
@@ -60,4 +60,9 @@ public interface IWindowManager {
      * Restores monitor window.
      */
     public void restoreMonitorWindow();
+    
+    /**
+     * Restores monitor window.
+     */
+    public void setCurrentWindowForeground();
 }

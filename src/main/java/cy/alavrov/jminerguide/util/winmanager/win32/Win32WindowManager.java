@@ -125,11 +125,42 @@ public class Win32WindowManager implements IWindowManager {
         
         return false;
     } 
+    
+    /**
+     * Returns true, if the window handle belongs to the executable with a given name, and
+     * window's title starts with the given string.
+     * When checking for EVE Online window, it must be created by exefile.exe and it's title should start 
+     * with "EVE"
+     * @param handle handle to the window
+     * @param titleStartsWith window's title should start with this
+     * @param exename executable name, *converted to lowercase*, should be exactly this
+     * @return 
+     */
+    private boolean isSystemWindow(HWND handle) {
+        if (handle != null) {
+            char[] buffer = new char[1024];
+            User32.GetWindowTextW(handle, buffer, buffer.length);
+            String curTitle = Native.toString(buffer);
+            if (curTitle.isEmpty() ||  curTitle.startsWith("Task Switching")) {                
+                PointerByReference pointer = new PointerByReference();
+                User32.GetWindowThreadProcessId(handle, pointer);
+                Pointer process = Kernel32.OpenProcess(Kernel32.PROCESS_QUERY_INFORMATION | Kernel32.PROCESS_VM_READ, false, pointer.getValue());
+                
+                int res = Psapi.GetModuleBaseNameW(process, null, buffer, 1024);
+                if (res != 0) {
+                    String exeName = Native.toString(buffer);           
+                    return exeName.toLowerCase().equals("explorer.exe");                                              
+                }
+            }
+        }
+        
+        return false;
+    }
 
     @Override
-    public boolean isMonitorWindow() {
-        HWND handle = User32.GetForegroundWindow();
-        return isDesiredWindow(handle, "Asteroid Monitor", "java.exe");
+    public boolean isMonitorOrSystemWindow() {
+        HWND handle = User32.GetForegroundWindow();        
+        return isDesiredWindow(handle, "Asteroid Monitor", "java.exe") || isSystemWindow(handle);
     }
 
     @Override
@@ -165,5 +196,11 @@ public class Win32WindowManager implements IWindowManager {
         } else {
             return out.get(0);
         }
+    }
+
+    @Override
+    public void setCurrentWindowForeground() {
+        HWND handle = User32.GetForegroundWindow();
+        User32.ShowWindow(handle, User32.SW_SHOW);
     }
 }

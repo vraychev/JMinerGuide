@@ -141,11 +141,11 @@ public class MiningSessionMonitor {
     }
     
     /**
-     * Returns true, if current window belongs to the asteroid monitor.
+     * Returns true, if current window belongs to the asteroid monitor or a system (task switching, tile mouseover).
      * @return 
      */
-    public boolean isMonitorWindow() {
-        return wManager.isMonitorWindow();
+    public boolean isMonitorOrSystemWindow() {
+        return wManager.isMonitorOrSystemWindow();
     }
     
     /**
@@ -160,5 +160,9 @@ public class MiningSessionMonitor {
      */
     public void restoreMonitorWindow() {
         wManager.restoreMonitorWindow();
+    }
+    
+    public void setCurrentWindowForeground() {
+        wManager.setCurrentWindowForeground();
     }
 }

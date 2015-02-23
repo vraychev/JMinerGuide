@@ -40,6 +40,7 @@ public class User32 {
     }
     
     public static int SW_HIDE = 0;
+    public static int SW_SHOW = 5;
     public static int SW_MINIMIZE = 6;
     public static int SW_RESTORE = 9;
     

@@ -192,8 +192,9 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
 
                 if (shouldLooseOnTop && loseOnTopAt < System.currentTimeMillis()) {
                     this.setAlwaysOnTop(false);
-                    if (!msMonitor.isMonitorWindow()) {
+                    if (!msMonitor.isMonitorOrSystemWindow()) {
                         msMonitor.minimizeMonitorWindow();
+                        msMonitor.setCurrentWindowForeground();
                     }
                     shouldLooseOnTop = false;
                 }

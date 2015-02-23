@@ -88,7 +88,7 @@ public class MiningTask implements Runnable{
                     }
                     
                     if ( // either we switched off from right window to the monitor
-                            ((session.equals(lastCurrentSession) && msMonitor.isMonitorWindow()) || 
+                            ((session.equals(lastCurrentSession) && msMonitor.isMonitorOrSystemWindow()) || 
                             // or we in the right window.
                             (session.equals(curSession))) 
                             && timer.isOkToClear()) {
