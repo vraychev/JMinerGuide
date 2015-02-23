@@ -428,6 +428,10 @@ public class MiningSession {
         timer = null;
     }
     
+    private String getButtonHTML(String name, String secondLine) {
+        return "<html><center>"+name+"<br>"+secondLine+"</center></html>";
+    }
+    
     /**
      * Updates corresponding session button with actual information, based
      * on the session state.
@@ -435,18 +439,18 @@ public class MiningSession {
      */
     public void updateButton(MiningSessionButton button) {
         if (character == null) {
-            button.setText(getCharacterName());
+            button.setText(getButtonHTML(getCharacterName(), "&nbsp;"));
         } else {
             EVECharacter eveChr = character.getCharacter();
             if (!eveChr.isMonitorIgnore() && getRemainingCargo() < 1) {
                 button.setForeground(Color.RED);
-                button.setText("/!\\ CARGO /!\\");
+                button.setText(getButtonHTML(getCharacterName(), "/!\\ CARGO /!\\"));
                 return;
             } 
             
             if (timer != null && timer.isFinished()) {
                 button.setForeground(Color.RED);
-                button.setText("/!\\ TIMER /!\\");
+                button.setText(getButtonHTML(getCharacterName(), "/!\\ TIMER /!\\"));
                 return;
             }
             
@@ -459,7 +463,7 @@ public class MiningSession {
 
             if (!eveChr.isMonitorIgnore() && timer == null && (!t1isMining || !t2isMining || !t3isMining)) {                
                 button.setForeground(Color.RED);
-                button.setText("/!\\ TURRET /!\\");
+                button.setText(getButtonHTML(getCharacterName(), "/!\\ TURRET /!\\"));
             } else {
                 int rem = Integer.MAX_VALUE;
 
@@ -490,7 +494,7 @@ public class MiningSession {
 
                 if (eveChr.isMonitorIgnore() && rem == Integer.MAX_VALUE) {
                     button.setForeground(Color.BLACK);
-                    button.setText(character.getCharacter().getName());
+                    button.setText(getButtonHTML(character.getCharacter().getName(), "&nbsp;"));
                 } else {
                     int cycle = (int) character.getStats().getTurretCycle();
                     float remcycles = rem /(float)cycle;
@@ -498,8 +502,8 @@ public class MiningSession {
                     Period remPeriod = Seconds.seconds(rem)
                         .toStandardDuration().toPeriod();
 
-                    button.setText(character.getCharacter().getName() 
-                            + " ("+minutesAndSeconds.print(remPeriod)+")");
+                    button.setText(getButtonHTML(character.getCharacter().getName(), 
+                            minutesAndSeconds.print(remPeriod)));
                     if (remcycles > 1) {
                         button.setForeground(Color.BLACK);
                     } else {
