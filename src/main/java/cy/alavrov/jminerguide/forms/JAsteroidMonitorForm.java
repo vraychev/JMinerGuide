@@ -50,6 +50,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -122,6 +123,10 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         initComponents();
         
         settings = new AsteroidMonitorSettings(dCont.getPath());
+        this.setLocationRelativeTo(null);
+        if (settings.getX() != -1 && settings.getX() != -1) {
+            this.setLocation(settings.getX(), settings.getY());
+        }
         
         AbstractDocument idDoc = ((AbstractDocument)jTextFieldHold.getDocument());
         idDoc.setDocumentFilter(new IntegerDocumentFilter());
@@ -594,6 +599,11 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jSpinnerSequence = new javax.swing.JSpinner();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentMoved(java.awt.event.ComponentEvent evt) {
+                formComponentMoved(evt);
+            }
+        });
 
         jLabel1.setText("Character:");
 
@@ -1009,6 +1019,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCloseActionPerformed
+        settings.save();
         parent.setVisible(true);
         this.setVisible(false);
         this.dispose();
@@ -1298,6 +1309,12 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         processEvents = true;
     }//GEN-LAST:event_jSpinnerSequenceStateChanged
 
+    private void formComponentMoved(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentMoved
+        Point topleft = getLocationOnScreen();
+        settings.setX(topleft.x);
+        settings.setY(topleft.y);
+    }//GEN-LAST:event_formComponentMoved
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton15sec;
     private javax.swing.JButton jButton1min;
@@ -1340,4 +1357,5 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JToggleButton jToggleButtonTurret3;
     // End of variables declaration//GEN-END:variables
 }
+
 

@@ -57,6 +57,16 @@ public class AsteroidMonitorSettings {
      * How many seconds we should wait before removing an expired timer alert?
      */
     private volatile int timerAlertRemoveTimeout;
+    
+    /**
+     * X coordinate of the top left corner.
+     */
+    private volatile int x;
+    
+    /**
+     * Y coordinate of the top left corner.
+     */
+    private volatile int y;
 
     public AsteroidMonitorSettings(String path) {
         this.path = path;
@@ -66,6 +76,8 @@ public class AsteroidMonitorSettings {
             popupOnAlert = true;
             soundOnAlert = true;
             timerAlertRemoveTimeout = 5;
+            x = -1;
+            y = -1;
             save();
             return;
         }
@@ -79,11 +91,15 @@ public class AsteroidMonitorSettings {
             soundOnAlert = "true".equals(rootNode.getChildText("soundonalert"));
             
             timerAlertRemoveTimeout = Integer.parseInt(rootNode.getChildText("timeralerttimeout"), 10);            
+            x = Integer.parseInt(rootNode.getChildText("x"), 10);               
+            y = Integer.parseInt(rootNode.getChildText("y"), 10);            
         } catch (Exception e) {
             JMGLogger.logSevere("Unable to load settings for the asteroid monitor", e);
             popupOnAlert = true;
             soundOnAlert = true;
             timerAlertRemoveTimeout = 5;
+            x = -1;
+            y = -1;
         } 
     }
     
@@ -112,6 +128,8 @@ public class AsteroidMonitorSettings {
         root.addContent(new Element("soundonalert").setText(String.valueOf(soundOnAlert)));
         root.addContent(new Element("timeralerttimeout").setText(String.valueOf(timerAlertRemoveTimeout)));
 
+        root.addContent(new Element("x").setText(String.valueOf(x)));
+        root.addContent(new Element("y").setText(String.valueOf(y)));
         
         XMLOutputter xmlOutput = new XMLOutputter();
         xmlOutput.setFormat(Format.getPrettyFormat());
@@ -168,5 +186,37 @@ public class AsteroidMonitorSettings {
      */
     public void setTimerAlertRemoveTimeout(int timerAlertRemoveTimeout) {
         this.timerAlertRemoveTimeout = timerAlertRemoveTimeout;
+    }
+
+    /**
+     * X coordinate of the top left corner.
+     * @return the x
+     */
+    public int getX() {
+        return x;
+    }
+
+    /**
+     * X coordinate of the top left corner.
+     * @param x the x to set
+     */
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    /**
+     * Y coordinate of the top left corner.
+     * @return the y
+     */
+    public int getY() {
+        return y;
+    }
+
+    /**
+     * Y coordinate of the top left corner.
+     * @param y the y to set
+     */
+    public void setY(int y) {
+        this.y = y;
     }
 }
