@@ -429,6 +429,14 @@ public class MiningSession {
     }
     
     private String getButtonHTML(String name, String secondLine) {
+        if (name == null) {
+            name = "- no pilot selected -";
+        }
+        
+        if (secondLine == null) {
+            secondLine = "";
+        }
+        
         return "<html><center>"+name+"<br>"+secondLine+"</center></html>";
     }
     
