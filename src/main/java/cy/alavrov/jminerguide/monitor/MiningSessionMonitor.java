@@ -161,4 +161,20 @@ public class MiningSessionMonitor {
     public void restoreMonitorWindow() {
         wManager.restoreMonitorWindow();
     }
+    
+    /**
+     * Returns true, if popup on alerts is enabled, and any of the sessions
+     * have some alerts to show, false otherwise. Session alerts detection is 
+     * influenced by "ignore character" setting, just as any other alert detection.
+     * @param settings
+     * @return 
+     */
+    public boolean haveAlerts(AsteroidMonitorSettings settings) {
+        if (!settings.isPopupOnAlert()) return false;
+        for (MiningSession session : sessions.values()) {
+            if (session.haveAlerts()) return true;
+        }
+        
+        return false;
+    }
 }

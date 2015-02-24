@@ -64,6 +64,7 @@ public class MiningSession {
     private final TurretInstance turret2;
     private final TurretInstance turret3;
     private volatile MiningTimer timer;
+    private volatile boolean haveAlerts = false;
     
     public MiningSession(IEVEWindow window) {
         this.window = window;
@@ -384,6 +385,7 @@ public class MiningSession {
         }
         
         if (isHoldError) {
+            haveAlerts = true;
             // we should unbind all turrets here, because we could get the exception
             // only on the last turret, for example.
             turret1.unbindAsteroid();
@@ -393,6 +395,7 @@ public class MiningSession {
         }
         
         if (isRoidError) {
+            haveAlerts = true;
             throw roidEx;
         }
     }
@@ -448,15 +451,18 @@ public class MiningSession {
     public void updateButton(MiningSessionButton button) {
         if (character == null) {
             button.setText(getButtonHTML(getCharacterName(), "&nbsp;"));
+            haveAlerts = false;
         } else {
             EVECharacter eveChr = character.getCharacter();
             if (!eveChr.isMonitorIgnore() && getRemainingCargo() < 1) {
+                haveAlerts = true;
                 button.setForeground(Color.RED);
                 button.setText(getButtonHTML(getCharacterName(), "/!\\ CARGO /!\\"));
                 return;
             } 
             
             if (timer != null && timer.isFinished()) {
+                haveAlerts = true;
                 button.setForeground(Color.RED);
                 button.setText(getButtonHTML(getCharacterName(), "/!\\ TIMER /!\\"));
                 return;
@@ -469,10 +475,12 @@ public class MiningSession {
             // if there is no turret3 on a ship, return true to skip
             boolean t3isMining = ship.getTurretCount() < 3 || turret3.isMining(); 
 
-            if (!eveChr.isMonitorIgnore() && timer == null && (!t1isMining || !t2isMining || !t3isMining)) {                
+            if (!eveChr.isMonitorIgnore() && timer == null && (!t1isMining || !t2isMining || !t3isMining)) {  
+                haveAlerts = true;              
                 button.setForeground(Color.RED);
                 button.setText(getButtonHTML(getCharacterName(), "/!\\ TURRET /!\\"));
             } else {
+                haveAlerts = false;
                 int rem = Integer.MAX_VALUE;
 
                 // we skip remaining time of 0, as unused turrets return exactly that.
@@ -522,6 +530,13 @@ public class MiningSession {
         }
     }
     
+    /**
+     * Returns true, if the session have alerts.     
+     * @return 
+     */
+    boolean haveAlerts() {
+        return haveAlerts;
+    }
     
     public class AsteroidTableModel extends AbstractTableModel {                
 

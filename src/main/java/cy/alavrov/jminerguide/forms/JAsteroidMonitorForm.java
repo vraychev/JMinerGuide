@@ -186,7 +186,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         
         MiningSession session = msMonitor.getCurrentSession();
         if (session == null) {            
-            if (lsDlog == null) { // only hide if we doesn't have load scan dialog open.
+            if (lsDlog == null && !msMonitor.haveAlerts(settings)) { 
+                // only hide if we doesn't have load scan dialog open and have no alerts.
                 // wait a few milliseconds to lose always on top to combat flickering.
                 if (this.isAlwaysOnTop() && !shouldLooseOnTop) {
                     shouldLooseOnTop = true;
