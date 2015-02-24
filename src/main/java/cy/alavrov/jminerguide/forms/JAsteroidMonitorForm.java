@@ -308,6 +308,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
         
         if (jCheckBoxCharacterIgnore.isEnabled()) jCheckBoxCharacterIgnore.setEnabled(false);
+        if (jSpinnerSequence.isEnabled()) jSpinnerSequence.setEnabled(false);
     }
     
     private void loadCharacterData(MiningSession session) {
@@ -316,6 +317,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
         
         if (!jCheckBoxCharacterIgnore.isEnabled()) jCheckBoxCharacterIgnore.setEnabled(true);
+        if (!jSpinnerSequence.isEnabled()) jSpinnerSequence.setEnabled(true);
         
         SessionCharacter character = session.getSessionCharacter();
         
