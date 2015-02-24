@@ -338,6 +338,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
         
         jCheckBoxCharacterIgnore.setSelected(character.getCharacter().isMonitorIgnore());
+        jSpinnerSequence.setValue(character.getCharacter().getMonitorSequence());
         
         updateCharacterStats(session);
     }
@@ -588,6 +589,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jLabelMinerName = new javax.swing.JLabel();
         jCheckBoxCharacterIgnore = new javax.swing.JCheckBox();
         jButtonSettings = new javax.swing.JButton();
+        jSpinnerSequence = new javax.swing.JSpinner();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
@@ -923,7 +925,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         );
         jPanelSelectorLayout.setVerticalGroup(
             jPanelSelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 89, Short.MAX_VALUE)
+            .addGap(0, 84, Short.MAX_VALUE)
         );
 
         jButtonClose.setText("Close");
@@ -950,6 +952,14 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             }
         });
 
+        jSpinnerSequence.setModel(new javax.swing.SpinnerNumberModel(0, 0, 99, 1));
+        jSpinnerSequence.setToolTipText("Sequence of the character in session list. Characters with bigger sequence number go first in list");
+        jSpinnerSequence.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jSpinnerSequenceStateChanged(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -964,6 +974,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabelMinerName)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jSpinnerSequence, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jCheckBoxCharacterIgnore))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jButtonSettings)
@@ -978,7 +990,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(jLabelMinerName)
-                    .addComponent(jCheckBoxCharacterIgnore))
+                    .addComponent(jCheckBoxCharacterIgnore)
+                    .addComponent(jSpinnerSequence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanelSetup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1269,6 +1282,20 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         dlog.setVisible(true);
     }//GEN-LAST:event_jButtonSettingsActionPerformed
 
+    private void jSpinnerSequenceStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinnerSequenceStateChanged
+        if (!processEvents) return;
+        processEvents = false;
+        
+        if (currentSession != null) { 
+            SessionCharacter character = currentSession.getSessionCharacter();
+            if (character != null) {
+                character.getCharacter().setMonitorSequence((int) jSpinnerSequence.getValue());
+            }
+        }
+        
+        processEvents = true;
+    }//GEN-LAST:event_jSpinnerSequenceStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton15sec;
     private javax.swing.JButton jButton1min;
@@ -1302,6 +1329,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanelSelector;
     private javax.swing.JPanel jPanelSetup;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSpinner jSpinnerSequence;
     private javax.swing.JTable jTableRoids;
     private javax.swing.JTextField jTextFieldCustomTimer;
     private javax.swing.JTextField jTextFieldHold;

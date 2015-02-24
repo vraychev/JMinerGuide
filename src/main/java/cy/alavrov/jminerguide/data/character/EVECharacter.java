@@ -92,6 +92,7 @@ public class EVECharacter {
     private volatile String monitorBooster;
     private volatile String monitorBoosterShip;
     private volatile boolean monitorUseBoosterShip = false;
+    private volatile int monitorSequence = 0;
     
     private final HashSet<BasicHarvestable> roidFilter;
     
@@ -138,13 +139,6 @@ public class EVECharacter {
             hidden = attr.getBooleanValue();
         } catch (Exception e) {
             hidden = false;
-        }
-        
-        try {
-            attr = root.getAttribute("monitorignore");
-            monitorIgnore = attr.getBooleanValue();
-        } catch (Exception e) {
-            monitorIgnore = false;
         }
             
         this.slot7 = Implant.NOTHING;
@@ -194,6 +188,20 @@ public class EVECharacter {
         Element monitorConf = root.getChild("monitor");
         
         try {
+            attr = monitorConf.getAttribute("ignore");
+            monitorIgnore = attr.getBooleanValue();
+        } catch (Exception e) {
+            monitorIgnore = false;
+        }
+        
+        try {
+            attr = monitorConf.getAttribute("sequence");
+            monitorSequence = attr.getIntValue();
+        } catch (Exception e) {
+            monitorSequence = 0;
+        }
+        
+        try {
             monitorBooster = monitorConf.getChildText("booster");
             monitorShip = monitorConf.getChildText("ship");
             monitorBoosterShip = monitorConf.getChildText("boostership");
@@ -233,7 +241,6 @@ public class EVECharacter {
             Element root = new Element("character");
             root.setAttribute(new Attribute("id", String.valueOf(id)));    
             root.setAttribute(new Attribute("hidden", String.valueOf(hidden)));    
-            root.setAttribute(new Attribute("monitorignore", String.valueOf(monitorIgnore)));    
             root.addContent(new Element("name").setText(name));
 
             Element skillSet = new Element("skills");
@@ -257,6 +264,9 @@ public class EVECharacter {
             root.addContent(implantSet);
 
             Element monitorConf = new Element("monitor");
+            monitorConf.setAttribute(new Attribute("ignore", String.valueOf(monitorIgnore)));  
+            monitorConf.setAttribute(new Attribute("sequence", String.valueOf(monitorSequence)));    
+            
             if (monitorBooster != null) {
                Element boosterElem = new Element("booster");
                boosterElem.setText(monitorBooster);
@@ -843,12 +853,20 @@ public class EVECharacter {
         }
     }
     
+    /**
+     * Clears asteroid filter.
+     * Equivalent to "allow nothing" filter.
+     */
     public void clearAsteroidFilter() {
         synchronized(blocker) {
             roidFilter.clear();
         }
     }
     
+    /**
+     * Fills asteroid filter with every ore harvestable out there.
+     * Equivalent to "allow all" filter.
+     */
     public final void allOnAsteroidFilter() {
         synchronized(blocker) {
             for (BasicHarvestable hv : BasicHarvestable.values()) {
@@ -858,4 +876,18 @@ public class EVECharacter {
             }
         }
     }
+
+    public void setMonitorSequence(int monitorSequence) {
+        synchronized(blocker) {
+            this.monitorSequence = monitorSequence;
+        }
+    }
+
+    public int getMonitorSequence() {
+        synchronized(blocker) {
+            return monitorSequence;
+        }
+    }
+    
+    
 }

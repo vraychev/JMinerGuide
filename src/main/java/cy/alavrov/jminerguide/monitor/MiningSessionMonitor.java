@@ -31,6 +31,8 @@ import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
 import cy.alavrov.jminerguide.util.winmanager.IWindowManager;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,6 +42,36 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class MiningSessionMonitor {
+    /**
+     * A comparator to compare sessions by their char sequence.
+     * Sessions with no chars receive Integer.MIN_VALUE sequence.
+     */
+    private final static Comparator<MiningSession> seqComparator = new Comparator<MiningSession>() {
+
+        @Override
+        public int compare(MiningSession o1, MiningSession o2) {
+            int thisSeq = 0;
+            int otherSeq = 0;
+            
+            SessionCharacter sChar = o1.getSessionCharacter();
+            if (sChar == null) {
+                thisSeq = Integer.MIN_VALUE;
+            } else {
+                thisSeq = sChar.getCharacter().getMonitorSequence();
+            }
+            
+            sChar = o2.getSessionCharacter();
+            if (sChar == null) {
+                otherSeq = Integer.MIN_VALUE;
+            } else {
+                otherSeq = sChar.getCharacter().getMonitorSequence();
+            }
+            
+            // greater ones go in first, so reverse comparing.
+            return Integer.valueOf(otherSeq).compareTo(thisSeq);            
+        }
+    };
+    
     private final IWindowManager wManager;
     private final DataContainer dCont;
     private volatile IEVEWindow currentWindow = null;
@@ -130,6 +162,7 @@ public class MiningSessionMonitor {
         
     /**
      * Returns all of the sessions available at this moment.
+     * Sessions are sorted by their sequence, unknown ones go to the end.
      * @return 
      */
     public List<MiningSession> getSessions() {
@@ -137,6 +170,7 @@ public class MiningSessionMonitor {
         for (MiningSession session : sessions.values()) {
             out.add(session);
         }
+        Collections.sort(out, seqComparator);
         return out;
     }
     
