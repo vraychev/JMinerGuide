@@ -555,6 +555,43 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         return settings;
     }        
     
+    private void setCustomHold() {
+        MiningSession sess = currentSession;
+        if (sess != null) {
+            String hold = jTextFieldHold.getText();
+            int newHoldSize;
+            try {
+                newHoldSize = Integer.parseInt(hold, 10);
+            } catch (NumberFormatException e) {
+                newHoldSize = 0;
+            }
+
+            SessionCharacter curchar = sess.getSessionCharacter();
+            if (curchar != null) {
+                int maxHoldSize = curchar.getStats().getOreHold();
+                if (newHoldSize > maxHoldSize) newHoldSize = maxHoldSize;
+            } else {
+                newHoldSize = 0;
+            }
+
+            sess.setUsedCargo(newHoldSize);
+            updateCharacterStats(sess);
+        }
+    }
+    
+    private void setCustomTimer() {
+        MiningSession sess = currentSession;
+        if (sess != null) {            
+            try {
+                int secs = Integer.parseInt(jTextFieldCustomTimer.getText(), 10);
+                sess.newTimer(secs, settings.getTimerAlertRemoveTimeout());
+                updateTimerLabel();
+            } catch (NumberFormatException | NullPointerException e) {
+                // do nothing
+            }
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -643,6 +680,11 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         });
 
         jTextFieldHold.setText("0");
+        jTextFieldHold.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldHoldActionPerformed(evt);
+            }
+        });
 
         jButtonSetOreHold.setText("Set");
         jButtonSetOreHold.setActionCommand("");
@@ -794,6 +836,11 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         });
 
         jTextFieldCustomTimer.setText("0");
+        jTextFieldCustomTimer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldCustomTimerActionPerformed(evt);
+            }
+        });
 
         jButtonCustomTimer.setText("Custom");
         jButtonCustomTimer.addActionListener(new java.awt.event.ActionListener() {
@@ -1191,27 +1238,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (!processEvents) return;
         processEvents = false;
 
-        MiningSession sess = currentSession;
-        if (sess != null) {
-            String hold = jTextFieldHold.getText();
-            int newHoldSize;
-            try {
-                newHoldSize = Integer.decode(hold);
-            } catch (NumberFormatException e) {
-                newHoldSize = 0;
-            }
-
-            SessionCharacter curchar = sess.getSessionCharacter();
-            if (curchar != null) {
-                int maxHoldSize = curchar.getStats().getOreHold();
-                if (newHoldSize > maxHoldSize) newHoldSize = maxHoldSize;
-            } else {
-                newHoldSize = 0;
-            }
-
-            sess.setUsedCargo(newHoldSize);
-            updateCharacterStats(sess);
-        }
+        setCustomHold();
 
         processEvents = true;
     }//GEN-LAST:event_jButtonSetOreHoldActionPerformed
@@ -1290,16 +1317,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2minActionPerformed
 
     private void jButtonCustomTimerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCustomTimerActionPerformed
-        MiningSession sess = currentSession;
-        if (sess != null) {            
-            try {
-                int secs = Integer.parseInt(jTextFieldCustomTimer.getText(), 10);
-                sess.newTimer(secs, settings.getTimerAlertRemoveTimeout());
-                updateTimerLabel();
-            } catch (NumberFormatException | NullPointerException e) {
-                // do nothing
-            }
-        }
+        setCustomTimer();
     }//GEN-LAST:event_jButtonCustomTimerActionPerformed
 
     private void jButtonStopTimerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonStopTimerActionPerformed
@@ -1347,6 +1365,24 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         settings.setX(topleft.x);
         settings.setY(topleft.y);
     }//GEN-LAST:event_formComponentMoved
+
+    private void jTextFieldHoldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldHoldActionPerformed
+        if (!processEvents) return;
+        processEvents = false;
+
+        setCustomHold();
+
+        processEvents = true;
+    }//GEN-LAST:event_jTextFieldHoldActionPerformed
+
+    private void jTextFieldCustomTimerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldCustomTimerActionPerformed
+        if (!processEvents) return;
+        processEvents = false;
+        
+        setCustomTimer();
+
+        processEvents = true;
+    }//GEN-LAST:event_jTextFieldCustomTimerActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton15sec;

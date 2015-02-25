@@ -516,7 +516,13 @@ public class EVECharacter {
         out.slot7 = slot7;
         out.slot8 = slot8;
         out.slot10 = slot10;   
-        out.hidden = hidden;     
+        out.hidden = hidden; 
+        out.monitorBooster = monitorBooster;
+        out.monitorBoosterShip = monitorBoosterShip;
+        out.monitorIgnore = monitorIgnore;
+        out.monitorSequence = monitorSequence;
+        out.monitorShip = monitorShip;
+        out.monitorUseBoosterShip = monitorUseBoosterShip;
         return out;
     }
     
@@ -531,6 +537,12 @@ public class EVECharacter {
         out.slot8 = slot8;
         out.slot10 = slot10;
         out.hidden = hidden;
+        out.monitorBooster = monitorBooster;
+        out.monitorBoosterShip = monitorBoosterShip;
+        out.monitorIgnore = monitorIgnore;
+        out.monitorSequence = monitorSequence;
+        out.monitorShip = monitorShip;
+        out.monitorUseBoosterShip = monitorUseBoosterShip;
         return out;
     }
     
