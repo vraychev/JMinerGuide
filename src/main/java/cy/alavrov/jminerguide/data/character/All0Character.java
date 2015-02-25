@@ -26,13 +26,13 @@
 package cy.alavrov.jminerguide.data.character;
 
 /**
- *
+ * Preset character with all skills to 0.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class All0Character extends EVECharacter{
 
     public All0Character() {
-        super(-1, "All 0", null);
+        super(-1, "• All 0", null);
     }
     
     @Override
@@ -47,7 +47,7 @@ public class All0Character extends EVECharacter{
     
     @Override
     public String toString() {
-        return "All 0";
+        return "• All 0";
     }
     
     @Override

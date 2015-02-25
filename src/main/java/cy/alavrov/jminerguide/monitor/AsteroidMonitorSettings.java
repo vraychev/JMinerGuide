@@ -27,7 +27,7 @@ package cy.alavrov.jminerguide.monitor;
 
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -133,8 +133,8 @@ public class AsteroidMonitorSettings {
         
         XMLOutputter xmlOutput = new XMLOutputter();
         xmlOutput.setFormat(Format.getPrettyFormat());
-        try (FileWriter fw = new FileWriter(path+File.separator+"amsettings.dat")){
-            xmlOutput.output(doc, fw);
+        try (FileOutputStream fos = new FileOutputStream(path+File.separator+"amsettings.dat")){
+            xmlOutput.output(doc, fos);
         } catch (Exception e) {
             JMGLogger.logSevere("Unable to save "+path+File.separator+"amsettings.dat", e);
         }

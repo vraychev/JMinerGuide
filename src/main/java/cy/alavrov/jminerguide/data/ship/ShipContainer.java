@@ -27,7 +27,7 @@ package cy.alavrov.jminerguide.data.ship;
 
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,7 +47,6 @@ public class ShipContainer {
     
     private final String path;
     
-    private final Object blocker = new Object();
     private String selectedShip;
     
     public ShipContainer(String path) {
@@ -62,7 +61,7 @@ public class ShipContainer {
     /**
      * Loads ships from a configuration file.
      */
-    public void load() {        
+    public synchronized void load() {        
         JMGLogger.logWarning("Loading ships...");
         File src = new File(path+File.separator+"ships.dat");
         if (!src.exists()) {            
@@ -88,22 +87,20 @@ public class ShipContainer {
             JMGLogger.logSevere("Unable to load a configuration file for ships", e);
         } 
         
-        synchronized(blocker) {
-            ships = newShips;
-            if (ships.isEmpty()) {
-                Ship ship = new Ship("T1 Venture");
-                ships.put(ship.getName(), ship);
-            }
-            // ships is never empty, so it's ok.
-            if (lastSelectedShip == null) lastSelectedShip = ships.values().iterator().next().getName();
-            selectedShip = lastSelectedShip;
+        ships = newShips;
+        if (ships.isEmpty()) {
+            Ship ship = new Ship("T1 Venture");
+            ships.put(ship.getName(), ship);
         }
+        // ships is never empty, so it's ok.
+        if (lastSelectedShip == null) lastSelectedShip = ships.values().iterator().next().getName();
+        selectedShip = lastSelectedShip;
     }
     
     /**
      * Saves all the ships into a file.
      */
-    public void save() {
+    public synchronized void save() {
         File src = new File(path+File.separator+"ships.dat");
         if (!src.exists()) {
             try {
@@ -121,21 +118,19 @@ public class ShipContainer {
         Element root = new Element("ships");
         Document doc = new Document(root);
                 
-        synchronized(blocker) {
-            String lastShip = selectedShip;
-            if (lastShip == null) lastShip = ships.values().iterator().next().getName();            
-            root.addContent(new Element("lastselectedship").setText(lastShip));
-            
-            for (Ship ship : ships.values()) {
-                Element elem = ship.getXMLElement();
-                root.addContent(elem);
-            }
+        String lastShip = selectedShip;
+        if (lastShip == null) lastShip = ships.values().iterator().next().getName();            
+        root.addContent(new Element("lastselectedship").setText(lastShip));
+
+        for (Ship ship : ships.values()) {
+            Element elem = ship.getXMLElement();
+            root.addContent(elem);
         }
         
         XMLOutputter xmlOutput = new XMLOutputter();
         xmlOutput.setFormat(Format.getPrettyFormat());
-        try (FileWriter fw = new FileWriter(path+File.separator+"ships.dat")){
-            xmlOutput.output(doc, fw);
+        try (FileOutputStream fos = new FileOutputStream(path+File.separator+"ships.dat")){
+            xmlOutput.output(doc, fos);
         } catch (Exception e) {
             JMGLogger.logSevere("Unable to save "+path+File.separator+"ships.dat", e);
         }
@@ -145,15 +140,13 @@ public class ShipContainer {
      * Returns a combo box model with ships for a Swing combo box. Ships are sorted by insertion order.
      * @return 
      */
-    public DefaultComboBoxModel<Ship> getShipModel() {
+    public synchronized DefaultComboBoxModel<Ship> getShipModel() {
         DefaultComboBoxModel<Ship> out = new DefaultComboBoxModel<>();
-                                        
-        synchronized(blocker) {
-            if (ships.isEmpty()) return out;
-            
-            for (Ship ship : ships.values()) {
-                out.addElement(ship);
-            }
+                                      
+        if (ships.isEmpty()) return out;
+
+        for (Ship ship : ships.values()) {
+            out.addElement(ship);
         }
         
         return out;
@@ -165,12 +158,10 @@ public class ShipContainer {
      * @param name
      * @return 
      */
-    public Ship getShip(String name) {
+    public synchronized Ship getShip(String name) {
         if (name == null) return null;
         
-        synchronized(blocker) {
-            return ships.get(name);
-        }
+        return ships.get(name);
     }
     
     /**
@@ -179,27 +170,23 @@ public class ShipContainer {
      * @param name
      * @return 
      */
-    public Ship createNewShip(String name) {
+    public synchronized Ship createNewShip(String name) {
         if (name == null || name.trim().isEmpty()) return null;
         
-        synchronized(blocker) {
-            if (getShip(name) != null) return null;
-            
-            Ship newShip = new Ship(name);
-            ships.put(name, newShip);
-            
-            return newShip;
-        }
+        if (getShip(name) != null) return null;
+
+        Ship newShip = new Ship(name);
+        ships.put(name, newShip);
+
+        return newShip;
     }
     
     /**
      * How many ships are there?
      * @return 
      */
-    public int getShipCount() {
-        synchronized(blocker) {
-            return ships.size();
-        }
+    public synchronized int getShipCount() {
+        return ships.size();
     }
     
     /**
@@ -207,15 +194,13 @@ public class ShipContainer {
      * @param ship
      * @return true, if successfully deleted.
      */
-    public boolean deleteShip(Ship ship) {
+    public synchronized boolean deleteShip(Ship ship) {
         if (ship == null) return false;
         
-        synchronized(blocker) {
-            if (getShipCount() < 2) return false;
-            
-            Ship res = ships.remove(ship.getName());
-            return (res != null);
-        }
+        if (getShipCount() < 2) return false;
+
+        Ship res = ships.remove(ship.getName());
+        return (res != null);
     }
     
     /**
@@ -228,43 +213,37 @@ public class ShipContainer {
      * @param newName desired new name.
      * @return true, if renamed successfully, false otherwise.
      */
-    public boolean renameShip(String oldName, String newName) {
+    public synchronized boolean renameShip(String oldName, String newName) {
         if (oldName == null || newName == null) return false;
         if (newName.trim().isEmpty()) return false;
         if (oldName.equals(newName)) return false;
         
-        synchronized(blocker) {
-            if (ships.containsKey(newName)) return false;
-            
-            Ship oldship = ships.remove(oldName);
-            if (oldship == null) return false;
-            oldship.setName(newName);
-            ships.put(newName, oldship);
-            
-            return true;
-        }
+        if (ships.containsKey(newName)) return false;
+
+        Ship oldship = ships.remove(oldName);
+        if (oldship == null) return false;
+        oldship.setName(newName);
+        ships.put(newName, oldship);
+
+        return true;
     }
     
     /**
      * Sets the name of a last selected ship.
      * @param name 
      */
-    public void setSelectedShip(String name) {
-        synchronized(blocker) {
-            selectedShip = name;
-        }
+    public synchronized void setSelectedShip(String name) {
+        selectedShip = name;
     }
     
     /**
      * Returns last selected ship.
      * @return 
      */
-    public Ship getLastSelectedShip() {
-        synchronized(blocker) {
-            Ship ret = ships.get(selectedShip);
-            // ships is never empty, so it's safe
-            if (ret == null) ret = ships.values().iterator().next();
-            return ret;
-        }
+    public synchronized Ship getLastSelectedShip() {
+        Ship ret = ships.get(selectedShip);
+        // ships is never empty, so it's safe
+        if (ret == null) ret = ships.values().iterator().next();
+        return ret;
     }
 }

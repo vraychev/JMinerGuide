@@ -81,23 +81,22 @@ public class EVECharacter {
     private final Integer id;
     private final String name;
     
-    private volatile Implant slot7;
-    private volatile Implant slot8;
-    private volatile Implant slot10;
+    private Implant slot7;
+    private Implant slot8;
+    private Implant slot10;
     
-    private volatile HashMap<Integer, Integer> skills;
-    private final Object blocker = new Object();
+    private HashMap<Integer, Integer> skills;
     
-    private volatile String monitorShip;
-    private volatile String monitorBooster;
-    private volatile String monitorBoosterShip;
-    private volatile boolean monitorUseBoosterShip = false;
-    private volatile int monitorSequence = 0;
+    private String monitorShip;
+    private String monitorBooster;
+    private String monitorBoosterShip;
+    private boolean monitorUseBoosterShip = false;
+    private int monitorSequence = 0;
     
     private final HashSet<BasicHarvestable> roidFilter;
     
-    private volatile boolean hidden;
-    private volatile boolean monitorIgnore;
+    private boolean hidden;
+    private boolean monitorIgnore;
     
     /**
      * Constructor for a new character.
@@ -236,72 +235,70 @@ public class EVECharacter {
      * Returns XML Element with character's data inside, to be used in saving.
      * @return 
      */
-    public Element getXMLElement() {
-        synchronized(blocker) {
-            Element root = new Element("character");
-            root.setAttribute(new Attribute("id", String.valueOf(id)));    
-            root.setAttribute(new Attribute("hidden", String.valueOf(hidden)));    
-            root.addContent(new Element("name").setText(name));
+    public synchronized Element getXMLElement() {
+        Element root = new Element("character");
+        root.setAttribute(new Attribute("id", String.valueOf(id)));    
+        root.setAttribute(new Attribute("hidden", String.valueOf(hidden)));    
+        root.addContent(new Element("name").setText(name));
 
-            Element skillSet = new Element("skills");
-            for(Map.Entry<Integer, Integer> skill : skills.entrySet()) {
-                Element skillElem = new Element("skill");
-                skillElem.setAttribute("id", skill.getKey().toString());
-                skillElem.setAttribute("value", skill.getValue().toString());
-                skillSet.addContent(skillElem);
-            }        
-            root.addContent(skillSet);
+        Element skillSet = new Element("skills");
+        for(Map.Entry<Integer, Integer> skill : skills.entrySet()) {
+            Element skillElem = new Element("skill");
+            skillElem.setAttribute("id", skill.getKey().toString());
+            skillElem.setAttribute("value", skill.getValue().toString());
+            skillSet.addContent(skillElem);
+        }        
+        root.addContent(skillSet);
 
-            Element implantSet = new Element("implants");        
-            Implant[] imps = {slot7, slot8, slot10};        
-            for(Implant imp : imps) {        
-                if (imp != Implant.NOTHING) {
-                    Element implantElem = new Element("implant");
-                    implantElem.setAttribute("id", String.valueOf(imp.getID()));
-                    implantSet.addContent(implantElem);
-                }
+        Element implantSet = new Element("implants");        
+        Implant[] imps = {slot7, slot8, slot10};        
+        for(Implant imp : imps) {        
+            if (imp != Implant.NOTHING) {
+                Element implantElem = new Element("implant");
+                implantElem.setAttribute("id", String.valueOf(imp.getID()));
+                implantSet.addContent(implantElem);
             }
-            root.addContent(implantSet);
-
-            Element monitorConf = new Element("monitor");
-            monitorConf.setAttribute(new Attribute("ignore", String.valueOf(monitorIgnore)));  
-            monitorConf.setAttribute(new Attribute("sequence", String.valueOf(monitorSequence)));    
-            
-            if (monitorBooster != null) {
-               Element boosterElem = new Element("booster");
-               boosterElem.setText(monitorBooster);
-               monitorConf.addContent(boosterElem);
-            }            
-            if (monitorShip != null) {
-               Element shipElem = new Element("ship");
-               shipElem.setText(monitorShip);
-               monitorConf.addContent(shipElem);
-            }           
-            if (monitorBoosterShip != null) {
-               Element bShipElem = new Element("boostership");
-               bShipElem.setText(monitorBoosterShip);
-               monitorConf.addContent(bShipElem);
-            }            
-            
-            Element useBShipElem = new Element("useboostership");
-            useBShipElem.setText(String.valueOf(monitorUseBoosterShip));
-            monitorConf.addContent(useBShipElem);
-            root.addContent(monitorConf);
-            
-            Element roidFilterElem = new Element("asteroidfilter");
-            String filterStr = "";
-            for (BasicHarvestable hv : roidFilter) {
-                if (filterStr.isEmpty()) {
-                    filterStr = hv.name();
-                } else {
-                    filterStr = filterStr + ","+ hv.name();
-                }
-            }
-            roidFilterElem.setText(filterStr);
-            root.addContent(roidFilterElem);
-            
-            return root;
         }
+        root.addContent(implantSet);
+
+        Element monitorConf = new Element("monitor");
+        monitorConf.setAttribute(new Attribute("ignore", String.valueOf(monitorIgnore)));  
+        monitorConf.setAttribute(new Attribute("sequence", String.valueOf(monitorSequence)));    
+
+        if (monitorBooster != null) {
+           Element boosterElem = new Element("booster");
+           boosterElem.setText(monitorBooster);
+           monitorConf.addContent(boosterElem);
+        }            
+        if (monitorShip != null) {
+           Element shipElem = new Element("ship");
+           shipElem.setText(monitorShip);
+           monitorConf.addContent(shipElem);
+        }           
+        if (monitorBoosterShip != null) {
+           Element bShipElem = new Element("boostership");
+           bShipElem.setText(monitorBoosterShip);
+           monitorConf.addContent(bShipElem);
+        }            
+
+        Element useBShipElem = new Element("useboostership");
+        useBShipElem.setText(String.valueOf(monitorUseBoosterShip));
+        monitorConf.addContent(useBShipElem);
+        root.addContent(monitorConf);
+
+        Element roidFilterElem = new Element("asteroidfilter");
+        String filterStr = "";
+        for (BasicHarvestable hv : roidFilter) {
+            if (filterStr.isEmpty()) {
+                filterStr = hv.name();
+            } else {
+                filterStr = filterStr + ","+ hv.name();
+            }
+        }
+        roidFilterElem.setText(filterStr);
+        root.addContent(roidFilterElem);
+
+        return root;
     }
     
     /**
@@ -325,11 +322,9 @@ public class EVECharacter {
      * @param skillID
      * @return skill level or 0 for unknown skill.
      */
-    public Integer getSkillLevel(Integer skillID) {
-        synchronized(blocker) {
-            Integer ret = skills.get(skillID);
-            return (ret == null ? 0 : ret);
-        }
+    public synchronized Integer getSkillLevel(Integer skillID) {
+        Integer ret = skills.get(skillID);
+        return (ret == null ? 0 : ret);
     }
     
     /**
@@ -338,11 +333,9 @@ public class EVECharacter {
      * @param skillID ID of a skill
      * @param level desired level
      */
-    public void setSkillLevel(Integer skillID, Integer level) {
+    public synchronized void setSkillLevel(Integer skillID, Integer level) {
         if (skillID == null || level == null || level < 0 || level > 5) return;
-        synchronized(blocker) {
-            skills.put(skillID, level);
-        }
+        skills.put(skillID, level);
     }
     
     /**
@@ -350,10 +343,8 @@ public class EVECharacter {
      * Implant.NOTHING is returned if there's nothing.
      * @return 
      */
-    public Implant getSlot7Implant() {
-        synchronized(blocker) {
-            return slot7 == null ? Implant.NOTHING : slot7;
-        }
+    public synchronized Implant getSlot7Implant() {
+        return slot7 == null ? Implant.NOTHING : slot7;
     }
     
     /**
@@ -361,11 +352,9 @@ public class EVECharacter {
      * Implant should be insertable to that slot, or nothing will happen.
      * @param imp 
      */
-    public void setSlot7Implant(Implant imp) {
+    public synchronized void setSlot7Implant(Implant imp) {
         if (imp == null || (imp.getSlot() != 7 && imp != Implant.NOTHING)) return;
-        synchronized(blocker) {
-            slot7 = imp;
-        }
+        slot7 = imp;
     }
     
     /**
@@ -373,10 +362,8 @@ public class EVECharacter {
      * Implant.NOTHING is returned if there's nothing.
      * @return 
      */
-    public Implant getSlot8Implant() {
-        synchronized(blocker) {
-            return slot8 == null ? Implant.NOTHING : slot8;
-        }
+    public synchronized Implant getSlot8Implant() {
+        return slot8 == null ? Implant.NOTHING : slot8;
     }
     
     /**
@@ -384,11 +371,9 @@ public class EVECharacter {
      * Implant should be insertable to that slot, or nothing will happen.
      * @param imp 
      */
-    public void setSlot8Implant(Implant imp) {
+    public synchronized void setSlot8Implant(Implant imp) {
         if (imp == null || (imp.getSlot() != 8 && imp != Implant.NOTHING)) return;
-        synchronized(blocker) {
-            slot8 = imp;
-        }
+        slot8 = imp;
     }
     
     /**
@@ -396,10 +381,8 @@ public class EVECharacter {
      * Implant.NOTHING is returned if there's nothing.
      * @return 
      */
-    public Implant getSlot10Implant() {
-        synchronized(blocker) {
-            return slot10 == null ? Implant.NOTHING : slot10;
-        }
+    public synchronized Implant getSlot10Implant() {
+        return slot10 == null ? Implant.NOTHING : slot10;
     }
     
     /**
@@ -407,11 +390,9 @@ public class EVECharacter {
      * Implant should be insertable to that slot, or nothing will happen.
      * @param imp 
      */
-    public void setSlot10Implant(Implant imp) {
+    public synchronized void setSlot10Implant(Implant imp) {
         if (imp == null || (imp.getSlot() != 10 && imp != Implant.NOTHING)) return;
-        synchronized(blocker) {
-            slot10 = imp;
-        }
+        slot10 = imp;
     }
     
     /**
@@ -424,7 +405,7 @@ public class EVECharacter {
      * @throws APIException thrown when something fails. Exception message
      * contains human-readable text, that can be passed to end-user
      */
-    public void loadAPIData() throws APIException {
+    public synchronized void loadAPIData() throws APIException {
         String keyCharProfileURL = DataContainer.baseURL+"/char/CharacterSheet.xml.aspx?keyID="
                 +parentKey.getID()+"&vCode="+parentKey.getVerification()+"&characterID="+id;
         
@@ -518,12 +499,10 @@ public class EVECharacter {
                 throw new APIException("Unable to fetch "+name+"'s implants");
             }
             
-            synchronized(blocker) {
-                skills = newSkills;
-                slot7 = newSlot7;
-                slot8 = newSlot8;
-                slot10 = newSlot10;
-            }
+            skills = newSkills;
+            slot7 = newSlot7;
+            slot8 = newSlot8;
+            slot10 = newSlot10;
             
         } catch (JDOMException | IOException | IllegalArgumentException | NullPointerException e ) {
             JMGLogger.logSevere("Cricical failure during API parsing", e);
@@ -532,15 +511,13 @@ public class EVECharacter {
     }
     
     @Override
-    public EVECharacter clone() {
-        synchronized(blocker) {
-            EVECharacter out = new EVECharacter(id, name, parentKey);
-            out.slot7 = slot7;
-            out.slot8 = slot8;
-            out.slot10 = slot10;   
-            out.hidden = hidden;     
-            return out;
-        }
+    public synchronized EVECharacter clone() {
+        EVECharacter out = new EVECharacter(id, name, parentKey);
+        out.slot7 = slot7;
+        out.slot8 = slot8;
+        out.slot10 = slot10;   
+        out.hidden = hidden;     
+        return out;
     }
     
     /**
@@ -548,19 +525,17 @@ public class EVECharacter {
      * @param parentKey
      * @return 
      */
-    public EVECharacter clone(APIKey parentKey) {
-        synchronized(blocker) {
-            EVECharacter out = new EVECharacter(id, name, parentKey);
-            out.slot7 = slot7;
-            out.slot8 = slot8;
-            out.slot10 = slot10;
-            out.hidden = hidden;
-            return out;
-        }
+    public synchronized EVECharacter clone(APIKey parentKey) {
+        EVECharacter out = new EVECharacter(id, name, parentKey);
+        out.slot7 = slot7;
+        out.slot8 = slot8;
+        out.slot10 = slot10;
+        out.hidden = hidden;
+        return out;
     }
     
     @Override
-    public String toString() {
+    public synchronized String toString() {
         return name + (hidden? " - hidden" : "");
     }
     
@@ -577,31 +552,29 @@ public class EVECharacter {
      * Warning! Modifiers aren't in percents, you can directly multiply by them.
      * @return 
      */
-    public float getMiningYieldModifier () {
+    public synchronized float getMiningYieldModifier () {
         float out = 1;
-        
-        synchronized(blocker) {
-            int miningLevel = this.getSkillLevel(SKILL_MINING);
-            if (miningLevel > 0) {
-                out = out * (1f + 0.05f*miningLevel);
-            }
 
-            int astroLevel = this.getSkillLevel(SKILL_ASTROGEOLOGY);
-            if (astroLevel > 0) {
-                out = out * (1f + 0.05f*astroLevel);
-            }
+        int miningLevel = this.getSkillLevel(SKILL_MINING);
+        if (miningLevel > 0) {
+            out = out * (1f + 0.05f*miningLevel);
+        }
 
-            int slot7Yield = this.slot7.getMiningYieldBonus();
-            if (slot7Yield > 0) {
-                out = out * (1f + 0.01f*slot7Yield);
-            }
+        int astroLevel = this.getSkillLevel(SKILL_ASTROGEOLOGY);
+        if (astroLevel > 0) {
+            out = out * (1f + 0.05f*astroLevel);
+        }
 
-            // slot 8 contains gas implants only, so we may pass it.
+        int slot7Yield = this.slot7.getMiningYieldBonus();
+        if (slot7Yield > 0) {
+            out = out * (1f + 0.01f*slot7Yield);
+        }
 
-            int slot10Yield = this.slot10.getMiningYieldBonus();
-            if (slot10Yield > 0) {
-                out = out * (1f + 0.01f*slot10Yield);
-            }
+        // slot 8 contains gas implants only, so we may pass it.
+
+        int slot10Yield = this.slot10.getMiningYieldBonus();
+        if (slot10Yield > 0) {
+            out = out * (1f + 0.01f*slot10Yield);
         }
         
         return out;
@@ -612,20 +585,18 @@ public class EVECharacter {
      * Warning! Modifiers aren't in percents, you can directly multiply by them.
      * @return 
      */
-    public float getIceCycleModifier() {
+    public synchronized float getIceCycleModifier() {
         float out = 1;
         
-        synchronized(blocker) {
-            int iceLevel = this.getSkillLevel(SKILL_ICE_HARVESTING);
-            if (iceLevel > 0) {
-                out = out * (1f - 0.05f*iceLevel);
-            }
+        int iceLevel = this.getSkillLevel(SKILL_ICE_HARVESTING);
+        if (iceLevel > 0) {
+            out = out * (1f - 0.05f*iceLevel);
+        }
 
-            // ice bonus only in slot 10
-            int slot10CycleBonus = this.slot10.getIceCycleBonus();
-            if (slot10CycleBonus > 0) {
-                out = out * (1f - 0.01f*slot10CycleBonus);
-            }
+        // ice bonus only in slot 10
+        int slot10CycleBonus = this.slot10.getIceCycleBonus();
+        if (slot10CycleBonus > 0) {
+            out = out * (1f - 0.01f*slot10CycleBonus);
         }
         
         return out;
@@ -636,15 +607,13 @@ public class EVECharacter {
      * Warning! Modifiers aren't in percents, you can directly multiply by them.
      * @return 
      */
-    public float getGasCycleModifier() {
+    public synchronized float getGasCycleModifier() {
         float out = 1;
         
-        synchronized(blocker) {
-            // gas bonus only in slot 8
-            int slot8CycleBonus = this.slot8.getGasCycleBonus();
-            if (slot8CycleBonus > 0) {
-                out = out * (1f - 0.01f*slot8CycleBonus);
-            }
+        // gas bonus only in slot 8
+        int slot8CycleBonus = this.slot8.getGasCycleBonus();
+        if (slot8CycleBonus > 0) {
+            out = out * (1f - 0.01f*slot8CycleBonus);
         }
         
         return out;
@@ -657,19 +626,17 @@ public class EVECharacter {
      * Warning! Modifiers aren't in percents, you can directly multiply by them.
      * @return 
      */
-    public float getDroneYieldModifier() {
+    public synchronized float getDroneYieldModifier() {
         float out = 1;
         
-        synchronized(blocker) {
-            int droneOperBonus = this.getSkillLevel(SKILL_MINING_DRONE_OPERATION);
-            if (droneOperBonus > 0) {
-                out = out * (1f + 0.05f*droneOperBonus);
-            }
+        int droneOperBonus = this.getSkillLevel(SKILL_MINING_DRONE_OPERATION);
+        if (droneOperBonus > 0) {
+            out = out * (1f + 0.05f*droneOperBonus);
+        }
 
-            int droneIntBonus = this.getSkillLevel(SKILL_DRONE_INTERFACING);
-            if (droneIntBonus > 0) {
-                out = out * (1f + 0.1f*droneIntBonus);
-            }
+        int droneIntBonus = this.getSkillLevel(SKILL_DRONE_INTERFACING);
+        if (droneIntBonus > 0) {
+            out = out * (1f + 0.1f*droneIntBonus);
         }
         
         return out;
@@ -680,19 +647,17 @@ public class EVECharacter {
      * Warning! Modifiers aren't in percents, you can directly multiply by them.
      * @return 
      */
-    public float getBoosterLinkModifier() {
+    public synchronized float getBoosterLinkModifier() {
         float out = 1;
         
-        synchronized(blocker) {
-            int miningDirectorBonus = this.getSkillLevel(SKILL_MINING_DIRECTOR);
-            if (miningDirectorBonus > 0) {
-                out = out * (1f + 0.2f*miningDirectorBonus);
-            }
+        int miningDirectorBonus = this.getSkillLevel(SKILL_MINING_DIRECTOR);
+        if (miningDirectorBonus > 0) {
+            out = out * (1f + 0.2f*miningDirectorBonus);
+        }
 
-            int warfareLinkSpecBonus = this.getSkillLevel(SKILL_WARFARE_LINK_SPECIALIST);
-            if (warfareLinkSpecBonus > 0) {
-                out = out * (1f + 0.1f*warfareLinkSpecBonus);
-            }
+        int warfareLinkSpecBonus = this.getSkillLevel(SKILL_WARFARE_LINK_SPECIALIST);
+        if (warfareLinkSpecBonus > 0) {
+            out = out * (1f + 0.1f*warfareLinkSpecBonus);
         }
         
         return out;
@@ -702,20 +667,16 @@ public class EVECharacter {
      * Returns true, if the character should be hidden.
      * @return 
      */
-    public boolean isHidden() {
-        synchronized(blocker) {
-            return hidden;
-        }
+    public synchronized boolean isHidden() {
+        return hidden;
     }
     
     /**
      * Sets the hidden flag.
      * @param what 
      */
-    public void setHidden(boolean what) {
-        synchronized(blocker) {
-            hidden = what;
-        }
+    public synchronized void setHidden(boolean what) {
+        hidden = what;
     }
 
     /**
@@ -723,10 +684,8 @@ public class EVECharacter {
      * Can return null!
      * @return 
      */
-    public String getMonitorBooster() {
-        synchronized(blocker) {
-            return monitorBooster;
-        }
+    public synchronized String getMonitorBooster() {
+        return monitorBooster;
     }
 
      /**
@@ -734,30 +693,24 @@ public class EVECharacter {
      * Can return null!
      * @return 
      */
-    public String getMonitorShip() {
-        synchronized(blocker) {
-            return monitorShip;
-        }
+    public synchronized String getMonitorShip() {
+        return monitorShip;
     }
 
      /**
      * Sets the name of last selected booster in asteroid monitor. 
      * @param monitorBooster
      */
-    public void setMonitorBooster(String monitorBooster) {
-        synchronized(blocker) {
-            this.monitorBooster = monitorBooster;
-        }
+    public synchronized void setMonitorBooster(String monitorBooster) {
+        this.monitorBooster = monitorBooster;
     }
 
     /**
      * Sets the name of last selected ship in asteroid monitor.
      * @param monitorShip 
      */
-    public void setMonitorShip(String monitorShip) {
-        synchronized(blocker) {
-            this.monitorShip = monitorShip;
-        }
+    public synchronized void setMonitorShip(String monitorShip) {
+        this.monitorShip = monitorShip;
     }        
 
     /**
@@ -765,60 +718,48 @@ public class EVECharacter {
      * Can return null!
      * @return 
      */
-    public String getMonitorBoosterShip() {
-        synchronized(blocker) {
-            return monitorBoosterShip;
-        }
+    public synchronized String getMonitorBoosterShip() {
+        return monitorBoosterShip;
     }
 
     /**
      * Sets the name of last selected booster ship in asteroid monitor.
      * @param monitorBoosterShip 
      */
-    public void setMonitorBoosterShip(String monitorBoosterShip) {
-        synchronized(blocker) {
-            this.monitorBoosterShip = monitorBoosterShip;
-        }
+    public synchronized void setMonitorBoosterShip(String monitorBoosterShip) {
+        this.monitorBoosterShip = monitorBoosterShip;
     }        
 
     /**
      * Returns true, if the character uses boosting ship in asteroid monitor,
      * @return 
      */
-    public boolean isMonitorUseBoosterShip() {
-        synchronized(blocker) {
-            return monitorUseBoosterShip;
-        }
+    public synchronized boolean isMonitorUseBoosterShip() {
+        return monitorUseBoosterShip;
     }
 
     /**
      * Sets if the character uses boosting ship in asteroid monitor,
      * @param monitorUseBoosterShip 
      */
-    public void setMonitorUseBoosterShip(boolean monitorUseBoosterShip) {
-        synchronized(blocker) {
-            this.monitorUseBoosterShip = monitorUseBoosterShip;
-        }
+    public synchronized void setMonitorUseBoosterShip(boolean monitorUseBoosterShip) {
+        this.monitorUseBoosterShip = monitorUseBoosterShip;
     }        
 
     /**
      * Returns true, if character's mining status is ignored in the asteroid monitor.
      * @return 
      */
-    public boolean isMonitorIgnore() {
-        synchronized(blocker) {
-            return monitorIgnore;
-        }
+    public synchronized boolean isMonitorIgnore() {
+        return monitorIgnore;
     }
 
     /**
      * Sets if character's mining status should be ignored in the asteroid monitor.
      * @param monitorIgnore 
      */
-    public void setMonitorIgnore(boolean monitorIgnore) {
-        synchronized(blocker) {
-            this.monitorIgnore = monitorIgnore;
-        }
+    public synchronized void setMonitorIgnore(boolean monitorIgnore) {
+        this.monitorIgnore = monitorIgnore;
     }
         
     /**
@@ -827,67 +768,51 @@ public class EVECharacter {
      * addHarvestableToFilter and removeHarvestableFromFilter methods.
      * @return 
      */
-    public HashSet<BasicHarvestable> getAsteroidFilter() {
-        synchronized(blocker) {
-            return (HashSet<BasicHarvestable>) roidFilter.clone();
-        }
+    public synchronized HashSet<BasicHarvestable> getAsteroidFilter() {
+        return (HashSet<BasicHarvestable>) roidFilter.clone();
     }     
     
     /**
      * Adds BasicHarvestable to asteroid filter.
      * @param type 
      */
-    public void addHarvestableToFilter(BasicHarvestable type) {
-        synchronized(blocker) {
-            roidFilter.add(type);
-        }
+    public synchronized void addHarvestableToFilter(BasicHarvestable type) {
+        roidFilter.add(type);
     }  
     
     /**
      * Removes BasicHarvestable from asteroid filter.
      * @param type 
      */
-    public void removeHarvestableFromFilter(BasicHarvestable type) {
-        synchronized(blocker) {
-            roidFilter.remove(type);
-        }
+    public synchronized void removeHarvestableFromFilter(BasicHarvestable type) {
+        roidFilter.remove(type);
     }
     
     /**
      * Clears asteroid filter.
      * Equivalent to "allow nothing" filter.
      */
-    public void clearAsteroidFilter() {
-        synchronized(blocker) {
-            roidFilter.clear();
-        }
+    public synchronized void clearAsteroidFilter() {
+        roidFilter.clear();
     }
     
     /**
      * Fills asteroid filter with every ore harvestable out there.
      * Equivalent to "allow all" filter.
      */
-    public final void allOnAsteroidFilter() {
-        synchronized(blocker) {
-            for (BasicHarvestable hv : BasicHarvestable.values()) {
-                if (hv.getType() == HarvestableType.ORE || hv.getType() == HarvestableType.MERCOXIT) {
-                    roidFilter.add(hv);
-                }
+    public synchronized void allOnAsteroidFilter() {
+        for (BasicHarvestable hv : BasicHarvestable.values()) {
+            if (hv.getType() == HarvestableType.ORE || hv.getType() == HarvestableType.MERCOXIT) {
+                roidFilter.add(hv);
             }
         }
     }
 
-    public void setMonitorSequence(int monitorSequence) {
-        synchronized(blocker) {
-            this.monitorSequence = monitorSequence;
-        }
+    public synchronized void setMonitorSequence(int monitorSequence) {
+        this.monitorSequence = monitorSequence;
     }
 
-    public int getMonitorSequence() {
-        synchronized(blocker) {
+    public synchronized int getMonitorSequence() {
             return monitorSequence;
-        }
-    }
-    
-    
+    }        
 }

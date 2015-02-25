@@ -39,8 +39,6 @@ public class BoosterShip {
     private ForemanLink cycleLink;
     private ForemanLink optimalLink;
     private boolean deployed;
-    
-    private final Object blocker = new Object();
 
     public BoosterShip(String name) {
         this.name = name;
@@ -92,58 +90,50 @@ public class BoosterShip {
         }
     }
     
-    public Element getXMLElement() {     
-        synchronized(blocker) {
-            Element root = new Element("booster");        
-            
-            root.addContent(new Element("name").setText(name));
-            
-            root.addContent(new Element("hull")
-                    .setAttribute("id", String.valueOf(hull.getID()))
-                    .setAttribute("deployed", String.valueOf(deployed))
-            );
-                        
-            root.addContent(new Element("cyclelink")
-                    .setAttribute("id", String.valueOf(cycleLink.getID()))
-            );
-            
-            root.addContent(new Element("optimallink")
-                    .setAttribute("id", String.valueOf(optimalLink.getID()))
-            );            
+    public synchronized Element getXMLElement() {    
+        Element root = new Element("booster");        
 
-            return root;
-        }        
+        root.addContent(new Element("name").setText(name));
+
+        root.addContent(new Element("hull")
+                .setAttribute("id", String.valueOf(hull.getID()))
+                .setAttribute("deployed", String.valueOf(deployed))
+        );
+
+        root.addContent(new Element("cyclelink")
+                .setAttribute("id", String.valueOf(cycleLink.getID()))
+        );
+
+        root.addContent(new Element("optimallink")
+                .setAttribute("id", String.valueOf(optimalLink.getID()))
+        );            
+
+        return root;        
     }
     
     /**
      * Sets a booster ship's hull.
      * @param hull 
      */
-    public void setHull(BoosterHull hull) {
+    public synchronized void setHull(BoosterHull hull) {
         if (hull == null) return;
-        synchronized(blocker) {
-            this.hull = hull;
-        }
+        this.hull = hull;
     }
     
     /**
      * Returns a booster ship's hull.
      * @return 
      */
-    public BoosterHull getHull() {
-        synchronized(blocker) {
-            return hull;
-        }
+    public synchronized BoosterHull getHull() {
+        return hull;
     }
     
     /**
      * Turns deployed mode on or off. Have no effect on hulls without such mode.
      * @param isDeployed 
      */
-    public void setDeployedMode(boolean isDeployed) {
-        synchronized(blocker) {
-            deployed = isDeployed;
-        }
+    public synchronized void setDeployedMode(boolean isDeployed) {
+        deployed = isDeployed;
     }
     
     /**
@@ -151,74 +141,58 @@ public class BoosterShip {
      * Always returns false, if booster's hull have no deployed mode support.
      * @return 
      */
-    public boolean isDeployedMode() {
-        synchronized(blocker) {
-            if (!hull.haveDeployedMode()) return false;
-            
-            return deployed;
-        }
+    public synchronized boolean isDeployedMode() {
+        if (!hull.haveDeployedMode()) return false;
+
+        return deployed;
     }
     
     /**
      * Sets foreman link for optimal distance.
      * @param link 
      */
-    public void setOptimalLink(ForemanLink link) {
+    public synchronized void setOptimalLink(ForemanLink link) {
         if (link == null) return;
-        synchronized(blocker) {
-            optimalLink = link;
-        }
+        optimalLink = link;        
     }
     
     /**
      * Returns foreman link for optimal distance.
      * @return 
      */
-    public ForemanLink getOptimalLink() {
-        synchronized(blocker) {
-            return optimalLink;
-        }
+    public synchronized ForemanLink getOptimalLink() {        
+        return optimalLink;
     }
     
     /**
      * Sets foreman link for mining cycle.
      * @param link 
      */
-    public void setCycleLink(ForemanLink link) {
+    public synchronized void setCycleLink(ForemanLink link) {
         if (link == null) return;
-        synchronized(blocker) {
-            cycleLink = link;
-        }
+        cycleLink = link;
     }
     
     /**
      * Returns foreman link for mining cycle.
      * @return 
      */
-    public ForemanLink getCycleLink() {
-        synchronized(blocker) {
-            return cycleLink;
-        }
+    public synchronized ForemanLink getCycleLink() {
+        return cycleLink;
     }
     
-    public String getName() {
-        synchronized(blocker) {
-            return name;
-        }
+    public synchronized String getName() {
+        return name;
     }
     
-    public void setName(String name) {
+    public synchronized void setName(String name) {
         if (name == null) return;
-        synchronized(blocker) {
-            this.name = name;
-        }
+        this.name = name;
     }
     
     @Override
-    public String toString() {
-        synchronized(blocker) {
-            return name;
-        }
+    public synchronized String toString() {
+        return name;
     }
 }
 

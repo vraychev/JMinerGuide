@@ -57,14 +57,14 @@ public class MiningSession {
      .toFormatter();
     
     private final IEVEWindow window;
-    private volatile SessionCharacter character;    
-    private volatile float usedCargo;  
-    private volatile CopyOnWriteArrayList<Asteroid> roids;
+    private SessionCharacter character;    
+    private float usedCargo;  
+    private CopyOnWriteArrayList<Asteroid> roids;
     private final TurretInstance turret1;
     private final TurretInstance turret2;
     private final TurretInstance turret3;
-    private volatile MiningTimer timer;
-    private volatile boolean haveAlerts = false;
+    private MiningTimer timer;
+    private boolean haveAlerts = false;
     
     public MiningSession(IEVEWindow window) {
         this.window = window;
@@ -111,7 +111,7 @@ public class MiningSession {
      * Returns session's character. Can return null.
      * @return 
      */
-    public SessionCharacter getSessionCharacter() {
+    public synchronized SessionCharacter getSessionCharacter() {
         return character;
     }
 
@@ -121,7 +121,7 @@ public class MiningSession {
      * @param character
      * @param dCont 
      */
-    public void createSessionCharacter(EVECharacter character, DataContainer dCont) {                       
+    public synchronized void createSessionCharacter(EVECharacter character, DataContainer dCont) {                       
         if (character == null) return;   
         
         turret1.unbindAsteroid();
@@ -138,7 +138,7 @@ public class MiningSession {
      * Resets turrets.
      * @param ship 
      */
-    public void updateCharacherShip(Ship ship) {
+    public synchronized void updateCharacherShip(Ship ship) {
         if (ship == null || character == null) return;
         
         turret1.unbindAsteroid();
@@ -154,7 +154,7 @@ public class MiningSession {
      * Does nothing, if there's no session character.
      * @param booster 
      */
-    public void updateCharacherBooster(EVECharacter booster) {
+    public synchronized void updateCharacherBooster(EVECharacter booster) {
         if (booster == null || character == null) return;
         
         SessionCharacter schar = new SessionCharacter(character, booster);
@@ -166,7 +166,7 @@ public class MiningSession {
      * Does nothing, if there's no session character.
      * @param boosterShip
      */
-    public void updateCharacherBoosterShip(BoosterShip boosterShip) {
+    public synchronized void updateCharacherBoosterShip(BoosterShip boosterShip) {
         if (boosterShip == null || character == null) return;
         
         SessionCharacter schar = new SessionCharacter(character, boosterShip);
@@ -178,7 +178,7 @@ public class MiningSession {
      * Does nothing, if there's no session character.
      * @param what
      */
-    public void updateCharacherUsingBoosterShip(boolean what) {
+    public synchronized void updateCharacherUsingBoosterShip(boolean what) {
         if (character == null) return;
         
         SessionCharacter schar = new SessionCharacter(character, what);
@@ -189,7 +189,7 @@ public class MiningSession {
      * Returns used cargo.
      * @return 
      */
-    public float getUsedCargo() {
+    public synchronized float getUsedCargo() {
         return usedCargo;
     }
     
@@ -197,7 +197,7 @@ public class MiningSession {
      * Returns remaining free cargo.
      * @return 
      */
-    public float getRemainingCargo() {
+    public synchronized float getRemainingCargo() {
         if (character == null) return 0;
         
         float ret = character.getStats().getOreHold() - usedCargo;
@@ -209,7 +209,7 @@ public class MiningSession {
      * Sets used cargo. Also stops all turrets from working.
      * @param amt used cargo, in m3. Can't be more, than ship's ore hold.
      */
-    public void setUsedCargo(float amt) {      
+    public synchronized void setUsedCargo(float amt) {      
         turret1.unbindAsteroid();
         turret2.unbindAsteroid();
         turret3.unbindAsteroid();
@@ -223,7 +223,7 @@ public class MiningSession {
         usedCargo = amt;
     }
     
-    private void putToCargo(float amt) {
+    private synchronized void putToCargo(float amt) {
         if (character != null) {
             int maxCargo = character.getStats().getOreHold();
             float newCargo = usedCargo + amt;
@@ -238,7 +238,7 @@ public class MiningSession {
      * Unbinds all turrets in the process.
      * @param newRoids 
      */
-    public void clearAndAddRoids(List<Asteroid> newRoids) {
+    public synchronized void clearAndAddRoids(List<Asteroid> newRoids) {
         if (character == null) return;
         turret1.unbindAsteroid();
         turret2.unbindAsteroid();
@@ -269,7 +269,7 @@ public class MiningSession {
      * Resets cargohold, stops turrets and loads in an asteroid list.
      * @param newRoids 
      */
-    public void resetAndAddRoids(List<Asteroid> newRoids) {
+    public synchronized void resetAndAddRoids(List<Asteroid> newRoids) {
         if (character == null) return;
         
         setUsedCargo(0);
@@ -281,7 +281,7 @@ public class MiningSession {
      * Adds list of asteroids into the existing one.
      * @param newRoids 
      */
-    public void addRoids(List<Asteroid> newRoids) {
+    public synchronized void addRoids(List<Asteroid> newRoids) {
         if (character == null) return;
         
         Set<BasicHarvestable> filter = character.getCharacter().getAsteroidFilter();                
@@ -291,7 +291,7 @@ public class MiningSession {
     /**
      * Cleans up the asteroid list, removing empty ones.
      */
-    public void cleanupRoids() {
+    public synchronized void cleanupRoids() {
         List<Asteroid> filtered = new ArrayList<>();
         for(Asteroid roid : roids) {
             if(roid.getRemainingUnits() > 0) {
@@ -306,7 +306,7 @@ public class MiningSession {
      * Clears the asteroid list, leaving it empty.
      * Also, turns of turrets.
      */
-    public void clearRoids() {            
+    public synchronized void clearRoids() {            
         turret1.unbindAsteroid();
         turret2.unbindAsteroid();
         turret3.unbindAsteroid();
@@ -314,7 +314,7 @@ public class MiningSession {
         roids = new CopyOnWriteArrayList<>();
     }
     
-    public TableModel getTableModel() {
+    public synchronized TableModel getTableModel() {
         return new AsteroidTableModel();
     }
 
@@ -340,7 +340,7 @@ public class MiningSession {
     }
     
     
-    public void doMining() throws AsteroidMinedException, FullOreHoldException {
+    public synchronized void doMining() throws AsteroidMinedException, FullOreHoldException {
         if (character == null) return;
         
         boolean isRoidError = false;
@@ -413,7 +413,7 @@ public class MiningSession {
         return window.hashCode();
     }
 
-    public MiningTimer getTimer() {
+    public synchronized MiningTimer getTimer() {
         return timer;
     }
     
@@ -422,12 +422,12 @@ public class MiningSession {
      * Will not do anything, if there is no character.
      * @param seconds 
      */
-    public void newTimer(int seconds, int secondsToClear) {
+    public synchronized void newTimer(int seconds, int secondsToClear) {
         if (character == null) return;
         timer = new MiningTimer(seconds, secondsToClear);
     }
     
-    public void stopTimer() {
+    public synchronized void stopTimer() {
         timer = null;
     }
     
@@ -448,7 +448,7 @@ public class MiningSession {
      * on the session state.
      * @param button 
      */
-    public void updateButton(MiningSessionButton button) {
+    public synchronized void updateButton(MiningSessionButton button) {
         if (character == null) {
             button.setText(getButtonHTML(getCharacterName(), "&nbsp;"));
             haveAlerts = false;
@@ -534,7 +534,7 @@ public class MiningSession {
      * Returns true, if the session have alerts.     
      * @return 
      */
-    boolean haveAlerts() {
+    public synchronized boolean haveAlerts() {
         return haveAlerts;
     }
     
@@ -542,7 +542,9 @@ public class MiningSession {
 
         @Override
         public int getRowCount() {
-            return roids.size();
+            synchronized (MiningSession.this) {
+                return roids.size();
+            }
         }
 
         @Override
@@ -575,29 +577,31 @@ public class MiningSession {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            if (rowIndex >= roids.size() || columnIndex > 3) return null;
-            
-            Asteroid roid = roids.get(rowIndex);
-            switch (columnIndex) {
-                case 0:
-                    return roid;
-                    
-                case 1:
-                    return roid.getDistance();
-                    
-                case 2:
-                    if (character == null) {
-                        return roid.getRemainingUnits();
-                    } else {
-                        return roid.getRemString(character.getStats());
-                    }
-                    
-                case 3:
-                    return roid.getTurrets(); // tba
-                    
-                default:
-                    return null;
-                    
+            synchronized (MiningSession.this) {
+                if (rowIndex >= roids.size() || columnIndex > 3) return null;
+
+                Asteroid roid = roids.get(rowIndex);
+                switch (columnIndex) {
+                    case 0:
+                        return roid;
+
+                    case 1:
+                        return roid.getDistance();
+
+                    case 2:
+                        if (character == null) {
+                            return roid.getRemainingUnits();
+                        } else {
+                            return roid.getRemString(character.getStats());
+                        }
+
+                    case 3:
+                        return roid.getTurrets(); // tba
+
+                    default:
+                        return null;
+
+                }                
             }
         }                            
     }

@@ -34,7 +34,7 @@ public class All5Character extends EVECharacter{
     private final String namemod;
     
     public All5Character(String namemod) {
-        super(-1, "All 5"+namemod, null);
+        super(-1, "• All 5"+namemod, null);
         this.namemod = namemod;
     }
     
@@ -50,7 +50,7 @@ public class All5Character extends EVECharacter{
     
     @Override
     public String toString() {
-        return "All 5"+namemod;
+        return "• All 5"+namemod;
     }
     
     @Override

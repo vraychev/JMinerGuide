@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * All harverstables mapped by their name.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class AllHarvestables {

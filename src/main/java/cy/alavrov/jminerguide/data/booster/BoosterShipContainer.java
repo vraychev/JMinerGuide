@@ -27,7 +27,7 @@ package cy.alavrov.jminerguide.data.booster;
 
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,13 +45,12 @@ import org.jdom2.output.XMLOutputter;
  */
 public class BoosterShipContainer {
     private LinkedHashMap<String, BoosterShip> boosterShips;
-    private BoosterShip notABoosterShip = new NoBoosterShip();
+    private final BoosterShip notABoosterShip = new NoBoosterShip();
     private final String path;
     
     private boolean useBoosterShip;
     private String selectedBoosterShip;
     
-    private final Object blocker = new Object();
     
     public BoosterShipContainer(String path) {
         boosterShips = new LinkedHashMap<>();
@@ -65,7 +64,7 @@ public class BoosterShipContainer {
     /**
      * Loads booster ships from a configuration file.
      */
-    public void load() {        
+    public synchronized void load() {        
         JMGLogger.logWarning("Loading booster ships...");
         File src = new File(path+File.separator+"boosters.dat");
         if (!src.exists()) {            
@@ -92,24 +91,22 @@ public class BoosterShipContainer {
         } catch (Exception e) {
             JMGLogger.logSevere("Unable to load a configuration file for booster ships", e);
         }        
-        
-        synchronized(blocker) {
-            useBoosterShip = doUseBoosterShip;
-            boosterShips = newBoosterShips;
-            if (boosterShips.isEmpty()) {
-                BoosterShip booster = new BoosterShip("Generic Ship");
-                boosterShips.put(booster.getName(), booster);
-            }
-            // booster ships is never empty, so it's ok.
-            if (lastSelectedBoosterShip == null) lastSelectedBoosterShip = boosterShips.values().iterator().next().getName();
-            selectedBoosterShip = lastSelectedBoosterShip;
+
+        useBoosterShip = doUseBoosterShip;
+        boosterShips = newBoosterShips;
+        if (boosterShips.isEmpty()) {
+            BoosterShip booster = new BoosterShip("Generic Ship");
+            boosterShips.put(booster.getName(), booster);
         }
+        // booster ships is never empty, so it's ok.
+        if (lastSelectedBoosterShip == null) lastSelectedBoosterShip = boosterShips.values().iterator().next().getName();
+        selectedBoosterShip = lastSelectedBoosterShip;
     }
     
     /**
      * Saves all the booster ships into a file.
      */
-    public void save() {
+    public synchronized void save() {
         File src = new File(path+File.separator+"boosters.dat");
         if (!src.exists()) {
             try {
@@ -126,24 +123,22 @@ public class BoosterShipContainer {
         
         Element root = new Element("boosters");
         Document doc = new Document(root);
-                
-        synchronized(blocker) {
-            root.setAttribute("useship", String.valueOf(useBoosterShip));
-            
-            String lastBoosterShip = selectedBoosterShip;
-            if (lastBoosterShip == null) lastBoosterShip = boosterShips.values().iterator().next().getName();            
-            root.addContent(new Element("lastselectedboostership").setText(lastBoosterShip));
-            
-            for (BoosterShip booster : boosterShips.values()) {
-                Element elem = booster.getXMLElement();
-                root.addContent(elem);
-            }
+        
+        root.setAttribute("useship", String.valueOf(useBoosterShip));
+
+        String lastBoosterShip = selectedBoosterShip;
+        if (lastBoosterShip == null) lastBoosterShip = boosterShips.values().iterator().next().getName();            
+        root.addContent(new Element("lastselectedboostership").setText(lastBoosterShip));
+
+        for (BoosterShip booster : boosterShips.values()) {
+            Element elem = booster.getXMLElement();
+            root.addContent(elem);
         }
         
         XMLOutputter xmlOutput = new XMLOutputter();
         xmlOutput.setFormat(Format.getPrettyFormat());
-        try (FileWriter fw = new FileWriter(path+File.separator+"boosters.dat")){
-            xmlOutput.output(doc, fw);
+        try (FileOutputStream fos = new FileOutputStream(path+File.separator+"boosters.dat")){
+            xmlOutput.output(doc, fos);
         } catch (Exception e) {
             JMGLogger.logSevere("Unable to save "+path+File.separator+"boosters.dat", e);
         }
@@ -154,26 +149,22 @@ public class BoosterShipContainer {
      * Ships are sorted by insertion order.
      * @return 
      */
-    public DefaultComboBoxModel<BoosterShip> getBoosterShipModel() {
+    public synchronized DefaultComboBoxModel<BoosterShip> getBoosterShipModel() {
         DefaultComboBoxModel<BoosterShip> out = new DefaultComboBoxModel<>();
-                                        
-        synchronized(blocker) {
-            if (boosterShips.isEmpty()) return out;
-            
-            for (BoosterShip ship : boosterShips.values()) {
-                out.addElement(ship);
-            }
+                                  
+        if (boosterShips.isEmpty()) return out;
+
+        for (BoosterShip ship : boosterShips.values()) {
+            out.addElement(ship);
         }
         
         return out;
     }
     
-    public BoosterShip getBoosterShip(String name) {
+    public synchronized BoosterShip getBoosterShip(String name) {
         if (name == null) return null;
         
-        synchronized(blocker) {
-            return boosterShips.get(name);
-        }
+        return boosterShips.get(name);
     }
     
     /**
@@ -188,7 +179,7 @@ public class BoosterShipContainer {
      * Should we use boosting ship for boosting?
      * @return 
      */
-    public boolean isUsingBoosterShip() {
+    public synchronized boolean isUsingBoosterShip() {
         return useBoosterShip;
     }
     
@@ -196,7 +187,7 @@ public class BoosterShipContainer {
      * Sets if we should use boosting ships for boosting.
      * @param what 
      */
-    public void setUsingBoosterShip(boolean what) {
+    public synchronized void setUsingBoosterShip(boolean what) {
         useBoosterShip = what;
     }        
     
@@ -206,27 +197,23 @@ public class BoosterShipContainer {
      * @param name
      * @return 
      */
-    public BoosterShip createNewBoosterShip(String name) {
+    public synchronized BoosterShip createNewBoosterShip(String name) {
         if (name == null || name.trim().isEmpty()) return null;
         
-        synchronized(blocker) {
-            if (getBoosterShip(name) != null) return null;
-            
-            BoosterShip newShip = new BoosterShip(name);
-            boosterShips.put(name, newShip);
-            
-            return newShip;
-        }
+        if (getBoosterShip(name) != null) return null;
+
+        BoosterShip newShip = new BoosterShip(name);
+        boosterShips.put(name, newShip);
+
+        return newShip;
     }
     
     /**
      * How many booster ships are there?
      * @return 
      */
-    public int getBoosterShipCount() {
-        synchronized(blocker) {
-            return boosterShips.size();
-        }
+    public synchronized int getBoosterShipCount() {
+        return boosterShips.size();
     }
     
     /**
@@ -234,15 +221,13 @@ public class BoosterShipContainer {
      * @param ship
      * @return true, if successfully deleted.
      */
-    public boolean deleteBoosterShip(BoosterShip ship) {
+    public synchronized boolean deleteBoosterShip(BoosterShip ship) {
         if (ship == null) return false;
         
-        synchronized(blocker) {
-            if (getBoosterShipCount() < 2) return false;
-            
-            BoosterShip res = boosterShips.remove(ship.getName());
-            return (res != null);
-        }
+        if (getBoosterShipCount() < 2) return false;
+
+        BoosterShip res = boosterShips.remove(ship.getName());
+        return (res != null);
     }
     
     /**
@@ -255,43 +240,37 @@ public class BoosterShipContainer {
      * @param newName desired new name.
      * @return true, if renamed successfully, false otherwise.
      */
-    public boolean renameBoosterShip(String oldName, String newName) {
+    public synchronized boolean renameBoosterShip(String oldName, String newName) {
         if (oldName == null || newName == null) return false;
         if (newName.trim().isEmpty()) return false;
         if (oldName.equals(newName)) return false;
         
-        synchronized(blocker) {
-            if (boosterShips.containsKey(newName)) return false;
-            
-            BoosterShip oldship = boosterShips.remove(oldName);
-            if (oldship == null) return false;
-            oldship.setName(newName);
-            boosterShips.put(newName, oldship);
-            
-            return true;
-        }
+        if (boosterShips.containsKey(newName)) return false;
+
+        BoosterShip oldship = boosterShips.remove(oldName);
+        if (oldship == null) return false;
+        oldship.setName(newName);
+        boosterShips.put(newName, oldship);
+
+        return true;
     }
     
     /**
      * Sets the name of a last selected booster ship.
      * @param name 
      */
-    public void setSelectedBoosterShip(String name) {
-        synchronized(blocker) {
-            selectedBoosterShip = name;
-        }
+    public synchronized void setSelectedBoosterShip(String name) {
+        selectedBoosterShip = name;
     }
     
     /**
      * Returns last selected booster ship.
      * @return 
      */
-    public BoosterShip getLastSelectedBoosterShip() {
-        synchronized(blocker) {
-            BoosterShip ret = boosterShips.get(selectedBoosterShip);
-            // ships is never empty, so it's safe
-            if (ret == null) ret = boosterShips.values().iterator().next();
-            return ret;
-        }
+    public synchronized BoosterShip getLastSelectedBoosterShip() {
+        BoosterShip ret = boosterShips.get(selectedBoosterShip);
+        // ships is never empty, so it's safe
+        if (ret == null) ret = boosterShips.values().iterator().next();
+        return ret;
     }
 }

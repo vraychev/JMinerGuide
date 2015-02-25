@@ -216,7 +216,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             if (!this.isAlwaysOnTop()) {
                 this.setAlwaysOnTop(true);
                 msMonitor.restoreMonitorWindow();
-                currentSession.switchToWindow();
+                session.switchToWindow();
             }
             
             String name = session.getCharacterName();
@@ -270,12 +270,13 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     }
     
     public void updateTimerLabel() {
-        if (currentSession == null || currentSession.getSessionCharacter() == null) {
+        MiningSession sess = currentSession;
+        if (sess == null || sess.getSessionCharacter() == null) {
             jLabelTimer.setText("0:00");
             return;
         }
         
-        MiningTimer mTimer = currentSession.getTimer();
+        MiningTimer mTimer = sess.getTimer();
         if (mTimer == null || mTimer.isFinished()) {
             jLabelTimer.setText("0:00");
             return;
@@ -292,12 +293,13 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
      * and text as needed, according to sessions.
      */
     public void updateSessionButtons() {
+        MiningSession sess = currentSession;
         for (Component component : jPanelSelector.getComponents()) {
             if (component instanceof MiningSessionButton) {
                 MiningSessionButton button = (MiningSessionButton) component;
                 
                 MiningSession session = button.getMiningSession();
-                boolean current = session.equals(currentSession);
+                boolean current = session.equals(sess);
                 if (button.isSelected() != current) {
                     button.setSelected(current);
                 }
@@ -362,7 +364,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     }
     
     public void updateCurrentCharacterStats() {
-        if (currentSession != null) updateCharacterStats(currentSession);
+        MiningSession sess = currentSession;
+        if (sess != null) updateCharacterStats(sess);
     }
     
     /**
@@ -479,42 +482,45 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
      * Checks turret buttons, enabling or disabling them as needed.
      */
     public void checkTurretButtons() {
-        if (currentSession == null) {
+        MiningSession sess = currentSession;
+        if (sess == null) {
             disableTurretButtons();
             return;
         }
-        
-        SessionCharacter chr = currentSession.getSessionCharacter();
-        if (chr == null) {
-            disableTurretButtons();
-            return;
+                
+        synchronized(sess) {
+            SessionCharacter chr = sess.getSessionCharacter();
+            if (chr == null) {
+                disableTurretButtons();
+                return;
+            }
+
+            float holdRem = sess.getRemainingCargo();
+            if (holdRem == 0) {
+                disableTurretButtons();
+                return;
+            }
+
+            Ship ship = chr.getShip();
+            if (ship.getTurretCount() > 3) {
+                disableTurretButtons();
+                return;
+            }
+
+            if (ship.getTurretCount() > 2) {
+                enableToggleButton(jToggleButtonTurret3, sess.getTurret3().isMining());
+            } else {
+                disableToggleButton(jToggleButtonTurret3);
+            }
+
+            if (ship.getTurretCount() > 1) {
+                enableToggleButton(jToggleButtonTurret2, sess.getTurret2().isMining());
+            } else {
+                disableToggleButton(jToggleButtonTurret2);
+            }
+
+            enableToggleButton(jToggleButtonTurret1, sess.getTurret1().isMining());
         }
-        
-        float holdRem = currentSession.getRemainingCargo();
-        if (holdRem == 0) {
-            disableTurretButtons();
-            return;
-        }
-        
-        Ship ship = chr.getShip();
-        if (ship.getTurretCount() > 3) {
-            disableTurretButtons();
-            return;
-        }
-        
-        if (ship.getTurretCount() > 2) {
-            enableToggleButton(jToggleButtonTurret3, currentSession.getTurret3().isMining());
-        } else {
-            disableToggleButton(jToggleButtonTurret3);
-        }
-        
-        if (ship.getTurretCount() > 1) {
-            enableToggleButton(jToggleButtonTurret2, currentSession.getTurret2().isMining());
-        } else {
-            disableToggleButton(jToggleButtonTurret2);
-        }
-        
-        enableToggleButton(jToggleButtonTurret1, currentSession.getTurret1().isMining());
     }
     
     /**
@@ -1028,69 +1034,78 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonCloseActionPerformed
 
     private void jToggleButtonTurret3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonTurret3ActionPerformed
-        if (currentSession != null) {
-            SessionCharacter chr = currentSession.getSessionCharacter();
-            if (chr != null && chr.getShip().getTurretCount() > 2) {
-                TurretInstance turret = currentSession.getTurret3();
-                if (turret.isMining()) {
-                    turret.unbindAsteroid();
-                } else {
-                    Asteroid roid = getSelectedAsteroid();
-                    if (roid != null) {
-                        turret.bindAsteroid(roid);
+        MiningSession sess = currentSession;
+        if (sess != null) {
+            synchronized(sess) {
+                SessionCharacter chr = sess.getSessionCharacter();
+                if (chr != null && chr.getShip().getTurretCount() > 2) {
+                    TurretInstance turret = sess.getTurret3();
+                    if (turret.isMining()) {
+                        turret.unbindAsteroid();
+                    } else {
+                        Asteroid roid = getSelectedAsteroid();
+                        if (roid != null) {
+                            turret.bindAsteroid(roid);
+                        }
                     }
-                }
 
-                notifyTableUpdate();
+                    notifyTableUpdate();
 
-                if (jToggleButtonTurret3.isSelected() != turret.isMining()) {
-                    jToggleButtonTurret3.setSelected(turret.isMining());
+                    if (jToggleButtonTurret3.isSelected() != turret.isMining()) {
+                        jToggleButtonTurret3.setSelected(turret.isMining());
+                    }
                 }
             }
         }
     }//GEN-LAST:event_jToggleButtonTurret3ActionPerformed
 
     private void jToggleButtonTurret2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonTurret2ActionPerformed
-        if (currentSession != null) {
-            SessionCharacter chr = currentSession.getSessionCharacter();
-            if (chr != null && chr.getShip().getTurretCount() > 1) {
-                TurretInstance turret = currentSession.getTurret2();
-                if (turret.isMining()) {
-                    turret.unbindAsteroid();
-                } else {
-                    Asteroid roid = getSelectedAsteroid();
-                    if (roid != null) {
-                        turret.bindAsteroid(roid);
+        MiningSession sess = currentSession;
+        if (sess != null) {
+            synchronized(sess) {
+                SessionCharacter chr = sess.getSessionCharacter();
+                if (chr != null && chr.getShip().getTurretCount() > 1) {
+                    TurretInstance turret = sess.getTurret2();
+                    if (turret.isMining()) {
+                        turret.unbindAsteroid();
+                    } else {
+                        Asteroid roid = getSelectedAsteroid();
+                        if (roid != null) {
+                            turret.bindAsteroid(roid);
+                        }
                     }
-                }
 
-                notifyTableUpdate();
+                    notifyTableUpdate();
 
-                if (jToggleButtonTurret2.isSelected() != turret.isMining()) {
-                    jToggleButtonTurret2.setSelected(turret.isMining());
+                    if (jToggleButtonTurret2.isSelected() != turret.isMining()) {
+                        jToggleButtonTurret2.setSelected(turret.isMining());
+                    }
                 }
             }
         }
     }//GEN-LAST:event_jToggleButtonTurret2ActionPerformed
 
     private void jToggleButtonTurret1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonTurret1ActionPerformed
-        if (currentSession != null) {
-            SessionCharacter chr = currentSession.getSessionCharacter();
-            if (chr != null) {
-                TurretInstance turret = currentSession.getTurret1();
-                if (turret.isMining()) {
-                    turret.unbindAsteroid();
-                } else {
-                    Asteroid roid = getSelectedAsteroid();
-                    if (roid != null) {
-                        turret.bindAsteroid(roid);
+        MiningSession sess = currentSession;
+        if (sess != null) {
+            synchronized(sess) {
+                SessionCharacter chr = sess.getSessionCharacter();
+                if (chr != null) {
+                    TurretInstance turret = sess.getTurret1();
+                    if (turret.isMining()) {
+                        turret.unbindAsteroid();
+                    } else {
+                        Asteroid roid = getSelectedAsteroid();
+                        if (roid != null) {
+                            turret.bindAsteroid(roid);
+                        }
                     }
-                }
 
-                notifyTableUpdate();
+                    notifyTableUpdate();
 
-                if (jToggleButtonTurret1.isSelected() != turret.isMining()) {
-                    jToggleButtonTurret1.setSelected(turret.isMining());
+                    if (jToggleButtonTurret1.isSelected() != turret.isMining()) {
+                        jToggleButtonTurret1.setSelected(turret.isMining());
+                    }
                 }
             }
         }
@@ -1100,9 +1115,10 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (!processEvents) return;
         processEvents = false;
 
-        if (currentSession != null) {
-            currentSession.updateCharacherUsingBoosterShip(jCheckBoxUseBoosterShip.isSelected());
-            SessionCharacter curchar = currentSession.getSessionCharacter();
+        MiningSession sess = currentSession;
+        if (sess != null) {
+            sess.updateCharacherUsingBoosterShip(jCheckBoxUseBoosterShip.isSelected());
+            SessionCharacter curchar = sess.getSessionCharacter();
 
             if (curchar != null) {
                 if (jCheckBoxUseBoosterShip.isSelected()) {
@@ -1111,7 +1127,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     if (jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(false);
                 }
 
-                updateCharacterStats(currentSession);
+                updateCharacterStats(sess);
             }
         }
 
@@ -1122,32 +1138,36 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (!processEvents) return;
         processEvents = false;
 
+        MiningSession sess = currentSession;
         BoosterShip bShip = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
-        if (currentSession != null) {
-            currentSession.updateCharacherBoosterShip(bShip);
-            updateCharacterStats(currentSession);
+        if (sess != null) {
+            sess.updateCharacherBoosterShip(bShip);
+            updateCharacterStats(sess);
         }
 
         processEvents = true;
     }//GEN-LAST:event_jComboBoxBoosterShipItemStateChanged
 
     private void jButtonCleanupAsteroidsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCleanupAsteroidsActionPerformed
-        if (currentSession != null) {
-            currentSession.cleanupRoids();
-            updateAsteroids(currentSession);
+        MiningSession sess = currentSession;
+        if (sess != null) {
+            sess.cleanupRoids();
+            updateAsteroids(sess);
         }
     }//GEN-LAST:event_jButtonCleanupAsteroidsActionPerformed
 
     private void jButtonClearAsteroidsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearAsteroidsActionPerformed
-        if (currentSession != null) {
-            currentSession.clearRoids();
-            updateAsteroids(currentSession);
+        MiningSession sess = currentSession;
+        if (sess != null) {
+            sess.clearRoids();
+            updateAsteroids(sess);
         }
     }//GEN-LAST:event_jButtonClearAsteroidsActionPerformed
 
     private void jButtonFiltersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFiltersActionPerformed
-        if (currentSession != null && currentSession.getSessionCharacter() != null) {
-            JAsteroidFilterDialog dlog = new JAsteroidFilterDialog(this, currentSession.getSessionCharacter().getCharacter());
+        MiningSession sess = currentSession;
+        if (sess != null && sess.getSessionCharacter() != null) {
+            JAsteroidFilterDialog dlog = new JAsteroidFilterDialog(this, sess.getSessionCharacter().getCharacter());
             dlog.setLocationRelativeTo(this);
 
             dlog.setVisible(true);
@@ -1155,10 +1175,11 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonFiltersActionPerformed
 
     private void jButtonLoadScanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoadScanActionPerformed
-        if (currentSession != null) {
+        MiningSession sess = currentSession;
+        if (sess != null) {
 
             if (lsDlog == null) {
-                lsDlog = new JLoadScanDialog(this, currentSession);
+                lsDlog = new JLoadScanDialog(this, sess);
                 lsDlog.setLocationRelativeTo(this);
             }
 
@@ -1170,7 +1191,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (!processEvents) return;
         processEvents = false;
 
-        if (currentSession != null) {
+        MiningSession sess = currentSession;
+        if (sess != null) {
             String hold = jTextFieldHold.getText();
             int newHoldSize;
             try {
@@ -1179,7 +1201,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 newHoldSize = 0;
             }
 
-            SessionCharacter curchar = currentSession.getSessionCharacter();
+            SessionCharacter curchar = sess.getSessionCharacter();
             if (curchar != null) {
                 int maxHoldSize = curchar.getStats().getOreHold();
                 if (newHoldSize > maxHoldSize) newHoldSize = maxHoldSize;
@@ -1187,8 +1209,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 newHoldSize = 0;
             }
 
-            currentSession.setUsedCargo(newHoldSize);
-            updateCharacterStats(currentSession);
+            sess.setUsedCargo(newHoldSize);
+            updateCharacterStats(sess);
         }
 
         processEvents = true;
@@ -1198,9 +1220,10 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (!processEvents) return;
         processEvents = false;
 
-        if (currentSession != null) {
-            currentSession.setUsedCargo(0);
-            updateCharacterStats(currentSession);
+        MiningSession sess = currentSession;
+        if (sess != null) {
+            sess.setUsedCargo(0);
+            updateCharacterStats(sess);
         }
 
         processEvents = true;
@@ -1210,10 +1233,11 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (!processEvents) return;
         processEvents = false;
 
+        MiningSession sess = currentSession;
         EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
-        if (currentSession != null) {
-            currentSession.updateCharacherBooster(booster);
-            updateCharacterStats(currentSession);
+        if (sess != null) {
+            sess.updateCharacherBooster(booster);
+            updateCharacterStats(sess);
         }
 
         processEvents = true;
@@ -1223,48 +1247,54 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (!processEvents) return;
         processEvents = false;
 
+        MiningSession sess = currentSession;
         Ship ship = (Ship) jComboBoxShip.getSelectedItem();
-        if (currentSession != null) {
-            currentSession.updateCharacherShip(ship);
-            updateCharacterStats(currentSession);
+        if (sess != null) {
+            sess.updateCharacherShip(ship);
+            updateCharacterStats(sess);
         }
 
         processEvents = true;
     }//GEN-LAST:event_jComboBoxShipItemStateChanged
 
     private void jButton15secActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton15secActionPerformed
-        if (currentSession != null) {
-            currentSession.newTimer(15, settings.getTimerAlertRemoveTimeout());
+        MiningSession sess = currentSession;
+        if (sess != null) {
+            sess.newTimer(15, settings.getTimerAlertRemoveTimeout());
             updateTimerLabel();
         }
     }//GEN-LAST:event_jButton15secActionPerformed
 
     private void jButton30secActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton30secActionPerformed
-        if (currentSession != null) {
-            currentSession.newTimer(30, settings.getTimerAlertRemoveTimeout());
+        MiningSession sess = currentSession;
+        if (sess != null) {
+            sess.newTimer(30, settings.getTimerAlertRemoveTimeout());
             updateTimerLabel();
         }
     }//GEN-LAST:event_jButton30secActionPerformed
 
     private void jButton1minActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1minActionPerformed
-        if (currentSession != null) {
-            currentSession.newTimer(60, settings.getTimerAlertRemoveTimeout());
+        MiningSession sess = currentSession;
+        if (sess != null) {
+            sess.newTimer(60, settings.getTimerAlertRemoveTimeout());
             updateTimerLabel();
         }
     }//GEN-LAST:event_jButton1minActionPerformed
 
     private void jButton2minActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2minActionPerformed
-        if (currentSession != null) {
-            currentSession.newTimer(120, settings.getTimerAlertRemoveTimeout());
+        MiningSession sess = currentSession;
+        if (sess != null) {
+            sess.newTimer(120, settings.getTimerAlertRemoveTimeout());
             updateTimerLabel();
         }
     }//GEN-LAST:event_jButton2minActionPerformed
 
     private void jButtonCustomTimerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCustomTimerActionPerformed
-        if (currentSession != null) {            
+        MiningSession sess = currentSession;
+        if (sess != null) {            
             try {
                 int secs = Integer.parseInt(jTextFieldCustomTimer.getText(), 10);
-                currentSession.newTimer(secs, settings.getTimerAlertRemoveTimeout());
+                sess.newTimer(secs, settings.getTimerAlertRemoveTimeout());
                 updateTimerLabel();
             } catch (NumberFormatException | NullPointerException e) {
                 // do nothing
@@ -1273,15 +1303,17 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonCustomTimerActionPerformed
 
     private void jButtonStopTimerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonStopTimerActionPerformed
-        if (currentSession != null) { 
-            currentSession.stopTimer();
+        MiningSession sess = currentSession;
+        if (sess != null) { 
+            sess.stopTimer();
             updateTimerLabel();
         }
     }//GEN-LAST:event_jButtonStopTimerActionPerformed
 
     private void jCheckBoxCharacterIgnoreItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxCharacterIgnoreItemStateChanged
-        if (currentSession != null) { 
-            SessionCharacter character = currentSession.getSessionCharacter();
+        MiningSession sess = currentSession;
+        if (sess != null) { 
+            SessionCharacter character = sess.getSessionCharacter();
             if (character != null) {
                 character.getCharacter().setMonitorIgnore(jCheckBoxCharacterIgnore.isSelected());
             }
@@ -1299,8 +1331,9 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (!processEvents) return;
         processEvents = false;
         
-        if (currentSession != null) { 
-            SessionCharacter character = currentSession.getSessionCharacter();
+        MiningSession sess = currentSession;
+        if (sess != null) { 
+            SessionCharacter character = sess.getSessionCharacter();
             if (character != null) {
                 character.getCharacter().setMonitorSequence((int) jSpinnerSequence.getValue());
             }

@@ -34,6 +34,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineEvent;
+import javax.sound.sampled.LineListener;
 
 /**
  * A task to do mining every second.
@@ -129,7 +131,18 @@ public class MiningTask implements Runnable{
             AudioInputStream aStream = AudioSystem.getAudioInputStream(resourceStream);
             AudioFormat audioFormat = aStream.getFormat();
             DataLine.Info dataLineInfo = new DataLine.Info(Clip.class, audioFormat);
-            Clip clip = (Clip) AudioSystem.getLine(dataLineInfo);
+            final Clip clip = (Clip) AudioSystem.getLine(dataLineInfo);
+            
+            clip.addLineListener(new LineListener(){
+                @Override
+                public void update(LineEvent event){
+                    if(event.getType() == LineEvent.Type.STOP){
+                        event.getLine().close();
+                        clip.close();
+                    }
+                }
+            });
+            
             clip.open(aStream);
             clip.start();
         } catch (Exception e) {

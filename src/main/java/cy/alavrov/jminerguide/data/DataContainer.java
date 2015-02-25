@@ -53,8 +53,6 @@ public class DataContainer {
     private ShipContainer ships;
     private BoosterShipContainer boosters;
     
-    private volatile Ship ship;
-    
     private ExecutorService pool;
     
     /**

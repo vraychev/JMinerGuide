@@ -29,7 +29,7 @@ package cy.alavrov.jminerguide.data.character;
 import cy.alavrov.jminerguide.data.implant.Implant;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -57,8 +57,6 @@ public class CharacterContainer {
     private LinkedHashMap<Integer, APIKey> keys;
     private HashMap<String, EVECharacter> charMap;
     
-    private final Object blocker = new Object();
-    
     private String selectedMiner;
     private String selectedBooster;
     
@@ -78,7 +76,7 @@ public class CharacterContainer {
     /**
      * Loads API keys and their characters from a configuration file.
      */
-    public void load() {        
+    public synchronized void load() {        
         JMGLogger.logWarning("Loading characters...");
         File src = new File(path+File.separator+"characters.dat");
         if (!src.exists()) {            
@@ -121,7 +119,7 @@ public class CharacterContainer {
     /**
      * Saves all the keys and characters into a file.
      */
-    public void save() {
+    public synchronized void save() {
         File src = new File(path+File.separator+"characters.dat");
         if (!src.exists()) {
             try {
@@ -138,26 +136,24 @@ public class CharacterContainer {
         
         Element root = new Element("apikeys");
         Document doc = new Document(root);
-                
-        synchronized(blocker) {
-            String lastMiner = selectedMiner;
-            if (lastMiner == null) lastMiner = all5miner.getName();
-            root.addContent(new Element("lastselectedminer").setText(lastMiner));
-
-            String lastBooster = selectedBooster;
-            if (lastBooster == null) lastBooster = all0.getName();
-            root.addContent(new Element("lastselectedbooster").setText(lastBooster));        
         
-            for (APIKey key : keys.values()) {
-                Element elem = key.getXMLElement();
-                root.addContent(elem);
-            }
+        String lastMiner = selectedMiner;
+        if (lastMiner == null) lastMiner = all5miner.getName();
+        root.addContent(new Element("lastselectedminer").setText(lastMiner));
+
+        String lastBooster = selectedBooster;
+        if (lastBooster == null) lastBooster = all0.getName();
+        root.addContent(new Element("lastselectedbooster").setText(lastBooster));        
+
+        for (APIKey key : keys.values()) {
+            Element elem = key.getXMLElement();
+            root.addContent(elem);
         }
         
         XMLOutputter xmlOutput = new XMLOutputter();
         xmlOutput.setFormat(Format.getPrettyFormat());
-        try (FileWriter fw = new FileWriter(path+File.separator+"characters.dat")){
-            xmlOutput.output(doc, fw);
+        try (FileOutputStream fos = new FileOutputStream(path+File.separator+"characters.dat")){
+            xmlOutput.output(doc, fos);
         } catch (Exception e) {
             JMGLogger.logSevere("Unable to save "+path+File.separator+"characters.dat", e);
         }
@@ -167,15 +163,13 @@ public class CharacterContainer {
      * Returns a list model with API keys for a Swing list. Keys are sorted by insertion order.
      * @return 
      */
-    public DefaultListModel<APIKey> getListModel() {
+    public synchronized DefaultListModel<APIKey> getListModel() {
         DefaultListModel<APIKey> out = new DefaultListModel<>();
-                                        
-        synchronized(blocker) {
-            if (keys.isEmpty()) return out;
-            
-            for (APIKey key : keys.values()) {
-                out.addElement(key);
-            }
+                                  
+        if (keys.isEmpty()) return out;
+
+        for (APIKey key : keys.values()) {
+            out.addElement(key);
         }
         
         return out;
@@ -185,23 +179,21 @@ public class CharacterContainer {
      * Reloads character name to character map. Stores only one character per name.
      * Does not contain hidden characters.
      */
-    public void reloadCharMap() {
-        synchronized(blocker) {
-            HashMap<String, EVECharacter> newCharMap = new HashMap<>();
-            
-            newCharMap.put(all5miner.getName(), all5miner);
-            newCharMap.put(all5booster.getName(), all5booster);
-            newCharMap.put(all0.getName(), all0);
-            for (APIKey key : keys.values()) {
-                for (EVECharacter eveChar : key.getCharacters()) {
-                    if (!eveChar.isHidden()) {
-                        newCharMap.put(eveChar.getName(), eveChar);
-                    }
+    public synchronized void reloadCharMap() {
+        HashMap<String, EVECharacter> newCharMap = new HashMap<>();
+
+        newCharMap.put(all5miner.getName(), all5miner);
+        newCharMap.put(all5booster.getName(), all5booster);
+        newCharMap.put(all0.getName(), all0);
+        for (APIKey key : keys.values()) {
+            for (EVECharacter eveChar : key.getCharacters()) {
+                if (!eveChar.isHidden()) {
+                    newCharMap.put(eveChar.getName(), eveChar);
                 }
             }
-            
-            charMap = newCharMap;
         }
+
+        charMap = newCharMap;
     }
     
     /**
@@ -210,11 +202,9 @@ public class CharacterContainer {
      * @param name
      * @return 
      */
-    public EVECharacter getCharacterByName(String name) {
+    public synchronized EVECharacter getCharacterByName(String name) {
         if (name == null) return null;
-        synchronized(blocker) {
-            return charMap.get(name);
-        }
+        return charMap.get(name);
     }
     
     /**
@@ -222,26 +212,22 @@ public class CharacterContainer {
      * If there's already a API key with same key ID, does nothing.
      * @param key
      */
-    public void addAPIKey(APIKey key) {
+    public synchronized void addAPIKey(APIKey key) {
         if (key == null) return;
         
-        synchronized(blocker) {
-            if (keys.containsKey(key.getID())) return;
-            
-            keys.put(key.getID(), key);
-        }
+        if (keys.containsKey(key.getID())) return;
+
+        keys.put(key.getID(), key);
     }
     
     /**
      * Removes an API key from the storage.
      * @param key 
      */
-    public void removeAPIKey(APIKey key) {
+    public synchronized void removeAPIKey(APIKey key) {
         if (key == null) return;
         
-        synchronized(blocker) {
-            keys.remove(key.getID());
-        }
+        keys.remove(key.getID());
     }
     
     /**
@@ -250,12 +236,10 @@ public class CharacterContainer {
      * @param id
      * @return 
      */
-    public APIKey getAPIKey(Integer id) {
+    public synchronized APIKey getAPIKey(Integer id) {
         if (id == null) return null;
         
-        synchronized(blocker) {
-            return keys.get(id);
-        }
+        return keys.get(id);
     }
     
     /**
@@ -265,13 +249,11 @@ public class CharacterContainer {
      * If there is no such key, nothing happens.
      * @param key 
      */
-    public void updateAPIKey(APIKey key) {
+    public synchronized void updateAPIKey(APIKey key) {
         if (key == null) return;
         
-        synchronized(blocker) {
-            if (keys.containsKey(key.getID())) {
-                keys.put(key.getID(), key);
-            }
+        if (keys.containsKey(key.getID())) {
+            keys.put(key.getID(), key);
         }
     }
     
@@ -282,20 +264,18 @@ public class CharacterContainer {
      * Does not contain hidden characters.
      * @return 
      */
-    public DefaultComboBoxModel<EVECharacter> getCharModel() {
+    public synchronized DefaultComboBoxModel<EVECharacter> getCharModel() {
         DefaultComboBoxModel<EVECharacter> out = new DefaultComboBoxModel<>();
         
         out.addElement(all5miner);
         out.addElement(all5booster);
         out.addElement(all0);
-        
-        synchronized(blocker) {            
-            for (APIKey key : keys.values()) {
-                List<EVECharacter> chrs = key.getCharacters();
-                for (EVECharacter chr : chrs) {
-                    if (!chr.isHidden()) {
-                        out.addElement(chr);
-                    }
+                  
+        for (APIKey key : keys.values()) {
+            List<EVECharacter> chrs = key.getCharacters();
+            for (EVECharacter chr : chrs) {
+                if (!chr.isHidden()) {
+                    out.addElement(chr);
                 }
             }
         }
@@ -307,23 +287,19 @@ public class CharacterContainer {
      * Sets name of selected miner.
      * @param name 
      */
-    public void setSelectedMiner(String name) {
-        synchronized(blocker) {
+    public synchronized void setSelectedMiner(String name) {
             selectedMiner = name;
-        }
     }
     
     /**
      * Returns last selected miner (all5, if there were none).
      * @return 
      */
-    public EVECharacter getLastSelectedMiner() {
-        synchronized(blocker) {
-            EVECharacter ret = charMap.get(selectedMiner);
-            if (ret == null) ret = all5miner;
-            
-            return ret;
-        }
+    public synchronized EVECharacter getLastSelectedMiner() {
+        EVECharacter ret = charMap.get(selectedMiner);
+        if (ret == null) ret = all5miner;
+
+        return ret;
     }
     
     /**
@@ -331,9 +307,7 @@ public class CharacterContainer {
      * @param name 
      */
     public void setSelectedBooster(String name) {
-        synchronized(blocker) {
-            selectedBooster = name;
-        }
+        selectedBooster = name;
     }
     
     /**
@@ -341,12 +315,10 @@ public class CharacterContainer {
      * @return 
      */
     public EVECharacter getLastSelectedBooster() {
-        synchronized(blocker) {
-            EVECharacter ret = charMap.get(selectedBooster);
-            if (ret == null) ret = all0;
-            
-            return ret;
-        }
+        EVECharacter ret = charMap.get(selectedBooster);
+        if (ret == null) ret = all0;
+
+        return ret;
     }
 
     /**

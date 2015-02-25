@@ -32,9 +32,7 @@ import org.jdom2.Element;
  * Assembled ship with a pilot.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class Ship {
-    private final Object blocker = new Object();
-    
+public class Ship {    
     private String name;
     
     private Hull hull;
@@ -246,38 +244,36 @@ public class Ship {
         }        
     }
     
-    public Element getXMLElement() {     
-        synchronized(blocker) {
-            Element root = new Element("ship");        
-            
-            root.addContent(new Element("name").setText(name));
-            
-            root.addContent(new Element("hull").setAttribute("id", String.valueOf(hull.getID())));
-                        
-            root.addContent(new Element("turret")
-                    .setAttribute("id", String.valueOf(turret.getID()))
-                    .setAttribute("count", String.valueOf(turretCount))
-                    .setAttribute("crystal", String.valueOf(miningCrystal.getID()))
-            );
+    public synchronized Element getXMLElement() {    
+        Element root = new Element("ship");        
 
-            root.addContent(new Element("upgrade")
-                    .setAttribute("id", String.valueOf(harvestUpgrade.getID()))
-                    .setAttribute("count", String.valueOf(harvestUpgradeCount))
-            );
-            
-            root.addContent(new Element("drone")
-                    .setAttribute("id", String.valueOf(drone.getID()))
-                    .setAttribute("count", String.valueOf(droneCount))
-            );
-            
-            root.addContent(new Element("rigs")
-                    .setAttribute("rig1id", String.valueOf(rig1.getID()))
-                    .setAttribute("rig2id", String.valueOf(rig2.getID()))
-                    .setAttribute("rig3id", String.valueOf(rig3.getID()))
-            );
-            
-            return root;
-        }        
+        root.addContent(new Element("name").setText(name));
+
+        root.addContent(new Element("hull").setAttribute("id", String.valueOf(hull.getID())));
+
+        root.addContent(new Element("turret")
+                .setAttribute("id", String.valueOf(turret.getID()))
+                .setAttribute("count", String.valueOf(turretCount))
+                .setAttribute("crystal", String.valueOf(miningCrystal.getID()))
+        );
+
+        root.addContent(new Element("upgrade")
+                .setAttribute("id", String.valueOf(harvestUpgrade.getID()))
+                .setAttribute("count", String.valueOf(harvestUpgradeCount))
+        );
+
+        root.addContent(new Element("drone")
+                .setAttribute("id", String.valueOf(drone.getID()))
+                .setAttribute("count", String.valueOf(droneCount))
+        );
+
+        root.addContent(new Element("rigs")
+                .setAttribute("rig1id", String.valueOf(rig1.getID()))
+                .setAttribute("rig2id", String.valueOf(rig2.getID()))
+                .setAttribute("rig3id", String.valueOf(rig3.getID()))
+        );
+
+        return root;     
     }
     
     /**
@@ -285,84 +281,75 @@ public class Ship {
      * change maximum number of turrets, upgrades, drones and/or rig composition.
      * @param newHull 
      */
-    public void setHull(Hull newHull) {
+    public synchronized void setHull(Hull newHull) {
         if (newHull == null) return;
         
-        synchronized(blocker) {
-            Hull oldhull = hull;
-            hull = newHull;
-            if (turretCount > hull.getMaxTurrets()) {
-                turretCount = hull.getMaxTurrets();
+        hull = newHull;
+        if (turretCount > hull.getMaxTurrets()) {
+            turretCount = hull.getMaxTurrets();
+        }
+
+        // let's preserve turret selection, if we have to change turret type.
+        if (hull.isUsingStripMiners()) {
+            if (turret.getTurretType() == TurretType.GASHARVESTER || 
+                turret.getTurretType() == TurretType.MININGLASER) {
+                lastMiningTurret = turret;
+                turret = lastStripTurret;
             }
-            
-            // let's preserve turret selection, if we have to change turret type.
-            if (hull.isUsingStripMiners()) {
-                if (turret.getTurretType() == TurretType.GASHARVESTER || 
-                    turret.getTurretType() == TurretType.MININGLASER) {
-                    lastMiningTurret = turret;
-                    turret = lastStripTurret;
-                }
-            } else {
-                if (turret.getTurretType() == TurretType.STRIPMINER || 
-                    turret.getTurretType() == TurretType.ICEHARVESTER) {
-                    lastStripTurret = turret;
-                    turret = lastMiningTurret;
-                }
+        } else {
+            if (turret.getTurretType() == TurretType.STRIPMINER || 
+                turret.getTurretType() == TurretType.ICEHARVESTER) {
+                lastStripTurret = turret;
+                turret = lastMiningTurret;
             }
-            
-            if (this.harvestUpgradeCount > hull.getMaxUpgrades()) {
-                this.harvestUpgradeCount = hull.getMaxUpgrades();
-            }
-            
-            // upgrade type won't change.
-            
-            int maxDroneCount  = hull.getDroneBandwidth() / drone.getBandwidth();   
-            if (maxDroneCount > 5) maxDroneCount = 5;
-            
-            if (droneCount > maxDroneCount) droneCount = maxDroneCount;
-            
-            if (!hull.isMediumHull()) {
-                if (rig1.isStrictlyMedium()) rig1 = Rig.NOTHING;
-                if (rig2.isStrictlyMedium()) rig2 = Rig.NOTHING;
-                if (rig3.isStrictlyMedium()) rig3 = Rig.NOTHING;
-            }
+        }
+
+        if (this.harvestUpgradeCount > hull.getMaxUpgrades()) {
+            this.harvestUpgradeCount = hull.getMaxUpgrades();
+        }
+
+        // upgrade type won't change.
+
+        int maxDroneCount  = hull.getDroneBandwidth() / drone.getBandwidth();   
+        if (maxDroneCount > 5) maxDroneCount = 5;
+
+        if (droneCount > maxDroneCount) droneCount = maxDroneCount;
+
+        if (!hull.isMediumHull()) {
+            if (rig1.isStrictlyMedium()) rig1 = Rig.NOTHING;
+            if (rig2.isStrictlyMedium()) rig2 = Rig.NOTHING;
+            if (rig3.isStrictlyMedium()) rig3 = Rig.NOTHING;
         }
     }
     
-    public Hull getHull() {
-        synchronized(blocker) {
-            return hull;
-        }
+    public synchronized Hull getHull() {
+        return hull;
     }
     
     /**
      * Sets type of a turret.
      * @param newTurret 
      */
-    public void setTurret(Turret newTurret) {
+    public synchronized void setTurret(Turret newTurret) {
         if (turret == null) return;
         
-        synchronized(blocker) {
-            if (hull.isUsingStripMiners()) {
-                if (turret.getTurretType() == TurretType.GASHARVESTER || 
-                    turret.getTurretType() == TurretType.MININGLASER) {
-                    return;
-                }
-            } else {
-                if (turret.getTurretType() == TurretType.STRIPMINER || 
-                    turret.getTurretType() == TurretType.ICEHARVESTER) {
-                    return;
-                }
+        if (hull.isUsingStripMiners()) {
+            if (turret.getTurretType() == TurretType.GASHARVESTER || 
+                turret.getTurretType() == TurretType.MININGLASER) {
+                return;
             }
-            
-            turret = newTurret;
+        } else {
+            if (turret.getTurretType() == TurretType.STRIPMINER || 
+                turret.getTurretType() == TurretType.ICEHARVESTER) {
+                return;
+            }
         }
+
+        turret = newTurret;
     }
     
-    public Turret getTurret() {
-        synchronized(blocker) {
-            return turret;
-        }
+    public synchronized Turret getTurret() {
+        return turret;
     }
     
     /**
@@ -370,18 +357,14 @@ public class Ship {
      * Can't exceed max turrets on a hull.
      * @param count 
      */
-    public void setTurrentCount(int count) {
-        synchronized(blocker) {
-            if (count < 0) count = 0;
-            if (count > hull.getMaxTurrets()) count = hull.getMaxTurrets();
-            turretCount = count;
-        }
+    public synchronized void setTurrentCount(int count) {
+        if (count < 0) count = 0;
+        if (count > hull.getMaxTurrets()) count = hull.getMaxTurrets();
+        turretCount = count;
     }
     
-    public int getTurretCount() {
-        synchronized(blocker) { 
-            return turretCount;
-        }
+    public synchronized int getTurretCount() {
+        return turretCount;
     }
     
     /**
@@ -389,34 +372,26 @@ public class Ship {
      * them, this is intentional (calculations ignore them anyway in that case).
      * @param lvl 
      */
-    public void setTurretCrystal(MiningCrystalLevel lvl) {
+    public synchronized void setTurretCrystal(MiningCrystalLevel lvl) {
         if (lvl == null) return;
-        synchronized(blocker) {
-            miningCrystal = lvl;
-        }
+        miningCrystal = lvl;
     }
     
-    public MiningCrystalLevel getTurretCrystal() {
-        synchronized(blocker) {
-            return miningCrystal;
-        }
+    public synchronized MiningCrystalLevel getTurretCrystal() {
+        return miningCrystal;
     }
     
     /**
      * Sets harvest upgrade type.
      * @param newUpg 
      */
-    public void setHarvestUpgrade(HarvestUpgrade newUpg) {
+    public synchronized void setHarvestUpgrade(HarvestUpgrade newUpg) {
         if (newUpg == null) return;
-        synchronized(blocker) {
-            harvestUpgrade = newUpg;
-        }
+        harvestUpgrade = newUpg;
     }
     
-    public HarvestUpgrade getHarvestUpgrade() {
-        synchronized(blocker) {
-            return harvestUpgrade;
-        }
+    public synchronized HarvestUpgrade getHarvestUpgrade() {
+        return harvestUpgrade;
     }
     
     /**
@@ -424,75 +399,56 @@ public class Ship {
      * Can't exceed max upgrades (i.e. lowslots) on a ship.
      * @param count 
      */
-    public void setHarvestUpgradeCount(int count) {
-        synchronized(blocker) {
-            if (count < 0) count = 0;
-            if (count > hull.getMaxUpgrades()) count = hull.getMaxUpgrades();
-            harvestUpgradeCount = count;
-        }
+    public synchronized void setHarvestUpgradeCount(int count) {
+        if (count < 0) count = 0;
+        if (count > hull.getMaxUpgrades()) count = hull.getMaxUpgrades();
+        harvestUpgradeCount = count;
     }
     
-    public int getHarvestUpgradeCount() {
-        synchronized(blocker) { 
-            return harvestUpgradeCount;
-        }
+    public synchronized int getHarvestUpgradeCount() {
+        return harvestUpgradeCount;
     }
     
-    public void setDrone(MiningDrone newDrone) {
+    public synchronized void setDrone(MiningDrone newDrone) {
         if (newDrone == null) return;
-        synchronized(blocker) {            
-            drone = newDrone;
-            int maxDroneCount = hull.getDroneBandwidth() / drone.getBandwidth();
-            if (maxDroneCount > 5) maxDroneCount = 5;
-            if (droneCount > maxDroneCount) droneCount = maxDroneCount;
-        }
+        
+        drone = newDrone;
+        int maxDroneCount = hull.getDroneBandwidth() / drone.getBandwidth();
+        if (maxDroneCount > 5) maxDroneCount = 5;
+        if (droneCount > maxDroneCount) droneCount = maxDroneCount;
     }
     
-    public MiningDrone getDrone() {
-        synchronized(blocker) {
-            return drone;
-        }
+    public synchronized MiningDrone getDrone() {
+        return drone;
     }
     
-    public void setDroneCount(int count) {
-        synchronized(blocker) {            
-            int maxDroneCount = hull.getDroneBandwidth() / drone.getBandwidth();
-            if (maxDroneCount > 5) maxDroneCount = 5;
-            if (count > maxDroneCount) count = maxDroneCount;
-            droneCount = count;
-        }
+    public synchronized void setDroneCount(int count) {     
+        int maxDroneCount = hull.getDroneBandwidth() / drone.getBandwidth();
+        if (maxDroneCount > 5) maxDroneCount = 5;
+        if (count > maxDroneCount) count = maxDroneCount;
+        droneCount = count;
     }
     
-    public int getDroneCount() {
-        synchronized(blocker) {
-            return droneCount;
-        }
+    public synchronized int getDroneCount() {
+        return droneCount;
     }
     
-    public int getMaxDrones() {
-        synchronized(blocker) {
-            int maxDroneCount = hull.getDroneBandwidth() / drone.getBandwidth();
-            if (maxDroneCount > 5) maxDroneCount = 5;
-            return maxDroneCount;
-        }
+    public synchronized int getMaxDrones() {
+        int maxDroneCount = hull.getDroneBandwidth() / drone.getBandwidth();
+        if (maxDroneCount > 5) maxDroneCount = 5;
+        return maxDroneCount;
     }
     
-    public Rig getRig1() {
-        synchronized(blocker) {
-            return rig1;
-        }
+    public synchronized Rig getRig1() {
+        return rig1;
     }
     
-    public Rig getRig2() {
-        synchronized(blocker) {
-            return rig2;
-        }
+    public synchronized Rig getRig2() {
+        return rig2;
     }
     
-    public Rig getRig3() {
-        synchronized(blocker) {
-            return rig3;
-        }
+    public synchronized Rig getRig3() {
+        return rig3;
     }
     
     /**
@@ -500,16 +456,14 @@ public class Ship {
      * @param newRig
      * @return false if failed.
      */
-    public boolean setRig1(Rig newRig) {
+    public synchronized boolean setRig1(Rig newRig) {
         if (newRig == null) return false;
         
-        synchronized(blocker) {
-            if (!hull.isMediumHull() && newRig.isStrictlyMedium()) return false;
-            if (rig2.getCalibrationCost() + rig3.getCalibrationCost() + 
-                    newRig.getCalibrationCost() > 400) return false;
-            rig1 = newRig;
-            return true;
-        }
+        if (!hull.isMediumHull() && newRig.isStrictlyMedium()) return false;
+        if (rig2.getCalibrationCost() + rig3.getCalibrationCost() + 
+                newRig.getCalibrationCost() > 400) return false;
+        rig1 = newRig;
+        return true;
     }
     
     /**
@@ -517,16 +471,14 @@ public class Ship {
      * @param newRig
      * @return false if failed.
      */
-    public boolean setRig2(Rig newRig) {
+    public synchronized boolean setRig2(Rig newRig) {
         if (newRig == null) return false;
         
-        synchronized(blocker) {
-            if (!hull.isMediumHull() && newRig.isStrictlyMedium()) return false;
-            if (rig1.getCalibrationCost() + rig3.getCalibrationCost() + 
-                    newRig.getCalibrationCost() > 400) return false;
-            rig2 = newRig;
-            return true;
-        }
+        if (!hull.isMediumHull() && newRig.isStrictlyMedium()) return false;
+        if (rig1.getCalibrationCost() + rig3.getCalibrationCost() + 
+                newRig.getCalibrationCost() > 400) return false;
+        rig2 = newRig;
+        return true;
     }
     
     /**
@@ -534,35 +486,27 @@ public class Ship {
      * @param newRig
      * @return false if failed.
      */
-    public boolean setRig3(Rig newRig) {
+    public synchronized boolean setRig3(Rig newRig) {
         if (newRig == null) return false;
         
-        synchronized(blocker) {
-            if (!hull.isMediumHull() && newRig.isStrictlyMedium()) return false;
-            if (rig1.getCalibrationCost() + rig2.getCalibrationCost() + 
-                    newRig.getCalibrationCost() > 400) return false;
-            rig3 = newRig;
-            return true;
-        }
+        if (!hull.isMediumHull() && newRig.isStrictlyMedium()) return false;
+        if (rig1.getCalibrationCost() + rig2.getCalibrationCost() + 
+                newRig.getCalibrationCost() > 400) return false;
+        rig3 = newRig;
+        return true;
     }
     
-    public String getName() {
-        synchronized(blocker) {
-            return name;
-        }
+    public synchronized String getName() {
+        return name;
     }
     
-    public void setName(String name) {
+    public synchronized void setName(String name) {
         if (name == null) return;
-        synchronized(blocker) {
-            this.name = name;
-        }
+        this.name = name;
     }
     
     @Override
-    public String toString() {
-        synchronized(blocker) {
-            return name;
-        }
+    public synchronized String toString() {
+        return name;
     }
 }

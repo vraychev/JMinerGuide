@@ -58,11 +58,9 @@ public class APIKey {
     
     private final Integer id;
     private final String verification;
-    private volatile DateTime expires = null;
+    private DateTime expires = null;
     
-    private volatile LinkedHashMap<Integer, EVECharacter> chars;
-    
-    private final Object blocker = new Object();
+    private LinkedHashMap<Integer, EVECharacter> chars;
     
     /**
      * Constructor for the new API key.
@@ -105,22 +103,20 @@ public class APIKey {
      * Returns XML Element with API key data inside, to be used in saving.
      * @return 
      */
-    public Element getXMLElement() {
-        synchronized(blocker) {
-            Element root = new Element("apikey");
-            root.setAttribute(new Attribute("id", String.valueOf(id)));    
-            root.addContent(new Element("verification").setText(verification));
-            if (expires != null) {
-                root.addContent(new Element("expires").setText(String.valueOf(expires.getMillis())));
-            }
-
-            for (EVECharacter character : chars.values()) {
-                Element elem = character.getXMLElement();
-                root.addContent(elem);
-            }
-
-            return root;
+    public synchronized Element getXMLElement() {
+        Element root = new Element("apikey");
+        root.setAttribute(new Attribute("id", String.valueOf(id)));    
+        root.addContent(new Element("verification").setText(verification));
+        if (expires != null) {
+            root.addContent(new Element("expires").setText(String.valueOf(expires.getMillis())));
         }
+
+        for (EVECharacter character : chars.values()) {
+            Element elem = character.getXMLElement();
+            root.addContent(elem);
+        }
+
+        return root;
     }
     
     /**
@@ -144,18 +140,14 @@ public class APIKey {
      * if the key have no expiration date.
      * @return 
      */
-    public String getExpires() {
-        synchronized(blocker) {
-            if (expires == null) return "Never";        
-            return expires.toString(fmt);
-        }
+    public synchronized String getExpires() {
+        if (expires == null) return "Never";        
+        return expires.toString(fmt);
     }
     
     @Override
-    public String toString() {
-        synchronized(blocker) {
-            return id+" ("+chars.size()+" pilots)";
-        }
+    public synchronized String toString() {
+        return id+" ("+chars.size()+" pilots)";
     }
     
     /**
@@ -166,7 +158,7 @@ public class APIKey {
      * @throws APIException thrown when something fails. Exception message
      * contains human-readable text, that can be passed to end-user
      */
-    public void loadAPIData() throws APIException {
+    public synchronized void loadAPIData() throws APIException {
         String keyVerifyURL = DataContainer.baseURL+"/account/APIKeyInfo.xml.aspx?keyID="
                 +id+"&vCode="+verification;
         
@@ -246,10 +238,8 @@ public class APIKey {
             }
             
             // if we got there, there was no errors on the way.
-            synchronized(blocker) {
-                expires = expiresNew;
-                chars = newChars;
-            }            
+            expires = expiresNew;
+            chars = newChars;                        
         } catch (JDOMException | IOException | IllegalArgumentException | NullPointerException e ) {
             JMGLogger.logSevere("Cricical failure during API parsing", e);
             throw new APIException("Unable to parse data, please see logs.");        
@@ -263,13 +253,11 @@ public class APIKey {
      * Contains hidden characters.
      * @return 
      */
-    public DefaultListModel<EVECharacter> getListModel() {
+    public synchronized DefaultListModel<EVECharacter> getListModel() {
         DefaultListModel<EVECharacter> out = new DefaultListModel<>();
         
-        synchronized(blocker) {
-            for (EVECharacter theChar : chars.values()) {
-                out.addElement(theChar);
-            }
+        for (EVECharacter theChar : chars.values()) {
+            out.addElement(theChar);
         }
         
         return out;
@@ -279,13 +267,11 @@ public class APIKey {
      * Returns a list of all characters. Characters are sorted by insertion order.
      * @return 
      */
-    public List<EVECharacter> getCharacters() {
+    public synchronized List<EVECharacter> getCharacters() {
         ArrayList<EVECharacter> out = new ArrayList<>();
-        
-        synchronized(blocker) {        
-            for (EVECharacter chr : chars.values()) {
-                out.add(chr);
-            }
+          
+        for (EVECharacter chr : chars.values()) {
+            out.add(chr);
         }
         
         return out;
