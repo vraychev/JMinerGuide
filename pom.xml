@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>cy.alavrov</groupId>
     <artifactId>JMinerGuide</artifactId>
-    <version>0.9.0-ALPHA</version>
+    <version>0.1.0-ALPHA</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
