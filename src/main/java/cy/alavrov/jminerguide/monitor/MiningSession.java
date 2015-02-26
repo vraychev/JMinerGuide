@@ -510,7 +510,7 @@ public class MiningSession {
                     }
                 }
 
-                if (eveChr.isMonitorIgnore() && rem == Integer.MAX_VALUE) {
+                if (rem == Integer.MAX_VALUE) {
                     button.setForeground(Color.BLACK);
                     button.setText(getButtonHTML(character.getCharacter().getName(), "&nbsp;"));
                 } else {
