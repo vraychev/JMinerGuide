@@ -77,6 +77,10 @@ public class MiningTask implements Runnable{
                                     playSound();
                                 }
                             }
+                            
+                            if (settings.isAsteroidAutoCleanup()) {
+                                session.cleanupRoids();
+                            }
                         }
                     });
                 }

@@ -54,6 +54,11 @@ public class AsteroidMonitorSettings {
     private volatile boolean soundOnAlert;
     
     /**
+     * Should we auto-cleanup asteroids?
+     */
+    private volatile boolean asteroidAutoCleanup;
+    
+    /**
      * How many seconds we should wait before removing an expired timer alert?
      */
     private volatile int timerAlertRemoveTimeout;
@@ -75,6 +80,7 @@ public class AsteroidMonitorSettings {
         if (!src.exists()) {   
             popupOnAlert = true;
             soundOnAlert = true;
+            asteroidAutoCleanup = true;
             timerAlertRemoveTimeout = 5;
             x = -1;
             y = -1;
@@ -89,6 +95,7 @@ public class AsteroidMonitorSettings {
             
             popupOnAlert = "true".equals(rootNode.getChildText("popuponalert"));
             soundOnAlert = "true".equals(rootNode.getChildText("soundonalert"));
+            asteroidAutoCleanup = "true".equals(rootNode.getChildText("cleanuproids"));
             
             timerAlertRemoveTimeout = Integer.parseInt(rootNode.getChildText("timeralerttimeout"), 10);            
             x = Integer.parseInt(rootNode.getChildText("x"), 10);               
@@ -97,6 +104,7 @@ public class AsteroidMonitorSettings {
             JMGLogger.logSevere("Unable to load settings for the asteroid monitor", e);
             popupOnAlert = true;
             soundOnAlert = true;
+            asteroidAutoCleanup = true;
             timerAlertRemoveTimeout = 5;
             x = -1;
             y = -1;
@@ -127,6 +135,7 @@ public class AsteroidMonitorSettings {
         root.addContent(new Element("popuponalert").setText(String.valueOf(popupOnAlert)));
         root.addContent(new Element("soundonalert").setText(String.valueOf(soundOnAlert)));
         root.addContent(new Element("timeralerttimeout").setText(String.valueOf(timerAlertRemoveTimeout)));
+        root.addContent(new Element("cleanuproids").setText(String.valueOf(asteroidAutoCleanup)));
 
         root.addContent(new Element("x").setText(String.valueOf(x)));
         root.addContent(new Element("y").setText(String.valueOf(y)));
@@ -218,5 +227,21 @@ public class AsteroidMonitorSettings {
      */
     public void setY(int y) {
         this.y = y;
+    }
+
+    /**
+     * Should we auto-cleanup asteroids?
+     * @return the asteroidAutoCleanup
+     */
+    public boolean isAsteroidAutoCleanup() {
+        return asteroidAutoCleanup;
+    }
+
+    /**
+     * Should we auto-cleanup asteroids?
+     * @param asteroidAutoCleanup the asteroidAutoCleanup to set
+     */
+    public void setAsteroidAutoCleanup(boolean asteroidAutoCleanup) {
+        this.asteroidAutoCleanup = asteroidAutoCleanup;
     }
 }

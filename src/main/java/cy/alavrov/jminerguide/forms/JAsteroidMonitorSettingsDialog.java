@@ -48,6 +48,7 @@ public class JAsteroidMonitorSettingsDialog extends javax.swing.JDialog {
         jCheckBoxPopupAlert.setSelected(settings.isPopupOnAlert());
         jCheckBoxSoundAlert.setSelected(settings.isSoundOnAlert());
         jTextFieldTimerRemove.setText(String.valueOf(settings.getTimerAlertRemoveTimeout()));
+        jCheckBoxRoidsCleanup.setSelected(settings.isAsteroidAutoCleanup());
         
         AbstractDocument idDoc = ((AbstractDocument)jTextFieldTimerRemove.getDocument());
         idDoc.setDocumentFilter(new IntegerDocumentFilter());
@@ -71,6 +72,8 @@ public class JAsteroidMonitorSettingsDialog extends javax.swing.JDialog {
         jTextFieldTimerRemove = new javax.swing.JTextField();
         jButtonSave = new javax.swing.JButton();
         jButtonClose = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
+        jCheckBoxRoidsCleanup = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Asteroid Monitor Settings");
@@ -101,6 +104,10 @@ public class JAsteroidMonitorSettingsDialog extends javax.swing.JDialog {
             }
         });
 
+        jLabel3.setText("Mining");
+
+        jCheckBoxRoidsCleanup.setText("Auto-cleanup Asteroids");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -117,7 +124,9 @@ public class JAsteroidMonitorSettingsDialog extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButtonSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonClose)))
+                        .addComponent(jButtonClose))
+                    .addComponent(jLabel3)
+                    .addComponent(jCheckBoxRoidsCleanup))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -130,14 +139,18 @@ public class JAsteroidMonitorSettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jCheckBoxSoundAlert)
                 .addGap(18, 18, 18)
-                .addComponent(jLabel2)
+                .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jCheckBoxRoidsCleanup)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jTextFieldTimerRemove, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonSave)
                     .addComponent(jButtonClose))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -150,6 +163,7 @@ public class JAsteroidMonitorSettingsDialog extends javax.swing.JDialog {
     private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
         settings.setPopupOnAlert(jCheckBoxPopupAlert.isSelected());
         settings.setSoundOnAlert(jCheckBoxSoundAlert.isSelected());
+        settings.setAsteroidAutoCleanup(jCheckBoxRoidsCleanup.isSelected());
         
         String timeoutStr = jTextFieldTimerRemove.getText();
         int timeout;
@@ -170,9 +184,11 @@ public class JAsteroidMonitorSettingsDialog extends javax.swing.JDialog {
     private javax.swing.JButton jButtonClose;
     private javax.swing.JButton jButtonSave;
     private javax.swing.JCheckBox jCheckBoxPopupAlert;
+    private javax.swing.JCheckBox jCheckBoxRoidsCleanup;
     private javax.swing.JCheckBox jCheckBoxSoundAlert;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JTextField jTextFieldTimerRemove;
     // End of variables declaration//GEN-END:variables
 }
