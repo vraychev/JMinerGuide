@@ -501,10 +501,12 @@ public class MiningSession {
                     rem = secs;
                 }
                 
+                boolean showTimer = false;
                 if (timer != null) {
                     secs = timer.getRemainingSeconds();
                     if (rem > secs) {
                         rem = secs;
+                        showTimer = true;
                     }
                 }
 
@@ -512,7 +514,12 @@ public class MiningSession {
                     button.setForeground(Color.BLACK);
                     button.setText(getButtonHTML(character.getCharacter().getName(), "&nbsp;"));
                 } else {
-                    int cycle = (int) character.getStats().getTurretCycle();
+                    int cycle;
+                    if (showTimer) {
+                        cycle = timer.getSeconds();
+                    } else {
+                        cycle = (int) character.getStats().getTurretCycle();
+                    }
                     float remcycles = rem /(float)cycle;
 
                     Period remPeriod = Seconds.seconds(rem)

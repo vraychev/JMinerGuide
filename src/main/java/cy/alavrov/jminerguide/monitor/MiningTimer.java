@@ -33,6 +33,7 @@ public class MiningTimer {
     private final long endAt;
     private final long clearAt;
     private volatile boolean wasAlarm;
+    private final int seconds;
     
     public MiningTimer(int seconds, int secondsToClear) {
         long now = System.currentTimeMillis();
@@ -41,6 +42,7 @@ public class MiningTimer {
         endAt = now + duration;
         clearAt = now + duration + clearDuration;
         wasAlarm = false;
+        this.seconds = seconds;
     }
         
     public boolean isFinished() {
@@ -66,4 +68,8 @@ public class MiningTimer {
     public void markAlarm() {
         wasAlarm = true;
     }
+
+    public int getSeconds() {
+        return seconds;
+    }        
 }
