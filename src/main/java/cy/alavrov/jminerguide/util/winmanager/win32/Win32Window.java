@@ -52,7 +52,10 @@ public class Win32Window implements IEVEWindow {
     }
 
     @Override
-    public void makeActive() {
+    public void makeActive() {        
+        if (User32.IsIconic(window)) {
+            User32.ShowWindow(window, User32.SW_RESTORE);
+        }
         User32.SetForegroundWindow(window);
     }
 
