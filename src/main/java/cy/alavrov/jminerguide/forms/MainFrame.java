@@ -2492,7 +2492,7 @@ public final class MainFrame extends javax.swing.JFrame {
         if (level > 0) {
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_FOREMAN) < 5) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING_FOREMAN, 5);
-                jComboBoxMining.setSelectedItem(5);
+                jComboBoxMForeman.setSelectedItem(5);
             }
         }
 
@@ -2552,12 +2552,12 @@ public final class MainFrame extends javax.swing.JFrame {
         if (level > 0) {
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_FOREMAN) < 5) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING_FOREMAN, 5);
-                jComboBoxMining.setSelectedItem(5);
+                jComboBoxMForeman.setSelectedItem(5);
             }
 
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_DIRECTOR) < 1) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING_DIRECTOR, 1);
-                jComboBoxMining.setSelectedItem(1);
+                jComboBoxMDirector.setSelectedItem(1);
             }
         }
 
@@ -2580,17 +2580,17 @@ public final class MainFrame extends javax.swing.JFrame {
         if (level > 0) {
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_FOREMAN) < 5) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING_FOREMAN, 5);
-                jComboBoxMining.setSelectedItem(5);
+                jComboBoxMForeman.setSelectedItem(5);
             }
 
             if (curChar.getSkillLevel(EVECharacter.SKILL_MINING_DIRECTOR) < 1) {
                 curChar.setSkillLevel(EVECharacter.SKILL_MINING_DIRECTOR, 1);
-                jComboBoxMining.setSelectedItem(1);
+                jComboBoxMDirector.setSelectedItem(1);
             }
 
             if (curChar.getSkillLevel(EVECharacter.SKILL_INDUSTRIAL_COMMAND_SHIPS) < 3) {
                 curChar.setSkillLevel(EVECharacter.SKILL_INDUSTRIAL_COMMAND_SHIPS, 3);
-                jComboBoxMining.setSelectedItem(3);
+                jComboBoxIComShips.setSelectedItem(3);
             }
         }
 

@@ -827,4 +827,12 @@ public class EVECharacter {
     public synchronized int getMonitorSequence() {
             return monitorSequence;
     }        
+    
+    protected synchronized void resetSkilsAndImplants() {                
+        this.skills = new HashMap<>();
+        
+        this.slot7 = Implant.NOTHING;
+        this.slot8 = Implant.NOTHING;
+        this.slot10 = Implant.NOTHING;
+    }
 }

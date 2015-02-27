@@ -51,6 +51,7 @@ public class CharacterContainer {
     private final EVECharacter all5booster = new All5Character(" - booster");
     private final EVECharacter all5miner = new All5Character(" - miner");
     private final EVECharacter all0 = new All0Character();
+    private EVECharacter customChar;
     
     private final String path;
     
@@ -70,6 +71,7 @@ public class CharacterContainer {
         selectedMiner = all5miner.getName();
         selectedBooster = all0.getName();
         all5booster.setSlot10Implant(Implant.MFMINDLINK);
+        customChar = new CustomCharacter();
         reloadCharMap();
     }
     
@@ -102,6 +104,19 @@ public class CharacterContainer {
                 APIKey key = new APIKey(keyEl);
                 newkeys.put(key.getID(), key);
             }
+            
+            Element customRoot = rootNode.getChild("customchars");
+            if (customRoot != null) {
+                List<Element> customChars = customRoot.getChildren("character"); 
+                if (!customChars.isEmpty()) {
+                    customChar = new CustomCharacter(customChars.get(0));
+                } else {
+                    customChar = new CustomCharacter();
+                }
+            } else {
+                customChar = new CustomCharacter();
+            }
+            
         } catch (Exception e) {
             JMGLogger.logSevere("Unable to load a configuration file for characters", e);
         } 
@@ -150,6 +165,10 @@ public class CharacterContainer {
             root.addContent(elem);
         }
         
+        Element customRoot = new Element("customchars");
+        customRoot.addContent(customChar.getXMLElement());
+        root.addContent(customRoot);
+        
         XMLOutputter xmlOutput = new XMLOutputter();
         xmlOutput.setFormat(Format.getPrettyFormat());
         try (FileOutputStream fos = new FileOutputStream(path+File.separator+"characters.dat")){
@@ -185,6 +204,7 @@ public class CharacterContainer {
         newCharMap.put(all5miner.getName(), all5miner);
         newCharMap.put(all5booster.getName(), all5booster);
         newCharMap.put(all0.getName(), all0);
+        newCharMap.put(customChar.getName(), customChar);
         for (APIKey key : keys.values()) {
             for (EVECharacter eveChar : key.getCharacters()) {
                 if (!eveChar.isHidden()) {
@@ -270,6 +290,7 @@ public class CharacterContainer {
         out.addElement(all5miner);
         out.addElement(all5booster);
         out.addElement(all0);
+        out.addElement(customChar);
                   
         for (APIKey key : keys.values()) {
             List<EVECharacter> chrs = key.getCharacters();
