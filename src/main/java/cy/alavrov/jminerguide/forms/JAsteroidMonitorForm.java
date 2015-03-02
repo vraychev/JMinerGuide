@@ -1361,9 +1361,13 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     }//GEN-LAST:event_jSpinnerSequenceStateChanged
 
     private void formComponentMoved(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentMoved
-        Point topleft = getLocationOnScreen();
-        settings.setX(topleft.x);
-        settings.setY(topleft.y);
+        try {
+            Point topleft = getLocationOnScreen();
+            settings.setX(topleft.x);
+            settings.setY(topleft.y);
+        } catch (Exception e) {
+            // form isn't visible, do nothing
+        }
     }//GEN-LAST:event_formComponentMoved
 
     private void jTextFieldHoldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldHoldActionPerformed

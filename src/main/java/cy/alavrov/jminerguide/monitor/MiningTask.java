@@ -27,6 +27,7 @@ package cy.alavrov.jminerguide.monitor;
 
 import cy.alavrov.jminerguide.forms.JAsteroidMonitorForm;
 import cy.alavrov.jminerguide.log.JMGLogger;
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.List;
 import javax.sound.sampled.AudioFormat;
@@ -132,7 +133,8 @@ public class MiningTask implements Runnable{
     private void playSound() {
         try {
             InputStream resourceStream = getClass().getClassLoader().getResourceAsStream("ting.wav");
-            AudioInputStream aStream = AudioSystem.getAudioInputStream(resourceStream);
+            InputStream bufferedStream = new BufferedInputStream(resourceStream);
+            AudioInputStream aStream = AudioSystem.getAudioInputStream(bufferedStream);
             AudioFormat audioFormat = aStream.getFormat();
             DataLine.Info dataLineInfo = new DataLine.Info(Clip.class, audioFormat);
             final Clip clip = (Clip) AudioSystem.getLine(dataLineInfo);
