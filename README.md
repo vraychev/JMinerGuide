@@ -43,6 +43,13 @@ To correctly use the monitor, you need to:
 * respond to the alerts
 * rince and repeat
 
+# Known issues
+
+* Yes, there is no Asteroid Monitor for Mac OS and Linux at this moment. Technology isn't there yet!
+* Asteroid monitor can't work with more, than three turrets, so no managing mining titans (sorry, Chribba!). This is intentional, as it will overcomplicate the interface, and, well, almost never used this days.
+* There is no drone support in the monitor at this moment. This is intentional, as it's harder to correctly emulate them with their need to constantly move to asteroid and back, than the generic turret, and there's more pressing issues at this moment. Maybe things will change later.
+* Yes, Station Trip field in the main window does nothing at this moment. This will change soon.
+
 # License
 
 JMinerGuide source code is distributed under the BSD 2-clause license.
