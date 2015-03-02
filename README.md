@@ -41,7 +41,7 @@ To correctly use the monitor, you need to:
 * check, that used ore hold is same both in monitor and a game, adjust if needed
 * start mining ingame, and then in the monitor, same turret on the same asteroid. You can press interface buttons for that, or use f1-f3 buttons, same as ingame
 * respond to the alerts
-* rince and repeat
+* rinse and repeat
 
 # Known issues
 
