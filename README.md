@@ -6,7 +6,7 @@ Helper application for EVE Online miners. In Java.
 
 * Make sure that you have Java 7+ JRE installed.
 * Download release archive and extract somewhere
-* Run JMinerGuide-x.x.x.jar from the root directory of the application
+* Run JMinerGuide.jar from the root directory of the application
 * Set up API keys for your miners and booster
 * If the API key for your booster isn't available, use All 5 booster char, or set up a custom char - if your booster isn't that good yet.
 * Set up your mining ship and booster ship.
