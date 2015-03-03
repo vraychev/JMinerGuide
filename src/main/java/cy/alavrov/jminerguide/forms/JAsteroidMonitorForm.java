@@ -108,6 +108,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private volatile boolean processEvents = false;
 
     private volatile JLoadScanDialog lsDlog = null;
+    private volatile JSessionCharacterSettingsDialog scsDlog = null;
     
     /**
      * Creates new form JAsteroidMonitorDialog
@@ -139,10 +140,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         this.wManager = wManager;
         this.msMonitor = new MiningSessionMonitor(wManager, dCont);
         
-        jComboBoxShip.setModel(dCont.getShipContainer().getShipModel());
-        jComboBoxBooster.setModel(dCont.getCharacterContainer().getCharModel());
-        jComboBoxBoosterShip.setModel(dCont.getBoosterShipContainer().getBoosterShipModel());
-        
         timer.scheduleWithFixedDelay(new UpdateWindowTask(msMonitor, this), 100, 100, TimeUnit.MILLISECONDS);
         timer.scheduleAtFixedRate(new MiningTask(msMonitor, this), 1, 1, TimeUnit.SECONDS);
         disableMonitorPanel();
@@ -150,7 +147,11 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         setTurretKeyBindings(jPanelSetup, JComponent.WHEN_IN_FOCUSED_WINDOW);
         setTurretKeyBindings(jPanelSelector, JComponent.WHEN_IN_FOCUSED_WINDOW);
         setTurretKeyBindings(jTableRoids, JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-                        
+               
+        msMonitor.update();
+        updateCurrentSession();
+        pack();
+        
         processEvents = true;
     }
 
@@ -184,6 +185,17 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 jToggleButtonTurret3ActionPerformed(e);
             }
         });
+    }
+    
+    private void hideModalDialogs() {
+        if (lsDlog != null) {
+            lsDlog.dispose();
+            deleteLoadScanDialog();
+        }             
+        if (scsDlog != null) {
+            scsDlog.dispose();
+            deleteSessionCharacterSettingsDialog();
+        }
     }
     
     public void updateCurrentSession() {
@@ -221,11 +233,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             
             String name = session.getCharacterName();
             if (name == null) {                
-                if (lsDlog != null) {
-                    lsDlog.setVisible(false);
-                    lsDlog.dispose();
-                    deleteLoadScanDialog();
-                }
+                hideModalDialogs();
                 
                 if (currentMiner != null) {
                     currentMiner = null;
@@ -235,12 +243,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     updateTimerLabel();
                 }
             } else {
-                if (!name.equals(currentMiner)) {                                    
-                    if (lsDlog != null) {
-                        lsDlog.setVisible(false);
-                        lsDlog.dispose();
-                        deleteLoadScanDialog();
-                    }
+                if (!name.equals(currentMiner)) {        
+                    hideModalDialogs();
                     
                     currentMiner = name;
                     SessionCharacter curchar = session.getSessionCharacter();                    
@@ -326,25 +330,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (!jCheckBoxCharacterIgnore.isEnabled()) jCheckBoxCharacterIgnore.setEnabled(true);
         if (!jSpinnerSequence.isEnabled()) jSpinnerSequence.setEnabled(true);
         
-        SessionCharacter character = session.getSessionCharacter();
-        
-        Ship ship = character.getShip();
-        jComboBoxShip.setSelectedItem(ship);
-        
-        EVECharacter booster = character.getBooster();
-        jComboBoxBooster.setSelectedItem(booster);
-        
-        BoosterShip bShip = character.getBoosterShip();
-        jComboBoxBoosterShip.setSelectedItem(bShip);
-        
-        boolean isUsingBS = character.isUseBoosterShip();
-        jCheckBoxUseBoosterShip.setSelected(isUsingBS);
-        
-        if (isUsingBS) {
-            if (!jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(true);
-        } else {
-            if (jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(false);
-        }
+        SessionCharacter character = session.getSessionCharacter();        
         
         jCheckBoxCharacterIgnore.setSelected(character.getCharacter().isMonitorIgnore());
         jSpinnerSequence.setValue(character.getCharacter().getMonitorSequence());
@@ -352,12 +338,22 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         updateCharacterStats(session);
     }
     
+    /**
+     * Updates stats for session only if it's a current session.
+     * @param session 
+     */
+    protected void updateCharacterStatsIfCurrent(MiningSession session) {
+        if (session != null && session.equals(currentSession)) {
+            updateCharacterStats(session);
+        }
+    }
+    
     private void updateCharacterStats(MiningSession session) {
         SessionCharacter character = session.getSessionCharacter();
         if (character == null) return;                
         
         CalculatedStats stats = character.getStats();
-        jLabelStats.setText(stats.getTurretYield()+" m3 / "+stats.getTurretCycle()+" sec / turret");
+        jLabelStats.setText(fmt.format(stats.getTurretYield())+" m3 / "+stats.getTurretCycle()+" sec / turret");
         jLabelHoldStats.setText(fmt.format(session.getUsedCargo())+" / "+stats.getOreHold()+" m3");
         
         checkTurretButtons();
@@ -402,11 +398,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {                                    
-                    if (lsDlog != null) {
-                        lsDlog.setVisible(false);
-                        lsDlog.dispose();
-                        deleteLoadScanDialog();
-                    }
+                    hideModalDialogs();
                     
                     JAsteroidMonitorForm.this.setAlwaysOnTop(true);
                     session.switchToWindow();
@@ -442,6 +434,14 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
      */
     public void deleteLoadScanDialog() {
         lsDlog = null;
+    }
+    
+    /**
+     * Deletes reference to character settings dialog.
+     * Called when the dialog is closed.
+     */
+    public void deleteSessionCharacterSettingsDialog() {
+        scsDlog = null;
     }
     
     /**
@@ -603,10 +603,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
 
         jLabel1 = new javax.swing.JLabel();
         jPanelSetup = new javax.swing.JPanel();
-        jComboBoxShip = new javax.swing.JComboBox<Ship>();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jComboBoxBooster = new javax.swing.JComboBox<EVECharacter>();
         jLabelStats = new javax.swing.JLabel();
         jLabelHoldStats = new javax.swing.JLabel();
         jButtonResetOreHold = new javax.swing.JButton();
@@ -619,9 +615,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jTableRoids = new javax.swing.JTable();
         jButtonCleanupAsteroids = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
-        jComboBoxBoosterShip = new javax.swing.JComboBox<BoosterShip>();
-        jLabel4 = new javax.swing.JLabel();
-        jCheckBoxUseBoosterShip = new javax.swing.JCheckBox();
         jToggleButtonTurret1 = new javax.swing.JToggleButton();
         jToggleButtonTurret2 = new javax.swing.JToggleButton();
         jToggleButtonTurret3 = new javax.swing.JToggleButton();
@@ -634,6 +627,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jTextFieldCustomTimer = new javax.swing.JTextField();
         jButtonCustomTimer = new javax.swing.JButton();
         jLabelTimer = new javax.swing.JLabel();
+        jButtonConfigureShip = new javax.swing.JButton();
         jPanelSelector = new javax.swing.JPanel();
         jButtonClose = new javax.swing.JButton();
         jLabelMinerName = new javax.swing.JLabel();
@@ -651,22 +645,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jLabel1.setText("Character:");
 
         jPanelSetup.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        jComboBoxShip.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jComboBoxShipItemStateChanged(evt);
-            }
-        });
-
-        jLabel2.setText("Ship");
-
-        jLabel3.setText("Booster");
-
-        jComboBoxBooster.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jComboBoxBoosterItemStateChanged(evt);
-            }
-        });
 
         jLabelStats.setText("0000 m3 / 000 sec / turret");
 
@@ -760,20 +738,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
 
         jLabel6.setText("Ore Hold");
 
-        jComboBoxBoosterShip.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jComboBoxBoosterShipItemStateChanged(evt);
-            }
-        });
-
-        jLabel4.setText("B. Ship");
-
-        jCheckBoxUseBoosterShip.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jCheckBoxUseBoosterShipItemStateChanged(evt);
-            }
-        });
-
         jToggleButtonTurret1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jToggleButtonTurret1.setText("1");
         jToggleButtonTurret1.addActionListener(new java.awt.event.ActionListener() {
@@ -852,6 +816,13 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jLabelTimer.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelTimer.setText("0:0");
 
+        jButtonConfigureShip.setText("Configure Ship");
+        jButtonConfigureShip.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonConfigureShipActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelSetupLayout = new javax.swing.GroupLayout(jPanelSetup);
         jPanelSetup.setLayout(jPanelSetupLayout);
         jPanelSetupLayout.setHorizontalGroup(
@@ -859,24 +830,12 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             .addGroup(jPanelSetupLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButtonConfigureShip, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(jPanelSetupLayout.createSequentialGroup()
                         .addComponent(jLabelStats)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabelHoldStats))
-                    .addGroup(jPanelSetupLayout.createSequentialGroup()
-                        .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 55, Short.MAX_VALUE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 55, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jComboBoxShip, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jComboBoxBooster, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(jPanelSetupLayout.createSequentialGroup()
-                                .addComponent(jComboBoxBoosterShip, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jCheckBoxUseBoosterShip))))
                     .addGroup(jPanelSetupLayout.createSequentialGroup()
                         .addComponent(jToggleButtonTurret1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -885,16 +844,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                         .addComponent(jToggleButtonTurret3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButtonCleanupAsteroids))
-                    .addGroup(jPanelSetupLayout.createSequentialGroup()
-                        .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanelSetupLayout.createSequentialGroup()
-                                .addComponent(jButtonLoadScan)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonFilters)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonClearAsteroids))
-                            .addComponent(jLabel5))
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanelSetupLayout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -922,26 +871,24 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                                 .addGap(13, 13, 13)))
                         .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabelTimer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButtonStopTimer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(jButtonStopTimer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(jPanelSetupLayout.createSequentialGroup()
+                        .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanelSetupLayout.createSequentialGroup()
+                                .addComponent(jButtonLoadScan)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonFilters)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonClearAsteroids))
+                            .addComponent(jLabel5))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanelSetupLayout.setVerticalGroup(
             jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelSetupLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jComboBoxShip, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(jComboBoxBooster, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jComboBoxBoosterShip, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel4))
-                    .addComponent(jCheckBoxUseBoosterShip))
+                .addComponent(jButtonConfigureShip)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabelStats)
@@ -979,7 +926,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     .addComponent(jTextFieldCustomTimer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonCustomTimer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabelTimer))
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout jPanelSelectorLayout = new javax.swing.GroupLayout(jPanelSelector);
@@ -990,7 +937,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         );
         jPanelSelectorLayout.setVerticalGroup(
             jPanelSelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 84, Short.MAX_VALUE)
+            .addGap(0, 57, Short.MAX_VALUE)
         );
 
         jButtonClose.setText("Close");
@@ -1042,7 +989,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                         .addComponent(jSpinnerSequence, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jCheckBoxCharacterIgnore))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(jButtonSettings)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButtonClose)))
@@ -1063,8 +1010,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 .addComponent(jPanelSelector, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButtonClose)
-                    .addComponent(jButtonSettings))
+                    .addComponent(jButtonSettings)
+                    .addComponent(jButtonClose))
                 .addContainerGap())
         );
 
@@ -1074,7 +1021,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private void jButtonCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCloseActionPerformed
         settings.save();
         parent.setVisible(true);
-        this.setVisible(false);
         this.dispose();
         timer.shutdown();
         parent.deleteMonitorForm();
@@ -1158,43 +1104,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jToggleButtonTurret1ActionPerformed
 
-    private void jCheckBoxUseBoosterShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxUseBoosterShipItemStateChanged
-        if (!processEvents) return;
-        processEvents = false;
-
-        MiningSession sess = currentSession;
-        if (sess != null) {
-            sess.updateCharacherUsingBoosterShip(jCheckBoxUseBoosterShip.isSelected());
-            SessionCharacter curchar = sess.getSessionCharacter();
-
-            if (curchar != null) {
-                if (jCheckBoxUseBoosterShip.isSelected()) {
-                    if (!jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(true);
-                } else {
-                    if (jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(false);
-                }
-
-                updateCharacterStats(sess);
-            }
-        }
-
-        processEvents = true;
-    }//GEN-LAST:event_jCheckBoxUseBoosterShipItemStateChanged
-
-    private void jComboBoxBoosterShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxBoosterShipItemStateChanged
-        if (!processEvents) return;
-        processEvents = false;
-
-        MiningSession sess = currentSession;
-        BoosterShip bShip = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
-        if (sess != null) {
-            sess.updateCharacherBoosterShip(bShip);
-            updateCharacterStats(sess);
-        }
-
-        processEvents = true;
-    }//GEN-LAST:event_jComboBoxBoosterShipItemStateChanged
-
     private void jButtonCleanupAsteroidsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCleanupAsteroidsActionPerformed
         MiningSession sess = currentSession;
         if (sess != null) {
@@ -1255,34 +1164,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
 
         processEvents = true;
     }//GEN-LAST:event_jButtonResetOreHoldActionPerformed
-
-    private void jComboBoxBoosterItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxBoosterItemStateChanged
-        if (!processEvents) return;
-        processEvents = false;
-
-        MiningSession sess = currentSession;
-        EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
-        if (sess != null) {
-            sess.updateCharacherBooster(booster);
-            updateCharacterStats(sess);
-        }
-
-        processEvents = true;
-    }//GEN-LAST:event_jComboBoxBoosterItemStateChanged
-
-    private void jComboBoxShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxShipItemStateChanged
-        if (!processEvents) return;
-        processEvents = false;
-
-        MiningSession sess = currentSession;
-        Ship ship = (Ship) jComboBoxShip.getSelectedItem();
-        if (sess != null) {
-            sess.updateCharacherShip(ship);
-            updateCharacterStats(sess);
-        }
-
-        processEvents = true;
-    }//GEN-LAST:event_jComboBoxShipItemStateChanged
 
     private void jButton15secActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton15secActionPerformed
         MiningSession sess = currentSession;
@@ -1388,6 +1269,19 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         processEvents = true;
     }//GEN-LAST:event_jTextFieldCustomTimerActionPerformed
 
+    private void jButtonConfigureShipActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonConfigureShipActionPerformed
+        MiningSession sess = currentSession;
+        if (sess != null) {
+            SessionCharacter schar = sess.getSessionCharacter();
+            if (schar != null && scsDlog == null) {
+                scsDlog = new JSessionCharacterSettingsDialog(this, sess, dCont);
+                scsDlog.setLocationRelativeTo(this);
+            }
+
+            scsDlog.setVisible(true);
+        }
+    }//GEN-LAST:event_jButtonConfigureShipActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton15sec;
     private javax.swing.JButton jButton1min;
@@ -1396,6 +1290,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JButton jButtonCleanupAsteroids;
     private javax.swing.JButton jButtonClearAsteroids;
     private javax.swing.JButton jButtonClose;
+    private javax.swing.JButton jButtonConfigureShip;
     private javax.swing.JButton jButtonCustomTimer;
     private javax.swing.JButton jButtonFilters;
     private javax.swing.JButton jButtonLoadScan;
@@ -1404,14 +1299,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JButton jButtonSettings;
     private javax.swing.JButton jButtonStopTimer;
     private javax.swing.JCheckBox jCheckBoxCharacterIgnore;
-    private javax.swing.JCheckBox jCheckBoxUseBoosterShip;
-    private javax.swing.JComboBox<EVECharacter> jComboBoxBooster;
-    private javax.swing.JComboBox<BoosterShip> jComboBoxBoosterShip;
-    private javax.swing.JComboBox<Ship> jComboBoxShip;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabelHoldStats;

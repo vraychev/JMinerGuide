@@ -213,7 +213,6 @@ public class JLoadScanDialog extends javax.swing.JDialog {
 
     private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
         parent.deleteLoadScanDialog();
-        this.setVisible(false);
         this.dispose();
     }//GEN-LAST:event_jButtonCancelActionPerformed
 
@@ -224,7 +223,6 @@ public class JLoadScanDialog extends javax.swing.JDialog {
         parent.updateAsteroids(session);
         
         parent.deleteLoadScanDialog();
-        this.setVisible(false);
         this.dispose();
     }//GEN-LAST:event_jButtonClearAndLoadActionPerformed
 
@@ -235,7 +233,6 @@ public class JLoadScanDialog extends javax.swing.JDialog {
         parent.updateAsteroids(session);
         
         parent.deleteLoadScanDialog();
-        this.setVisible(false);
         this.dispose();        
     }//GEN-LAST:event_jButtonLoadAndAddActionPerformed
 
@@ -250,7 +247,6 @@ public class JLoadScanDialog extends javax.swing.JDialog {
         parent.updateAsteroids(session);
         
         parent.deleteLoadScanDialog();
-        this.setVisible(false);
         this.dispose();
     }//GEN-LAST:event_jButtonResetAndLoadActionPerformed
 

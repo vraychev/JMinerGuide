@@ -275,7 +275,6 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
         parent.selectKey(tempKey);
         parent.loadSelectedKey(false);
         
-        this.setVisible(false);
         this.dispose();
     }//GEN-LAST:event_jButtonOKActionPerformed
 
@@ -315,14 +314,12 @@ public class JNewAPIDialog extends javax.swing.JDialog implements IKeyLoadingRes
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         if (!loading) {
-            this.setVisible(false);
             this.dispose();
         }
     }//GEN-LAST:event_formWindowClosing
 
     private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
         if (!loading) {
-            this.setVisible(false);
             this.dispose();
         }
     }//GEN-LAST:event_jButtonCancelActionPerformed

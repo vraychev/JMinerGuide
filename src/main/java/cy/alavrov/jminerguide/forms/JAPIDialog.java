@@ -449,7 +449,6 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         if (!loading) {
             updateParent();
             
-            this.setVisible(false);
             this.dispose();            
         }
     }//GEN-LAST:event_jButtonCloseActionPerformed
@@ -553,7 +552,6 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         if (!loading) {
             updateParent();
             
-            this.setVisible(false);
             this.dispose();
         }
     }//GEN-LAST:event_formWindowClosing

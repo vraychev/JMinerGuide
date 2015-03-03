@@ -130,19 +130,16 @@ public class JQuitDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JButtonCancelActionPerformed
-        this.setVisible(false);
         this.dispose();
     }//GEN-LAST:event_JButtonCancelActionPerformed
 
     private void JButtonQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JButtonQuitActionPerformed
-        this.setVisible(false);
         this.dispose();
         System.exit(0);
     }//GEN-LAST:event_JButtonQuitActionPerformed
 
     private void JButtonSaveAndQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JButtonSaveAndQuitActionPerformed
         dCont.save();
-        this.setVisible(false);
         this.dispose();
         System.exit(0);
     }//GEN-LAST:event_JButtonSaveAndQuitActionPerformed

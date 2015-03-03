@@ -179,12 +179,10 @@ public class JChangeShipNameDialog extends javax.swing.JDialog {
             parent.recalculateStats();
         }
 
-        this.setVisible(false);
         this.dispose();
     }//GEN-LAST:event_jButtonRenameActionPerformed
 
     private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
-        this.setVisible(false);
         this.dispose();
     }//GEN-LAST:event_jButtonCancelActionPerformed
 

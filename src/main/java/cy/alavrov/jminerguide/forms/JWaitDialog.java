@@ -99,7 +99,6 @@ public class JWaitDialog extends javax.swing.JDialog implements ICharLoadingResu
         dCont.getCharacterContainer().reloadCharMap();
         parent.loadCharacterList(true);
         parent.recalculateStats();
-        this.setVisible(false);
         this.dispose();
     }
     

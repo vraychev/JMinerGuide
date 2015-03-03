@@ -161,7 +161,6 @@ public class JNewShipDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
-        this.setVisible(false);
         this.dispose();
     }//GEN-LAST:event_jButtonCancelActionPerformed
 
@@ -176,7 +175,6 @@ public class JNewShipDialog extends javax.swing.JDialog {
             parent.recalculateStats();
         }
         
-        this.setVisible(false);
         this.dispose();
     }//GEN-LAST:event_jButtonCreateActionPerformed
 
