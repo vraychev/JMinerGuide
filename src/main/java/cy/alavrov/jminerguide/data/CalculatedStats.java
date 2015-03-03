@@ -45,7 +45,7 @@ import java.util.Comparator;
  *  
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class CalculatedStats {
+public class CalculatedStats implements ICalculatedStats {
     
     /**
      * Used to sort rigs by their drone yield bonus, descending.
@@ -338,6 +338,7 @@ public class CalculatedStats {
      * Yield of a turret, in m3.
      * @return the turretYield
      */
+    @Override
     public float getTurretYield() {
         return turretYield;
     }
@@ -346,6 +347,7 @@ public class CalculatedStats {
      * Yield of all turrets, combined, in m3.
      * @return the combinedTurretYield
      */
+    @Override
     public float getCombinedTurretYield() {
         return combinedTurretYield;
     }
@@ -354,6 +356,7 @@ public class CalculatedStats {
      * Cycle of a turret, in seconds.
      * @return the turretCycle
      */
+    @Override
     public float getTurretCycle() {
         return turretCycle;
     }
@@ -362,6 +365,7 @@ public class CalculatedStats {
      * Total individual yield per second, in m3/sec.
      * @return the turretM3S
      */
+    @Override
     public float getTurretM3S() {
         return turretM3S;
     }   
@@ -370,6 +374,7 @@ public class CalculatedStats {
      * Total turret yield per second, in m3/sec.
      * @return the combinedTurretM3S
      */
+    @Override
     public float getCombinedTurretM3S() {
         return combinedTurretM3S;
     }
@@ -378,6 +383,7 @@ public class CalculatedStats {
      * Yield of a drone, in m3.
      * @return the droneYield
      */
+    @Override
     public float getDroneYield() {
         return droneYield;
     }
@@ -386,6 +392,7 @@ public class CalculatedStats {
      * Yield of all drones, combined, in m3.
      * @return the combinedDroneYield
      */
+    @Override
     public float getCombinedDroneYield() {
         return combinedDroneYield;
     }
@@ -394,6 +401,7 @@ public class CalculatedStats {
      * Cycle of a drone, in seconds.
      * @return the droneCycle
      */
+    @Override
     public float getDroneCycle() {
         return droneCycle;
     }
@@ -402,6 +410,7 @@ public class CalculatedStats {
      * Total drone yield per second, in m3/sec.
      * @return the droneM3S
      */
+    @Override
     public float getDroneM3S() {
         return droneM3S;
     }
@@ -410,6 +419,7 @@ public class CalculatedStats {
      * Total ship yield, in m3/hour.
      * @return the totalM3H
      */
+    @Override
     public float getTotalM3H() {
         return totalM3H;
     }
@@ -418,6 +428,7 @@ public class CalculatedStats {
      * Ship's optimal, in metres.
      * @return the optimal
      */
+    @Override
     public int getOptimal() {
         return optimal;
     }
@@ -426,6 +437,7 @@ public class CalculatedStats {
      * Ship's ore (or cargo) hold, in m3.
      * @return the cargo
      */
+    @Override
     public int getOreHold() {
         return oreHold;
     }
@@ -434,6 +446,7 @@ public class CalculatedStats {
      * How long it takes for ore hold to fill, in seconds.
      * @return the secsForCargo
      */
+    @Override
     public int getSecsForOreHold() {
         return secsForOreHold;
     }
@@ -442,6 +455,7 @@ public class CalculatedStats {
      * Link bonus to the cycle time, in percents.
      * @return the linkCycleBonus
      */
+    @Override
     public float getLinkCycleBonus() {
         return linkCycleBonus;
     }
@@ -450,6 +464,7 @@ public class CalculatedStats {
      * Link bonus to the mining turret optimal, in percents.
      * @return the linkOptimalBonus
      */
+    @Override
     public float getLinkOptimalBonus() {
         return linkOptimalBonus;
     }

@@ -29,6 +29,7 @@ package cy.alavrov.jminerguide.forms;
 import cy.alavrov.jminerguide.App;
 import cy.alavrov.jminerguide.data.CalculatedStats;
 import cy.alavrov.jminerguide.data.DataContainer;
+import cy.alavrov.jminerguide.data.ICalculatedStats;
 import cy.alavrov.jminerguide.data.api.APICharLoader;
 import cy.alavrov.jminerguide.data.booster.BoosterHull;
 import cy.alavrov.jminerguide.data.booster.BoosterShip;
@@ -148,7 +149,7 @@ public final class MainFrame extends javax.swing.JFrame {
             if (jCheckBoxStatsMerco.isEnabled()) jCheckBoxStatsMerco.setEnabled(false);
         }
 
-        CalculatedStats newStats = new CalculatedStats(miner, booster, ship, bShip, isMerco);
+        ICalculatedStats newStats = new CalculatedStats(miner, booster, ship, bShip, isMerco);
 
         jLabelYield.setText(String.valueOf(fmt.format(newStats.getCombinedTurretYield())));
         jLabelYield.setToolTipText(fmt.format(newStats.getTurretYield())+" per turret");

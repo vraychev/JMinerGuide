@@ -27,6 +27,7 @@ package cy.alavrov.jminerguide.forms;
 
 import cy.alavrov.jminerguide.data.CalculatedStats;
 import cy.alavrov.jminerguide.data.DataContainer;
+import cy.alavrov.jminerguide.data.ICalculatedStats;
 import cy.alavrov.jminerguide.data.booster.BoosterShip;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.harvestable.Asteroid;
@@ -352,7 +353,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         SessionCharacter character = session.getSessionCharacter();
         if (character == null) return;                
         
-        CalculatedStats stats = character.getStats();
+        ICalculatedStats stats = character.getStats();
         jLabelStats.setText(fmt.format(stats.getTurretYield())+" m3 / "+stats.getTurretCycle()+" sec / turret");
         jLabelHoldStats.setText(fmt.format(session.getUsedCargo())+" / "+stats.getOreHold()+" m3");
         

@@ -26,6 +26,7 @@
 package cy.alavrov.jminerguide.data.harvestable;
 
 import cy.alavrov.jminerguide.data.CalculatedStats;
+import cy.alavrov.jminerguide.data.ICalculatedStats;
 import cy.alavrov.jminerguide.monitor.TurretInstance;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -110,7 +111,7 @@ public class Asteroid {
      * @param stats
      * @return 
      */
-    public synchronized int getRemainingSeconds(CalculatedStats stats) {
+    public synchronized int getRemainingSeconds(ICalculatedStats stats) {
         if (turrets.isEmpty()) return 0;
             
         float m3s = stats.getTurretM3S() * turrets.size();
@@ -118,7 +119,7 @@ public class Asteroid {
         return (int) (volume / m3s);
     }
     
-    public synchronized String getRemString(CalculatedStats stats) {
+    public synchronized String getRemString(ICalculatedStats stats) {
         if (stats == null || turrets.isEmpty()) return String.valueOf(remaining);        
         
         Period rem = Seconds.seconds(getRemainingSeconds(stats))

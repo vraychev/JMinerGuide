@@ -26,6 +26,7 @@
 package cy.alavrov.jminerguide.monitor;
 
 import cy.alavrov.jminerguide.data.CalculatedStats;
+import cy.alavrov.jminerguide.data.ICalculatedStats;
 import cy.alavrov.jminerguide.data.harvestable.Asteroid;
 import cy.alavrov.jminerguide.data.harvestable.HarvestableType;
 
@@ -57,7 +58,7 @@ public class TurretInstance {
      * @throws FullOreHoldException 
      * @throws AsteroidMinedException 
      */
-    public synchronized float mineSome(CalculatedStats stats, CalculatedStats mercoStats, float remainingOreHold) throws FullOreHoldException, AsteroidMinedException {
+    public synchronized float mineSome(ICalculatedStats stats, ICalculatedStats mercoStats, float remainingOreHold) throws FullOreHoldException, AsteroidMinedException {
         if (asteroid == null) return 0;
         if (asteroid.getRemainingUnits() <= 0) {
             unbindAsteroid();
@@ -136,7 +137,7 @@ public class TurretInstance {
      * @param stats
      * @return 
      */
-    public synchronized int getRemainingSeconds(CalculatedStats stats) {
+    public synchronized int getRemainingSeconds(ICalculatedStats stats) {
         if (asteroid == null) return 0;
         return asteroid.getRemainingSeconds(stats);
     }

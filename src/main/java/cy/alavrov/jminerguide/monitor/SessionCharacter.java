@@ -27,6 +27,7 @@ package cy.alavrov.jminerguide.monitor;
 
 import cy.alavrov.jminerguide.data.CalculatedStats;
 import cy.alavrov.jminerguide.data.DataContainer;
+import cy.alavrov.jminerguide.data.ICalculatedStats;
 import cy.alavrov.jminerguide.data.booster.BoosterShip;
 import cy.alavrov.jminerguide.data.booster.BoosterShipContainer;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
@@ -45,8 +46,8 @@ public class SessionCharacter {
     private final BoosterShip boosterShip;
     private final BoosterShip noBoosterShip;
     private final boolean useBoosterShip;
-    private final CalculatedStats stats; 
-    private final CalculatedStats statsMercoxit;    
+    private final ICalculatedStats stats; 
+    private final ICalculatedStats statsMercoxit;    
     
     public SessionCharacter(EVECharacter character, DataContainer dCont) {       
         CharacterContainer cCont = dCont.getCharacterContainer();
@@ -187,11 +188,11 @@ public class SessionCharacter {
         return useBoosterShip;
     }    
     
-    public CalculatedStats getStats() {
+    public ICalculatedStats getStats() {
         return stats;
     }        
 
-    public CalculatedStats getStatsMercoxit() {
+    public ICalculatedStats getStatsMercoxit() {
         return statsMercoxit;
     }        
 }
