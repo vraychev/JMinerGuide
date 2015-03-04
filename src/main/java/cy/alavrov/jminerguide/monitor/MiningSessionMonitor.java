@@ -53,18 +53,18 @@ public class MiningSessionMonitor {
             int thisSeq = 0;
             int otherSeq = 0;
             
-            SessionCharacter sChar = o1.getSessionCharacter();
+            ISessionCharacter sChar = o1.getSessionCharacter();
             if (sChar == null) {
                 thisSeq = Integer.MIN_VALUE;
             } else {
-                thisSeq = sChar.getCharacter().getMonitorSequence();
+                thisSeq = sChar.getCoreCharacter().getMonitorSequence();
             }
             
             sChar = o2.getSessionCharacter();
             if (sChar == null) {
                 otherSeq = Integer.MIN_VALUE;
             } else {
-                otherSeq = sChar.getCharacter().getMonitorSequence();
+                otherSeq = sChar.getCoreCharacter().getMonitorSequence();
             }
             
             // greater ones go in first, so reverse comparing.
@@ -106,14 +106,14 @@ public class MiningSessionMonitor {
                     // if a window lose it's logged in character (BUT HOW?!)
                     // we probably would be better destroying the session with all contents.                    
                 } else {
-                    SessionCharacter curChar = session.getSessionCharacter();
+                    ISessionCharacter curChar = session.getSessionCharacter();
                     if (curChar == null) {
                         // not very optimal, but will do for now, performance overhead is minimal.
                         EVECharacter newChar = dCont.getCharacterContainer().getCharacterByName(name);                        
                         if (newChar != null) {
                             session.createSessionCharacter(newChar, dCont);
                         }
-                    } else if (!curChar.getCharacter().getName().equals(name)) {
+                    } else if (!curChar.getCoreCharacter().getName().equals(name)) {
                         iter.remove();
                         // shouldn't happen ever! and if it does - kill it with fire.
                     }

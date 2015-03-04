@@ -32,6 +32,7 @@ import cy.alavrov.jminerguide.data.booster.BoosterShip;
 import cy.alavrov.jminerguide.data.booster.BoosterShipContainer;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
+import cy.alavrov.jminerguide.data.character.ICoreCharacter;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.data.ship.ShipContainer;
 
@@ -39,15 +40,15 @@ import cy.alavrov.jminerguide.data.ship.ShipContainer;
  * Session's character on a ship with booster.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class SessionCharacter {
+public class SessionCharacter implements ISessionCharacter{
     private final EVECharacter character;
-    private final Ship ship;
-    private final EVECharacter booster;
-    private final BoosterShip boosterShip;
-    private final BoosterShip noBoosterShip;
-    private final boolean useBoosterShip;
-    private final ICalculatedStats stats; 
-    private final ICalculatedStats statsMercoxit;    
+    private Ship ship;
+    private EVECharacter booster;
+    private BoosterShip boosterShip;
+    private BoosterShip noBoosterShip;
+    private boolean useBoosterShip;
+    private ICalculatedStats stats; 
+    private ICalculatedStats statsMercoxit;    
     
     public SessionCharacter(EVECharacter character, DataContainer dCont) {       
         CharacterContainer cCont = dCont.getCharacterContainer();
@@ -73,28 +74,13 @@ public class SessionCharacter {
         boosterShip = newBoosterShip;
         useBoosterShip = isUseBoosterShip;
         noBoosterShip = bCont.getNoBooster();
-        
-        CalculatedStats newStats = new CalculatedStats(character, booster, ship, 
-                useBoosterShip ? boosterShip : noBoosterShip, false);
-        
-        stats = newStats;
-        
-        CalculatedStats newMercoStats = new CalculatedStats(character, booster, ship, 
-                useBoosterShip ? boosterShip : noBoosterShip, true);
-        
-        statsMercoxit = newMercoStats;
-        
         this.character = character; 
+        
+        recalculateStats();
+        
     }
     
-    public SessionCharacter(SessionCharacter oldChar, Ship newShip) {
-        character = oldChar.character;
-        booster = oldChar.booster;
-        boosterShip = oldChar.boosterShip;
-        useBoosterShip = oldChar.useBoosterShip;
-        noBoosterShip = oldChar.noBoosterShip;
-        ship = newShip;
-        
+    private final void recalculateStats() {
         CalculatedStats newStats = new CalculatedStats(character, booster, ship, 
                 useBoosterShip ? boosterShip : noBoosterShip, false);
         
@@ -104,95 +90,66 @@ public class SessionCharacter {
                 useBoosterShip ? boosterShip : noBoosterShip, true);
         
         statsMercoxit = newMercoStats;
-        
-        character.setMonitorShip(newShip.getName());
-    }
-    
-    public SessionCharacter(SessionCharacter oldChar, EVECharacter newBooster) {
-        character = oldChar.character;
-        booster = newBooster;
-        boosterShip = oldChar.boosterShip;
-        useBoosterShip = oldChar.useBoosterShip;
-        noBoosterShip = oldChar.noBoosterShip;
-        ship = oldChar.ship;
-        
-        CalculatedStats newStats = new CalculatedStats(character, booster, ship, 
-                useBoosterShip ? boosterShip : noBoosterShip, false);
-        
-        stats = newStats;
-        
-        CalculatedStats newMercoStats = new CalculatedStats(character, booster, ship, 
-                useBoosterShip ? boosterShip : noBoosterShip, true);
-        
-        statsMercoxit = newMercoStats;
-        character.setMonitorBooster(newBooster.getName());
-    }
-            
-    public SessionCharacter(SessionCharacter oldChar, BoosterShip newBoosterShip) {
-        character = oldChar.character;
-        booster = oldChar.booster;
-        boosterShip = newBoosterShip;
-        useBoosterShip = oldChar.useBoosterShip;
-        noBoosterShip = oldChar.noBoosterShip;
-        ship = oldChar.ship;
-        
-        CalculatedStats newStats = new CalculatedStats(character, booster, ship, 
-                useBoosterShip ? boosterShip : noBoosterShip, false);
-        
-        stats = newStats;
-        
-        CalculatedStats newMercoStats = new CalculatedStats(character, booster, ship, 
-                useBoosterShip ? boosterShip : noBoosterShip, true);
-        
-        statsMercoxit = newMercoStats;
-        character.setMonitorBoosterShip(newBoosterShip.getName());
-    }
-            
-    public SessionCharacter(SessionCharacter oldChar, boolean doUseBoosterShip) {
-        character = oldChar.character;
-        booster = oldChar.booster;
-        boosterShip = oldChar.boosterShip;
-        useBoosterShip = doUseBoosterShip;
-        noBoosterShip = oldChar.noBoosterShip;
-        ship = oldChar.ship;
-        
-        CalculatedStats newStats = new CalculatedStats(character, booster, ship, 
-                useBoosterShip ? boosterShip : noBoosterShip, false);
-        
-        stats = newStats;
-        
-        CalculatedStats newMercoStats = new CalculatedStats(character, booster, ship, 
-                useBoosterShip ? boosterShip : noBoosterShip, true);
-        
-        statsMercoxit = newMercoStats;
-        character.setMonitorUseBoosterShip(doUseBoosterShip);
     }
 
-    public EVECharacter getCharacter() {
+    @Override
+    public synchronized ICoreCharacter getCoreCharacter() {
         return character;
     }
 
-    public Ship getShip() {
+    public synchronized Ship getShip() {
         return ship;
     }
 
-    public EVECharacter getBooster() {
+    public synchronized void setShip(Ship ship) {
+        this.ship = ship;
+        recalculateStats();
+    }        
+
+    public synchronized EVECharacter getBooster() {
         return booster;
     }
 
-    public BoosterShip getBoosterShip() {
+    public synchronized void setBooster(EVECharacter booster) {
+        this.booster = booster;
+        recalculateStats();
+    }   
+    
+    public synchronized BoosterShip getBoosterShip() {
         return boosterShip;
     }
 
-    public boolean isUseBoosterShip() {
+    public synchronized void setBoosterShip(BoosterShip boosterShip) {
+        this.boosterShip = boosterShip;
+        recalculateStats();
+    }
+
+    public synchronized boolean isUseBoosterShip() {
         return useBoosterShip;
     }    
+
+    public synchronized void setUseBoosterShip(boolean useBoosterShip) {
+        this.useBoosterShip = useBoosterShip;
+        recalculateStats();
+    }
     
-    public ICalculatedStats getStats() {
+    @Override
+    public synchronized ICalculatedStats getStats() {
         return stats;
     }        
 
-    public ICalculatedStats getStatsMercoxit() {
+    @Override
+    public synchronized ICalculatedStats getStatsMercoxit() {
         return statsMercoxit;
     }        
+
+    @Override
+    public boolean isSimple() {
+        return false;
+    }
+
+    @Override
+    public synchronized int getTurretCount() {
+        return ship.getTurretCount();
+    }
 }

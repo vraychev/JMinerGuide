@@ -25,7 +25,7 @@
  */
 package cy.alavrov.jminerguide.forms;
 
-import cy.alavrov.jminerguide.data.character.EVECharacter;
+import cy.alavrov.jminerguide.data.character.ICoreCharacter;
 import cy.alavrov.jminerguide.data.harvestable.BasicHarvestable;
 import java.awt.Frame;
 import java.util.Set;
@@ -35,12 +35,12 @@ import java.util.Set;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class JAsteroidFilterDialog extends javax.swing.JDialog {
-    private final EVECharacter character;
+    private final ICoreCharacter character;
 
     /**
      * Creates new form JAsteroidFilterDialog
      */
-    public JAsteroidFilterDialog(Frame parent, EVECharacter character) {
+    public JAsteroidFilterDialog(Frame parent, ICoreCharacter character) {
         super(parent, true);
         initComponents();
         

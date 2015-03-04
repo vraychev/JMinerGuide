@@ -52,7 +52,7 @@ import org.jdom2.input.SAXBuilder;
  * Pilot character. 
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class EVECharacter {
+public class EVECharacter implements ICoreCharacter{
     
     public final static int SKILL_ASTROGEOLOGY = 3410;
     public final static int SKILL_DRONE_INTERFACING = 3442;
@@ -313,6 +313,7 @@ public class EVECharacter {
      * Returns character's name.
      * @return 
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -762,6 +763,7 @@ public class EVECharacter {
      * Returns true, if character's mining status is ignored in the asteroid monitor.
      * @return 
      */
+    @Override
     public synchronized boolean isMonitorIgnore() {
         return monitorIgnore;
     }
@@ -770,6 +772,7 @@ public class EVECharacter {
      * Sets if character's mining status should be ignored in the asteroid monitor.
      * @param monitorIgnore 
      */
+    @Override
     public synchronized void setMonitorIgnore(boolean monitorIgnore) {
         this.monitorIgnore = monitorIgnore;
     }
@@ -780,6 +783,7 @@ public class EVECharacter {
      * addHarvestableToFilter and removeHarvestableFromFilter methods.
      * @return 
      */
+    @Override
     public synchronized HashSet<BasicHarvestable> getAsteroidFilter() {
         return (HashSet<BasicHarvestable>) roidFilter.clone();
     }     
@@ -788,6 +792,7 @@ public class EVECharacter {
      * Adds BasicHarvestable to asteroid filter.
      * @param type 
      */
+    @Override
     public synchronized void addHarvestableToFilter(BasicHarvestable type) {
         roidFilter.add(type);
     }  
@@ -796,6 +801,7 @@ public class EVECharacter {
      * Removes BasicHarvestable from asteroid filter.
      * @param type 
      */
+    @Override
     public synchronized void removeHarvestableFromFilter(BasicHarvestable type) {
         roidFilter.remove(type);
     }
@@ -804,6 +810,7 @@ public class EVECharacter {
      * Clears asteroid filter.
      * Equivalent to "allow nothing" filter.
      */
+    @Override
     public synchronized void clearAsteroidFilter() {
         roidFilter.clear();
     }
@@ -812,6 +819,7 @@ public class EVECharacter {
      * Fills asteroid filter with every ore harvestable out there.
      * Equivalent to "allow all" filter.
      */
+    @Override
     public synchronized void allOnAsteroidFilter() {
         for (BasicHarvestable hv : BasicHarvestable.values()) {
             if (hv.getType() == HarvestableType.ORE || hv.getType() == HarvestableType.MERCOXIT) {
@@ -820,10 +828,12 @@ public class EVECharacter {
         }
     }
 
+    @Override
     public synchronized void setMonitorSequence(int monitorSequence) {
         this.monitorSequence = monitorSequence;
     }
 
+    @Override
     public synchronized int getMonitorSequence() {
             return monitorSequence;
     }        

@@ -25,6 +25,8 @@
  */
 package cy.alavrov.jminerguide.data;
 
+import cy.alavrov.jminerguide.data.character.SimpleCharacter;
+
 /**
  * Stats, calculated for a ship, based on it's hull, modules, pilot and 
  * whatever else.
@@ -106,13 +108,23 @@ public class SimpleCalculatedStats implements ICalculatedStats{
      */
     private final float linkOptimalBonus;
 
-    public SimpleCalculatedStats(float turretYield, int turrets, float turretCycle, int orehold, int optimal) {
-        
+    public SimpleCalculatedStats(SimpleCharacter character) {
+        this(character.getTurretYield(), character.getTurrets(), 
+                character.getTurretCycle(), character.getOreHold(), 
+                character.getOptimal());
+    }
+    
+    public SimpleCalculatedStats(float turretYield, int turrets, float turretCycle, int orehold, int optimal) {        
         this.turretYield = turretYield;
         this.combinedTurretYield = turretYield * turrets;
         this.turretCycle = turretCycle;
-        this.turretM3S = turretYield/turretCycle;
-        this.combinedTurretM3S = combinedTurretYield/turretCycle;
+        if (turretCycle != 0) {
+            this.turretM3S = turretYield/turretCycle;
+            this.combinedTurretM3S = combinedTurretYield/turretCycle;
+        } else {
+            this.turretM3S = 0;
+            this.combinedTurretM3S = 0;
+        }
         
         // tba as needed
         this.droneYield = 0;
@@ -124,7 +136,11 @@ public class SimpleCalculatedStats implements ICalculatedStats{
         this.totalM3H = totalM3S * 60 * 60;
         this.optimal = optimal;
         this.oreHold = orehold;
-        this.secsForOreHold = (int) (oreHold / totalM3S);        
+        if (totalM3S != 0) {
+            this.secsForOreHold = (int) (oreHold / totalM3S);        
+        } else {
+            this.secsForOreHold = 0;
+        }
         
         this.linkCycleBonus = 0;
         this.linkOptimalBonus = 0;

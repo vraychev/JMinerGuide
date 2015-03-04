@@ -68,8 +68,8 @@ public class MiningTask implements Runnable{
                     java.awt.EventQueue.invokeLater(new Runnable() {
                         @Override
                         public void run(){
-                            SessionCharacter chr = session.getSessionCharacter();
-                            if (chr != null && !chr.getCharacter().isMonitorIgnore()) {
+                            ISessionCharacter chr = session.getSessionCharacter();
+                            if (chr != null && !chr.getCoreCharacter().isMonitorIgnore()) {
                                 if (settings.isPopupOnAlert()) {
                                     msMonitor.restoreMonitorWindow();                                    
                                     form.setAlwaysOnTop(true);

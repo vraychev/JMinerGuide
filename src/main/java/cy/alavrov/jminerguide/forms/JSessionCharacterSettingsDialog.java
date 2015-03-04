@@ -55,21 +55,23 @@ public class JSessionCharacterSettingsDialog extends javax.swing.JDialog {
         jComboBoxBooster.setModel(dCont.getCharacterContainer().getCharModel());
         jComboBoxBoosterShip.setModel(dCont.getBoosterShipContainer().getBoosterShipModel());
         
-        SessionCharacter character = session.getSessionCharacter();
-        
-        Ship ship = character.getShip();
-        jComboBoxShip.setSelectedItem(ship);
-        
-        EVECharacter booster = character.getBooster();
-        jComboBoxBooster.setSelectedItem(booster);
-        
-        BoosterShip bShip = character.getBoosterShip();
-        jComboBoxBoosterShip.setSelectedItem(bShip);
-        
-        boolean isUsingBS = character.isUseBoosterShip();
-        jCheckBoxUseBoosterShip.setSelected(isUsingBS);     
-        
-        jLabelName.setText(character.getCharacter().getName());
+        synchronized(session) {
+            SessionCharacter character = (SessionCharacter) session.getSessionCharacter();
+
+            Ship ship = character.getShip();
+            jComboBoxShip.setSelectedItem(ship);
+
+            EVECharacter booster = character.getBooster();
+            jComboBoxBooster.setSelectedItem(booster);
+
+            BoosterShip bShip = character.getBoosterShip();
+            jComboBoxBoosterShip.setSelectedItem(bShip);
+
+            boolean isUsingBS = character.isUseBoosterShip();
+            jCheckBoxUseBoosterShip.setSelected(isUsingBS);     
+
+            jLabelName.setText(character.getCoreCharacter().getName());
+        }
     }
 
     /**
@@ -93,7 +95,7 @@ public class JSessionCharacterSettingsDialog extends javax.swing.JDialog {
         jButtonCancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("Setup Ship");
+        setTitle("Configure Ship");
 
         jLabelName.setText("name");
 
@@ -177,17 +179,22 @@ public class JSessionCharacterSettingsDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
-        Ship ship = (Ship) jComboBoxShip.getSelectedItem();
-        session.updateCharacherShip(ship);
-        
-        EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
-        session.updateCharacherBooster(booster);
-        
-        BoosterShip bShip = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
-        session.updateCharacherBoosterShip(bShip);
-        
-        session.updateCharacherUsingBoosterShip(jCheckBoxUseBoosterShip.isSelected());
-        
+        synchronized(session) {
+            SessionCharacter character = (SessionCharacter) session.getSessionCharacter();
+
+            Ship ship = (Ship) jComboBoxShip.getSelectedItem();
+            character.setShip(ship);
+
+            EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
+            character.setBooster(booster);
+
+            BoosterShip bShip = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
+            character.setBoosterShip(bShip);
+
+            character.setUseBoosterShip(jCheckBoxUseBoosterShip.isSelected());
+            
+            session.unbindAllTurrets();
+        }
         
         parent.updateCharacterStatsIfCurrent(session);
         

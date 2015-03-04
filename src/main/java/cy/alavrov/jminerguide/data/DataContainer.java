@@ -27,9 +27,9 @@
 package cy.alavrov.jminerguide.data;
 
 import cy.alavrov.jminerguide.data.booster.BoosterShipContainer;
-import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.data.ship.ShipContainer;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
+import cy.alavrov.jminerguide.data.character.SimpleCharacterCointainer;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,6 +52,7 @@ public class DataContainer {
     private CharacterContainer chars;
     private ShipContainer ships;
     private BoosterShipContainer boosters;
+    private SimpleCharacterCointainer simpleChars;
     
     private ExecutorService pool;
     
@@ -64,6 +65,7 @@ public class DataContainer {
         chars = new CharacterContainer(path);
         ships = new ShipContainer(path);
         boosters = new BoosterShipContainer(path);
+        simpleChars = new SimpleCharacterCointainer(path);
         pool = Executors.newCachedThreadPool();
     }
     
@@ -78,6 +80,11 @@ public class DataContainer {
     public BoosterShipContainer getBoosterShipContainer() {
         return boosters;
     }
+
+    public SimpleCharacterCointainer getSimplecCharacterCointainer() {
+        return simpleChars;
+    }
+        
     
     /**
      * Loads all the data from configuration files.
@@ -88,6 +95,7 @@ public class DataContainer {
         chars.load();
         ships.load();
         boosters.load();
+        simpleChars.load();
     }
     
     /**
@@ -98,6 +106,7 @@ public class DataContainer {
         chars.save();
         ships.save();
         boosters.save();
+        simpleChars.save();
     }
     
     /**

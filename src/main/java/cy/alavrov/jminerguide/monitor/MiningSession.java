@@ -26,11 +26,10 @@
 package cy.alavrov.jminerguide.monitor;
 
 import cy.alavrov.jminerguide.data.DataContainer;
-import cy.alavrov.jminerguide.data.booster.BoosterShip;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
+import cy.alavrov.jminerguide.data.character.ICoreCharacter;
 import cy.alavrov.jminerguide.data.harvestable.Asteroid;
 import cy.alavrov.jminerguide.data.harvestable.BasicHarvestable;
-import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
 /**
- *
+ * EVE session, hopefully for mining.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class MiningSession {
@@ -57,7 +56,7 @@ public class MiningSession {
      .toFormatter();
     
     private final IEVEWindow window;
-    private SessionCharacter character;    
+    private ISessionCharacter character;    
     private float usedCargo;  
     private CopyOnWriteArrayList<Asteroid> roids;
     private final TurretInstance turret1;
@@ -111,8 +110,17 @@ public class MiningSession {
      * Returns session's character. Can return null.
      * @return 
      */
-    public synchronized SessionCharacter getSessionCharacter() {
+    public synchronized ISessionCharacter getSessionCharacter() {
         return character;
+    }        
+    
+    /**
+     * Unbinds all turrets from their respective asteroids.
+     */
+    public synchronized void unbindAllTurrets() {
+        turret1.unbindAsteroid();
+        turret2.unbindAsteroid();
+        turret3.unbindAsteroid();
     }
 
     /**
@@ -124,66 +132,11 @@ public class MiningSession {
     public synchronized void createSessionCharacter(EVECharacter character, DataContainer dCont) {                       
         if (character == null) return;   
         
-        turret1.unbindAsteroid();
-        turret2.unbindAsteroid();
-        turret3.unbindAsteroid();
+        unbindAllTurrets();
         
         SessionCharacter schar = new SessionCharacter(character, dCont);
         this.character = schar;
-    }        
-    
-    /**
-     * Updates session character's ship.
-     * Does nothing, if there's no session character.
-     * Resets turrets.
-     * @param ship 
-     */
-    public synchronized void updateCharacherShip(Ship ship) {
-        if (ship == null || character == null) return;
-        
-        turret1.unbindAsteroid();
-        turret2.unbindAsteroid();
-        turret3.unbindAsteroid();
-        
-        SessionCharacter schar = new SessionCharacter(character, ship);
-        this.character = schar;
-    }
-    
-    /**
-     * Updates session character's booster char.
-     * Does nothing, if there's no session character.
-     * @param booster 
-     */
-    public synchronized void updateCharacherBooster(EVECharacter booster) {
-        if (booster == null || character == null) return;
-        
-        SessionCharacter schar = new SessionCharacter(character, booster);
-        this.character = schar;
-    }
-    
-    /**
-     * Updates session character's booster ship.
-     * Does nothing, if there's no session character.
-     * @param boosterShip
-     */
-    public synchronized void updateCharacherBoosterShip(BoosterShip boosterShip) {
-        if (boosterShip == null || character == null) return;
-        
-        SessionCharacter schar = new SessionCharacter(character, boosterShip);
-        this.character = schar;
-    }
-    
-    /**
-     * Sets, if the session character's booster char actually uses booster ship, or not.
-     * Does nothing, if there's no session character.
-     * @param what
-     */
-    public synchronized void updateCharacherUsingBoosterShip(boolean what) {
-        if (character == null) return;
-        
-        SessionCharacter schar = new SessionCharacter(character, what);
-        this.character = schar;
-    }
+    }     
     
     /**
      * Returns used cargo.
@@ -210,9 +163,7 @@ public class MiningSession {
      * @param amt used cargo, in m3. Can't be more, than ship's ore hold.
      */
     public synchronized void setUsedCargo(float amt) {      
-        turret1.unbindAsteroid();
-        turret2.unbindAsteroid();
-        turret3.unbindAsteroid();
+        unbindAllTurrets();
         
         int maxCargo = 0;
         if (character != null) {
@@ -240,11 +191,9 @@ public class MiningSession {
      */
     public synchronized void clearAndAddRoids(List<Asteroid> newRoids) {
         if (character == null) return;
-        turret1.unbindAsteroid();
-        turret2.unbindAsteroid();
-        turret3.unbindAsteroid();
+        unbindAllTurrets();
                 
-        Set<BasicHarvestable> filter = character.getCharacter().getAsteroidFilter();                
+        Set<BasicHarvestable> filter = character.getCoreCharacter().getAsteroidFilter();                
         roids = new CopyOnWriteArrayList<>(filterRoids(newRoids, filter));
     }
     
@@ -273,7 +222,7 @@ public class MiningSession {
         if (character == null) return;
         
         setUsedCargo(0);
-        Set<BasicHarvestable> filter = character.getCharacter().getAsteroidFilter();                
+        Set<BasicHarvestable> filter = character.getCoreCharacter().getAsteroidFilter();                
         roids = new CopyOnWriteArrayList<>(filterRoids(newRoids, filter));
     }
     
@@ -284,7 +233,7 @@ public class MiningSession {
     public synchronized void addRoids(List<Asteroid> newRoids) {
         if (character == null) return;
         
-        Set<BasicHarvestable> filter = character.getCharacter().getAsteroidFilter();                
+        Set<BasicHarvestable> filter = character.getCoreCharacter().getAsteroidFilter();                
         roids.addAll(filterRoids(newRoids, filter));
     }
     
@@ -307,9 +256,7 @@ public class MiningSession {
      * Also, turns of turrets.
      */
     public synchronized void clearRoids() {            
-        turret1.unbindAsteroid();
-        turret2.unbindAsteroid();
-        turret3.unbindAsteroid();
+        unbindAllTurrets();
         
         roids = new CopyOnWriteArrayList<>();
     }
@@ -388,9 +335,7 @@ public class MiningSession {
             haveAlerts = true;
             // we should unbind all turrets here, because we could get the exception
             // only on the last turret, for example.
-            turret1.unbindAsteroid();
-            turret2.unbindAsteroid();
-            turret3.unbindAsteroid();
+            unbindAllTurrets();
             throw holdEx;            
         }
         
@@ -453,7 +398,7 @@ public class MiningSession {
             button.setText(getButtonHTML(getCharacterName(), "&nbsp;"));
             haveAlerts = false;
         } else {
-            EVECharacter eveChr = character.getCharacter();
+            ICoreCharacter eveChr = character.getCoreCharacter();
             if (!eveChr.isMonitorIgnore() && getRemainingCargo() < 1) {
                 haveAlerts = true;
                 button.setForeground(Color.RED);
@@ -468,12 +413,11 @@ public class MiningSession {
                 return;
             }
             
-            Ship ship = character.getShip();
             boolean t1isMining = turret1.isMining();
             // if there is no turret2 on a ship, return true to skip
-            boolean t2isMining = ship.getTurretCount() < 2 || turret2.isMining(); 
+            boolean t2isMining = character.getTurretCount() < 2 || turret2.isMining(); 
             // if there is no turret3 on a ship, return true to skip
-            boolean t3isMining = ship.getTurretCount() < 3 || turret3.isMining(); 
+            boolean t3isMining = character.getTurretCount() < 3 || turret3.isMining(); 
 
             if (!eveChr.isMonitorIgnore() && timer == null && (!t1isMining || !t2isMining || !t3isMining)) {  
                 haveAlerts = true;              
@@ -512,7 +456,7 @@ public class MiningSession {
 
                 if (rem == Integer.MAX_VALUE) {
                     button.setForeground(Color.BLACK);
-                    button.setText(getButtonHTML(character.getCharacter().getName(), "&nbsp;"));
+                    button.setText(getButtonHTML(character.getCoreCharacter().getName(), "&nbsp;"));
                 } else {
                     int cycle;
                     if (showTimer) {
@@ -525,7 +469,7 @@ public class MiningSession {
                     Period remPeriod = Seconds.seconds(rem)
                         .toStandardDuration().toPeriod();
 
-                    button.setText(getButtonHTML(character.getCharacter().getName(), 
+                    button.setText(getButtonHTML(character.getCoreCharacter().getName(), 
                             minutesAndSeconds.print(remPeriod)));
                     if (remcycles > 1) {
                         button.setForeground(Color.BLACK);

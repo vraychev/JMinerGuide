@@ -30,10 +30,12 @@ import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.ICalculatedStats;
 import cy.alavrov.jminerguide.data.booster.BoosterShip;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
+import cy.alavrov.jminerguide.data.character.ICoreCharacter;
 import cy.alavrov.jminerguide.data.harvestable.Asteroid;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import cy.alavrov.jminerguide.monitor.AsteroidMonitorSettings;
+import cy.alavrov.jminerguide.monitor.ISessionCharacter;
 import cy.alavrov.jminerguide.monitor.MiningSession;
 import cy.alavrov.jminerguide.monitor.MiningSessionButton;
 import cy.alavrov.jminerguide.monitor.MiningSessionMonitor;
@@ -248,8 +250,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     hideModalDialogs();
                     
                     currentMiner = name;
-                    SessionCharacter curchar = session.getSessionCharacter();                    
-                    jLabelMinerName.setText(currentMiner + (curchar == null ? "(not found)" : ""));
+                    ISessionCharacter curchar = session.getSessionCharacter();                    
+                    jLabelMinerName.setText(currentMiner + (curchar.isSimple() ? "(no API)" : ""));
                     
                     if (curchar == null) {
                         disableMonitorPanel();
@@ -331,10 +333,10 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (!jCheckBoxCharacterIgnore.isEnabled()) jCheckBoxCharacterIgnore.setEnabled(true);
         if (!jSpinnerSequence.isEnabled()) jSpinnerSequence.setEnabled(true);
         
-        SessionCharacter character = session.getSessionCharacter();        
+        ISessionCharacter character = session.getSessionCharacter();        
         
-        jCheckBoxCharacterIgnore.setSelected(character.getCharacter().isMonitorIgnore());
-        jSpinnerSequence.setValue(character.getCharacter().getMonitorSequence());
+        jCheckBoxCharacterIgnore.setSelected(character.getCoreCharacter().isMonitorIgnore());
+        jSpinnerSequence.setValue(character.getCoreCharacter().getMonitorSequence());
         
         updateCharacterStats(session);
     }
@@ -350,7 +352,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     }
     
     private void updateCharacterStats(MiningSession session) {
-        SessionCharacter character = session.getSessionCharacter();
+        ISessionCharacter character = session.getSessionCharacter();
         if (character == null) return;                
         
         ICalculatedStats stats = character.getStats();
@@ -490,7 +492,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
                 
         synchronized(sess) {
-            SessionCharacter chr = sess.getSessionCharacter();
+            ISessionCharacter chr = sess.getSessionCharacter();
             if (chr == null) {
                 disableTurretButtons();
                 return;
@@ -502,19 +504,18 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 return;
             }
 
-            Ship ship = chr.getShip();
-            if (ship.getTurretCount() > 3) {
+            if (chr.getTurretCount() > 3) {
                 disableTurretButtons();
                 return;
             }
 
-            if (ship.getTurretCount() > 2) {
+            if (chr.getTurretCount() > 2) {
                 enableToggleButton(jToggleButtonTurret3, sess.getTurret3().isMining());
             } else {
                 disableToggleButton(jToggleButtonTurret3);
             }
 
-            if (ship.getTurretCount() > 1) {
+            if (chr.getTurretCount() > 1) {
                 enableToggleButton(jToggleButtonTurret2, sess.getTurret2().isMining());
             } else {
                 disableToggleButton(jToggleButtonTurret2);
@@ -567,7 +568,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 newHoldSize = 0;
             }
 
-            SessionCharacter curchar = sess.getSessionCharacter();
+            ISessionCharacter curchar = sess.getSessionCharacter();
             if (curchar != null) {
                 int maxHoldSize = curchar.getStats().getOreHold();
                 if (newHoldSize > maxHoldSize) newHoldSize = maxHoldSize;
@@ -1031,8 +1032,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         MiningSession sess = currentSession;
         if (sess != null) {
             synchronized(sess) {
-                SessionCharacter chr = sess.getSessionCharacter();
-                if (chr != null && chr.getShip().getTurretCount() > 2) {
+                ISessionCharacter chr = sess.getSessionCharacter();
+                if (chr != null && chr.getTurretCount() > 2) {
                     TurretInstance turret = sess.getTurret3();
                     if (turret.isMining()) {
                         turret.unbindAsteroid();
@@ -1057,8 +1058,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         MiningSession sess = currentSession;
         if (sess != null) {
             synchronized(sess) {
-                SessionCharacter chr = sess.getSessionCharacter();
-                if (chr != null && chr.getShip().getTurretCount() > 1) {
+                ISessionCharacter chr = sess.getSessionCharacter();
+                if (chr != null && chr.getTurretCount() > 1) {
                     TurretInstance turret = sess.getTurret2();
                     if (turret.isMining()) {
                         turret.unbindAsteroid();
@@ -1083,7 +1084,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         MiningSession sess = currentSession;
         if (sess != null) {
             synchronized(sess) {
-                SessionCharacter chr = sess.getSessionCharacter();
+                ISessionCharacter chr = sess.getSessionCharacter();
                 if (chr != null) {
                     TurretInstance turret = sess.getTurret1();
                     if (turret.isMining()) {
@@ -1124,7 +1125,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private void jButtonFiltersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFiltersActionPerformed
         MiningSession sess = currentSession;
         if (sess != null && sess.getSessionCharacter() != null) {
-            JAsteroidFilterDialog dlog = new JAsteroidFilterDialog(this, sess.getSessionCharacter().getCharacter());
+            JAsteroidFilterDialog dlog = new JAsteroidFilterDialog(this, sess.getSessionCharacter().getCoreCharacter());
             dlog.setLocationRelativeTo(this);
 
             dlog.setVisible(true);
@@ -1213,9 +1214,9 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private void jCheckBoxCharacterIgnoreItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxCharacterIgnoreItemStateChanged
         MiningSession sess = currentSession;
         if (sess != null) { 
-            SessionCharacter character = sess.getSessionCharacter();
+            ISessionCharacter character = sess.getSessionCharacter();
             if (character != null) {
-                character.getCharacter().setMonitorIgnore(jCheckBoxCharacterIgnore.isSelected());
+                character.getCoreCharacter().setMonitorIgnore(jCheckBoxCharacterIgnore.isSelected());
             }
         }
     }//GEN-LAST:event_jCheckBoxCharacterIgnoreItemStateChanged
@@ -1233,9 +1234,9 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         
         MiningSession sess = currentSession;
         if (sess != null) { 
-            SessionCharacter character = sess.getSessionCharacter();
+            ISessionCharacter character = sess.getSessionCharacter();
             if (character != null) {
-                character.getCharacter().setMonitorSequence((int) jSpinnerSequence.getValue());
+                character.getCoreCharacter().setMonitorSequence((int) jSpinnerSequence.getValue());
             }
         }
         
@@ -1273,7 +1274,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private void jButtonConfigureShipActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonConfigureShipActionPerformed
         MiningSession sess = currentSession;
         if (sess != null) {
-            SessionCharacter schar = sess.getSessionCharacter();
+            ISessionCharacter schar = sess.getSessionCharacter();
             if (schar != null && scsDlog == null) {
                 scsDlog = new JSessionCharacterSettingsDialog(this, sess, dCont);
                 scsDlog.setLocationRelativeTo(this);
