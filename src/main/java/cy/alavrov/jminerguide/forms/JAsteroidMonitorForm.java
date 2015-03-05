@@ -1275,12 +1275,17 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         MiningSession sess = currentSession;
         if (sess != null) {
             ISessionCharacter schar = sess.getSessionCharacter();
-            if (schar != null && scsDlog == null) {
-                scsDlog = new JSessionCharacterSettingsDialog(this, sess, dCont);
-                scsDlog.setLocationRelativeTo(this);
-            }
-
-            scsDlog.setVisible(true);
+            if (schar != null) {
+                if (schar.isSimple()) {
+                    
+                } else {
+                    if (scsDlog == null) {
+                        scsDlog = new JSessionCharacterSettingsDialog(this, sess, dCont);
+                        scsDlog.setLocationRelativeTo(this);
+                    }
+                    scsDlog.setVisible(true);
+                }
+            }            
         }
     }//GEN-LAST:event_jButtonConfigureShipActionPerformed
 

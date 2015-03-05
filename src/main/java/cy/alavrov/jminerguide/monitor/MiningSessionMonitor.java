@@ -27,6 +27,7 @@ package cy.alavrov.jminerguide.monitor;
 
 import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
+import cy.alavrov.jminerguide.data.character.SimpleCharacter;
 import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
 import cy.alavrov.jminerguide.util.winmanager.IWindowManager;
 import java.util.ArrayList;
@@ -112,6 +113,9 @@ public class MiningSessionMonitor {
                         EVECharacter newChar = dCont.getCharacterContainer().getCharacterByName(name);                        
                         if (newChar != null) {
                             session.createSessionCharacter(newChar, dCont);
+                        } else {
+                            SimpleCharacter sChar = dCont.getSimplecCharacterCointainer().getCharacterByName(name);
+                            session.createSessionCharacter(sChar);
                         }
                     } else if (!curChar.getCoreCharacter().getName().equals(name)) {
                         iter.remove();
@@ -130,6 +134,9 @@ public class MiningSessionMonitor {
                     EVECharacter newChar = dCont.getCharacterContainer().getCharacterByName(name);                        
                     if (newChar != null) {
                         newSession.createSessionCharacter(newChar, dCont);
+                    } else {
+                        SimpleCharacter sChar = dCont.getSimplecCharacterCointainer().getCharacterByName(name);
+                        newSession.createSessionCharacter(sChar);
                     }
                 }
                 

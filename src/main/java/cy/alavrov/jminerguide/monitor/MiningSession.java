@@ -28,6 +28,7 @@ package cy.alavrov.jminerguide.monitor;
 import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.character.ICoreCharacter;
+import cy.alavrov.jminerguide.data.character.SimpleCharacter;
 import cy.alavrov.jminerguide.data.harvestable.Asteroid;
 import cy.alavrov.jminerguide.data.harvestable.BasicHarvestable;
 import cy.alavrov.jminerguide.util.winmanager.IEVEWindow;
@@ -134,9 +135,22 @@ public class MiningSession {
         
         unbindAllTurrets();
         
-        SessionCharacter schar = new SessionCharacter(character, dCont);
+        ISessionCharacter schar = new SessionCharacter(character, dCont);
         this.character = schar;
     }     
+    
+    /**
+     * Creates session character from the simple character.
+     * @param character 
+     */
+    public synchronized void createSessionCharacter(SimpleCharacter character) {
+        if (character == null) return;   
+        
+        unbindAllTurrets();
+        
+        ISessionCharacter schar = new SimpleSessionCharacter(character);
+        this.character = schar;
+    }
     
     /**
      * Returns used cargo.

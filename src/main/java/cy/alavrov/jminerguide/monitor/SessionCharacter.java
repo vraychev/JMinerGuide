@@ -80,7 +80,7 @@ public class SessionCharacter implements ISessionCharacter{
         
     }
     
-    private final void recalculateStats() {
+    private void recalculateStats() {
         CalculatedStats newStats = new CalculatedStats(character, booster, ship, 
                 useBoosterShip ? boosterShip : noBoosterShip, false);
         
