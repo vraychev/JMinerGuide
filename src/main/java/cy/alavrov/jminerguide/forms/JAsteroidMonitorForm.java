@@ -25,14 +25,9 @@
  */
 package cy.alavrov.jminerguide.forms;
 
-import cy.alavrov.jminerguide.data.CalculatedStats;
 import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.ICalculatedStats;
-import cy.alavrov.jminerguide.data.booster.BoosterShip;
-import cy.alavrov.jminerguide.data.character.EVECharacter;
-import cy.alavrov.jminerguide.data.character.ICoreCharacter;
 import cy.alavrov.jminerguide.data.harvestable.Asteroid;
-import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import cy.alavrov.jminerguide.monitor.AsteroidMonitorSettings;
 import cy.alavrov.jminerguide.monitor.ISessionCharacter;
@@ -41,7 +36,6 @@ import cy.alavrov.jminerguide.monitor.MiningSessionButton;
 import cy.alavrov.jminerguide.monitor.MiningSessionMonitor;
 import cy.alavrov.jminerguide.monitor.MiningTask;
 import cy.alavrov.jminerguide.monitor.MiningTimer;
-import cy.alavrov.jminerguide.monitor.SessionCharacter;
 import cy.alavrov.jminerguide.monitor.TurretInstance;
 import cy.alavrov.jminerguide.monitor.UpdateWindowTask;
 import cy.alavrov.jminerguide.util.IntegerDocumentFilter;
@@ -67,6 +61,7 @@ import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.table.AbstractTableModel;
@@ -111,7 +106,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private volatile boolean processEvents = false;
 
     private volatile JLoadScanDialog lsDlog = null;
-    private volatile JSessionCharacterSettingsDialog scsDlog = null;
+    private volatile JDialog scsDlog = null;
     
     /**
      * Creates new form JAsteroidMonitorDialog
@@ -1277,14 +1272,17 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             ISessionCharacter schar = sess.getSessionCharacter();
             if (schar != null) {
                 if (schar.isSimple()) {
-                    
+                    if (scsDlog == null) {
+                        scsDlog = new JSimpleCharacterSettingsDialog(this, sess);
+                        scsDlog.setLocationRelativeTo(this);
+                    } 
                 } else {
                     if (scsDlog == null) {
                         scsDlog = new JSessionCharacterSettingsDialog(this, sess, dCont);
                         scsDlog.setLocationRelativeTo(this);
-                    }
-                    scsDlog.setVisible(true);
+                    }                    
                 }
+                scsDlog.setVisible(true);
             }            
         }
     }//GEN-LAST:event_jButtonConfigureShipActionPerformed

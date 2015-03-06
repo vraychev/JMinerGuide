@@ -491,7 +491,7 @@ public final class MainFrame extends javax.swing.JFrame {
         }
     }
 
-    public DefaultComboBoxModel<Integer> getIntegerModel(int upto) {
+    public static DefaultComboBoxModel<Integer> getIntegerModel(int upto) {
         DefaultComboBoxModel<Integer> out = new DefaultComboBoxModel<>();
 
         if (upto > 0) {

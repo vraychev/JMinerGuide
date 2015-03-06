@@ -31,7 +31,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
 /**
- *
+ * Only numbers go in.
  * @author alavrov
  */
 public class IntegerDocumentFilter extends DocumentFilter{

@@ -23,53 +23,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package cy.alavrov.jminerguide.monitor;
+package cy.alavrov.jminerguide.util;
 
-import cy.alavrov.jminerguide.data.ICalculatedStats;
-import cy.alavrov.jminerguide.data.SimpleCalculatedStats;
-import cy.alavrov.jminerguide.data.character.ICoreCharacter;
-import cy.alavrov.jminerguide.data.character.SimpleCharacter;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 
 /**
- *
+ * Numbers and dot goes in.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class SimpleSessionCharacter implements ISessionCharacter{
-    private final SimpleCharacter character;
-    private ICalculatedStats stats; 
-
-    public SimpleSessionCharacter(SimpleCharacter character) {
-        this.character = character;
-        recalculateStats();
-    }
-        
-    public final synchronized void recalculateStats() {
-        stats = new SimpleCalculatedStats(character);
-    }
-
+public class FloatDocumentFilter extends DocumentFilter{
     @Override
-    public ICoreCharacter getCoreCharacter() {
-        return character;
-    }
-
-    @Override
-    public ICalculatedStats getStats() {
-        return stats;
-    }
-
-    @Override
-    public ICalculatedStats getStatsMercoxit() {
-        return stats;
-    }
-
-    @Override
-    public int getTurretCount() {
-        return character.getTurrets();
-    }
-
-    @Override
-    public boolean isSimple() {
-        return true;
+    public void insertString(DocumentFilter.FilterBypass fb, int offset, String string,
+                             AttributeSet attr) throws BadLocationException {
+        string = string.replaceAll("[^0-9.]", "");
+        super.insertString(fb, offset, string, attr);
     }
     
+    @Override
+    public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text,
+                        AttributeSet attrs) throws BadLocationException {
+        text = text.replaceAll("[^0-9.]", "");
+        super.replace(fb, offset, length, text, attrs);
+    }
 }

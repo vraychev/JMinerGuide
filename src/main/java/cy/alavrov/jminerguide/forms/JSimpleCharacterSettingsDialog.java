@@ -25,51 +25,62 @@
  */
 package cy.alavrov.jminerguide.forms;
 
-import cy.alavrov.jminerguide.data.DataContainer;
-import cy.alavrov.jminerguide.data.booster.BoosterShip;
-import cy.alavrov.jminerguide.data.character.EVECharacter;
-import cy.alavrov.jminerguide.data.ship.Ship;
+import cy.alavrov.jminerguide.data.character.SimpleCharacter;
+import cy.alavrov.jminerguide.log.JMGLogger;
 import cy.alavrov.jminerguide.monitor.MiningSession;
-import cy.alavrov.jminerguide.monitor.SessionCharacter;
+import cy.alavrov.jminerguide.monitor.SimpleSessionCharacter;
+import cy.alavrov.jminerguide.util.FloatDocumentFilter;
+import cy.alavrov.jminerguide.util.IntegerDocumentFilter;
+import javax.swing.text.AbstractDocument;
 
 /**
- * Setting ship and booster for a session character.
+ * Setting mining parameters for a simple session character.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class JSessionCharacterSettingsDialog extends javax.swing.JDialog {
+public class JSimpleCharacterSettingsDialog extends javax.swing.JDialog {
     private final MiningSession session;
     private final JAsteroidMonitorForm parent;
 
-    
     /**
-     * Creates new form JSessionCharacterSettingsDialog.
-     * Will fail, if there is no bound SessionCharacter, beware.
+     * Creates new form JSimpleCharacterSettingsDialog
      */
-    public JSessionCharacterSettingsDialog(JAsteroidMonitorForm parent, MiningSession session, DataContainer dCont) {
+    public JSimpleCharacterSettingsDialog(JAsteroidMonitorForm parent, MiningSession session) {
         super(parent, true);
         initComponents();
+                
         this.session = session;
         this.parent = parent;
         
-        jComboBoxShip.setModel(dCont.getShipContainer().getShipModel());
-        jComboBoxBooster.setModel(dCont.getCharacterContainer().getCharModel());
-        jComboBoxBoosterShip.setModel(dCont.getBoosterShipContainer().getBoosterShipModel());
+        AbstractDocument idDoc = ((AbstractDocument)jTextFieldTurretYield.getDocument());
+        idDoc.setDocumentFilter(new IntegerDocumentFilter());
+        
+        idDoc = ((AbstractDocument)jTextFieldOreHold.getDocument());
+        idDoc.setDocumentFilter(new IntegerDocumentFilter());
+        
+        idDoc = ((AbstractDocument)jTextFieldTurretYield.getDocument());
+        idDoc.setDocumentFilter(new FloatDocumentFilter());
+        
+        jComboBoxTurrets.setModel(MainFrame.getIntegerModel(3));
         
         synchronized(session) {
-            SessionCharacter character = (SessionCharacter) session.getSessionCharacter();
-
-            Ship ship = character.getShip();
-            jComboBoxShip.setSelectedItem(ship);
-
-            EVECharacter booster = character.getBooster();
-            jComboBoxBooster.setSelectedItem(booster);
-
-            BoosterShip bShip = character.getBoosterShip();
-            jComboBoxBoosterShip.setSelectedItem(bShip);
-
-            boolean isUsingBS = character.isUseBoosterShip();
-            jCheckBoxUseBoosterShip.setSelected(isUsingBS);     
-
+            SimpleSessionCharacter character = (SimpleSessionCharacter) session.getSessionCharacter();
+            
+            jTextFieldTurretCycle.setText(String.valueOf(
+                    ((SimpleCharacter)character.getCoreCharacter()).getTurretCycle()
+            ));
+            
+            jTextFieldTurretYield.setText(String.valueOf(
+                    ((SimpleCharacter)character.getCoreCharacter()).getTurretYield()
+            ));
+            
+            jTextFieldOreHold.setText(String.valueOf(
+                    ((SimpleCharacter)character.getCoreCharacter()).getOreHold()
+            ));
+            
+            jComboBoxTurrets.setSelectedItem(
+                    ((SimpleCharacter)character.getCoreCharacter()).getTurrets()
+            );
+            
             jLabelName.setText(character.getCoreCharacter().getName());
         }
     }
@@ -84,26 +95,29 @@ public class JSessionCharacterSettingsDialog extends javax.swing.JDialog {
     private void initComponents() {
 
         jLabelName = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        jTextFieldTurretYield = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jComboBoxShip = new javax.swing.JComboBox<Ship>();
+        jTextFieldTurretCycle = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jComboBoxBooster = new javax.swing.JComboBox<EVECharacter>();
-        jLabel4 = new javax.swing.JLabel();
-        jComboBoxBoosterShip = new javax.swing.JComboBox<BoosterShip>();
-        jCheckBoxUseBoosterShip = new javax.swing.JCheckBox();
+        jComboBoxTurrets = new javax.swing.JComboBox<Integer>();
         jButtonSave = new javax.swing.JButton();
         jButtonCancel = new javax.swing.JButton();
+        jLabel4 = new javax.swing.JLabel();
+        jTextFieldOreHold = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Configure Ship");
+        setModal(true);
+        setResizable(false);
 
         jLabelName.setText("name");
 
-        jLabel2.setText("Ship");
+        jLabel1.setText("Turret Yield, m3");
 
-        jLabel3.setText("Booster");
+        jLabel2.setText("Turret Cycle, sec");
 
-        jLabel4.setText("B. Ship");
+        jLabel3.setText("Turrets");
 
         jButtonSave.setText("Save");
         jButtonSave.addActionListener(new java.awt.event.ActionListener() {
@@ -119,6 +133,8 @@ public class JSessionCharacterSettingsDialog extends javax.swing.JDialog {
             }
         });
 
+        jLabel4.setText("Ore Hold");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -126,28 +142,24 @@ public class JSessionCharacterSettingsDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabelName)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jButtonSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jComboBoxShip, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jComboBoxBooster, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jComboBoxBoosterShip, 0, 144, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jCheckBoxUseBoosterShip))))
+                        .addComponent(jButtonCancel))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabelName)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jButtonSave)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonCancel)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel4))
+                        .addGap(63, 63, 63)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jTextFieldTurretCycle)
+                            .addComponent(jTextFieldTurretYield)
+                            .addComponent(jComboBoxTurrets, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextFieldOreHold, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -156,18 +168,20 @@ public class JSessionCharacterSettingsDialog extends javax.swing.JDialog {
                 .addComponent(jLabelName)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jTextFieldTurretYield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jComboBoxShip, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTextFieldTurretCycle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(jComboBoxBooster, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jComboBoxBoosterShip, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel4))
-                    .addComponent(jCheckBoxUseBoosterShip))
+                    .addComponent(jComboBoxTurrets, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(jTextFieldOreHold, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonSave)
@@ -180,24 +194,36 @@ public class JSessionCharacterSettingsDialog extends javax.swing.JDialog {
 
     private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
         synchronized(session) {
-            SessionCharacter character = (SessionCharacter) session.getSessionCharacter();
+            SimpleSessionCharacter character = (SimpleSessionCharacter) session.getSessionCharacter();
 
-            Ship ship = (Ship) jComboBoxShip.getSelectedItem();
-            character.setShip(ship);
+            SimpleCharacter sChar = (SimpleCharacter) character.getCoreCharacter();
 
-            EVECharacter booster = (EVECharacter) jComboBoxBooster.getSelectedItem();
-            character.setBooster(booster);
-
-            BoosterShip bShip = (BoosterShip) jComboBoxBoosterShip.getSelectedItem();
-            character.setBoosterShip(bShip);
-
-            character.setUseBoosterShip(jCheckBoxUseBoosterShip.isSelected());
+            try {
+                sChar.setTurretYield(Integer.parseInt(jTextFieldTurretYield.getText(), 10));                
+            } catch (Exception e) {
+                sChar.setTurretYield(0);
+            }
             
+            try {
+                sChar.setTurretCycle(Float.parseFloat(jTextFieldTurretCycle.getText()));
+            } catch (Exception e) {
+                sChar.setTurretCycle(0);
+            }
+                
+            try {
+                sChar.setOreHold(Integer.parseInt(jTextFieldOreHold.getText(), 10));
+            } catch (Exception e) {
+                sChar.setOreHold(0);
+            }
+            
+            sChar.setTurrets((int) jComboBoxTurrets.getSelectedItem());
+            
+            character.recalculateStats();
             session.unbindAllTurrets();
         }
-        
+
         parent.updateCharacterStatsIfCurrent(session);
-        
+
         parent.deleteSessionCharacterSettingsDialog();
         this.dispose();
     }//GEN-LAST:event_jButtonSaveActionPerformed
@@ -211,13 +237,14 @@ public class JSessionCharacterSettingsDialog extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonCancel;
     private javax.swing.JButton jButtonSave;
-    private javax.swing.JCheckBox jCheckBoxUseBoosterShip;
-    private javax.swing.JComboBox<EVECharacter> jComboBoxBooster;
-    private javax.swing.JComboBox<BoosterShip> jComboBoxBoosterShip;
-    private javax.swing.JComboBox<Ship> jComboBoxShip;
+    private javax.swing.JComboBox<Integer> jComboBoxTurrets;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabelName;
+    private javax.swing.JTextField jTextFieldOreHold;
+    private javax.swing.JTextField jTextFieldTurretCycle;
+    private javax.swing.JTextField jTextFieldTurretYield;
     // End of variables declaration//GEN-END:variables
 }
