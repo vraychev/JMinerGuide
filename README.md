@@ -24,24 +24,36 @@ Helper application for EVE Online miners. In Java.
 
 A tool to make mining more enjoyable. It's able to:
 
-* notify you of asteroid expiration before the laser cycle ends
-* alert you when your ore hold is filled
-* provide you with various timers for your needs
-* all of this - per-window. Turn your mining operation with six alts into whack-an-asteroid game with nearly zero mining time loss!
+* Notify you of asteroid expiration before the laser cycle ends
+* Alert you when your ore hold is filled
+* Provide you with various timers for your needs
+* All of this - per-window. Turn your mining operation with six alts into whack-an-asteroid game with nearly zero mining time loss!
 
 To correctly use the monitor, you need to:
 
-* use Windows OS. There's no monitor for other OSes at this moment.
-* set up API keys for all your chars. Monitor will ignore unknown chars.
-* set up API key for your booster. If the key isn't available, you should set up booster skills on the custom character and use it as a booster.
-* correctly set ship equipment for all your miners and a booster
-* check, that calculated values for mining yield, mining cycle time and ore hold are correct
-* set up monitor settings and asteroid filter as needed
-* load survey scanner result (ctr-a, then ctrl-c in the results window, ctrl-v into the Load Scan window)
-* check, that used ore hold is same both in monitor and a game, adjust if needed
-* start mining ingame, and then in the monitor, same turret on the same asteroid. You can press interface buttons for that, or use f1-f3 buttons, same as ingame
-* respond to the alerts
-* rinse and repeat
+* Use Windows OS. There's no monitor for other OSes at this moment.
+
+Either:
+
+* Set up API keys for all your chars.
+* Set up API key for your booster. If the key isn't available, you should set up booster skills on the custom character and use it as a booster.
+* Correctly set ship equipment for all your miners and a booster
+* Check, that calculated values for mining yield, mining cycle time and ore hold are correct
+
+Or:
+
+* Just start a Monitor
+* Set up ore hold volume, number of turrets, ore yield per turret and turret cycle for every pilot without the API key.
+* You can see yield and cycle time in a turret mouseover, by the way.
+
+And then:
+
+* Set up monitor settings and asteroid filter as needed
+* Load survey scanner result (ctr-a, then ctrl-c in the results window, ctrl-v into the Load Scan window)
+* Check, that used ore hold is same both in monitor and a game, adjust if needed
+* Start mining ingame, and then in the monitor, same turret on the same asteroid. You can press interface buttons for that, or use f1-f3 buttons, same as ingame
+* Respond to the alerts
+* Rinse and repeat
 
 # Known issues
 
