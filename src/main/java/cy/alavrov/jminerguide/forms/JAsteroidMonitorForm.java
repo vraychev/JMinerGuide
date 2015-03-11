@@ -516,7 +516,12 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                 disableToggleButton(jToggleButtonTurret2);
             }
 
-            enableToggleButton(jToggleButtonTurret1, sess.getTurret1().isMining());
+            if (chr.getTurretCount() > 0) {
+                enableToggleButton(jToggleButtonTurret1, sess.getTurret1().isMining());
+            } else {
+                disableToggleButton(jToggleButtonTurret1);
+            }
+            
         }
     }
     
@@ -1080,7 +1085,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (sess != null) {
             synchronized(sess) {
                 ISessionCharacter chr = sess.getSessionCharacter();
-                if (chr != null) {
+                if (chr != null && chr.getTurretCount() > 0) {
                     TurretInstance turret = sess.getTurret1();
                     if (turret.isMining()) {
                         turret.unbindAsteroid();

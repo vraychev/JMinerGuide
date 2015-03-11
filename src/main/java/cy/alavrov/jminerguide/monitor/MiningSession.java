@@ -380,6 +380,7 @@ public class MiningSession {
      * Starts a new timer.
      * Will not do anything, if there is no character.
      * @param seconds 
+     * @param secondsToClear seconds to clear the timer after its expiration.
      */
     public synchronized void newTimer(int seconds, int secondsToClear) {
         if (character == null) return;
@@ -427,7 +428,8 @@ public class MiningSession {
                 return;
             }
             
-            boolean t1isMining = turret1.isMining();
+            // if there is no turret1 on a ship, return true to skip
+            boolean t1isMining = character.getTurretCount() < 1 || turret1.isMining();
             // if there is no turret2 on a ship, return true to skip
             boolean t2isMining = character.getTurretCount() < 2 || turret2.isMining(); 
             // if there is no turret3 on a ship, return true to skip
