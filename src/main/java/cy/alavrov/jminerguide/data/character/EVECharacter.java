@@ -97,6 +97,7 @@ public class EVECharacter implements ICoreCharacter{
     
     private boolean hidden;
     private boolean monitorIgnore;
+    private boolean monitorSimple;
     
     /**
      * Constructor for a new character.
@@ -116,6 +117,7 @@ public class EVECharacter implements ICoreCharacter{
         this.slot10 = Implant.NOTHING;
         hidden = false;
         monitorIgnore = false;
+        monitorSimple = false;
         
         this.roidFilter = new HashSet<>();
         allOnAsteroidFilter();
@@ -194,6 +196,13 @@ public class EVECharacter implements ICoreCharacter{
         }
         
         try {
+            attr = monitorConf.getAttribute("simple");
+            monitorSimple = attr.getBooleanValue();
+        } catch (Exception e) {
+            monitorSimple = false;
+        }
+        
+        try {
             attr = monitorConf.getAttribute("sequence");
             monitorSequence = attr.getIntValue();
         } catch (Exception e) {
@@ -262,7 +271,8 @@ public class EVECharacter implements ICoreCharacter{
         root.addContent(implantSet);
 
         Element monitorConf = new Element("monitor");
-        monitorConf.setAttribute(new Attribute("ignore", String.valueOf(monitorIgnore)));  
+        monitorConf.setAttribute(new Attribute("ignore", String.valueOf(monitorIgnore)));
+        monitorConf.setAttribute(new Attribute("simple", String.valueOf(monitorSimple)));
         monitorConf.setAttribute(new Attribute("sequence", String.valueOf(monitorSequence)));    
 
         if (monitorBooster != null) {
@@ -768,6 +778,25 @@ public class EVECharacter implements ICoreCharacter{
         return monitorIgnore;
     }
 
+    /**
+     * Returns true, if asteroid monitor should use override to simple stats.
+     * @return 
+     */
+    @Override
+    public synchronized boolean isMonitorSimple() {
+        return monitorSimple;
+    }
+
+    /**
+     * Sets if asteroid monitor should use override to simple stats. 
+     * @param monitorSimple
+     */
+    @Override
+    public synchronized void setMonitorSimple(boolean monitorSimple) {
+        this.monitorSimple = monitorSimple;
+    }
+        
+    
     /**
      * Sets if character's mining status should be ignored in the asteroid monitor.
      * @param monitorIgnore 

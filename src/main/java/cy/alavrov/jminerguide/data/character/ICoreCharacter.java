@@ -46,4 +46,6 @@ public interface ICoreCharacter {
     
     public boolean isMonitorIgnore();
     public void setMonitorIgnore(boolean monitorIgnore);
+    public boolean isMonitorSimple();
+    public void setMonitorSimple(boolean monitorSimple);
 }

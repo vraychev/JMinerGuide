@@ -306,4 +306,14 @@ public class SimpleCharacter implements ICoreCharacter{
     public synchronized void setMonitorIgnore(boolean monitorIgnore) {
         this.monitorIgnore = monitorIgnore;
     }
+
+    @Override
+    public boolean isMonitorSimple() {
+        return false;
+    }
+
+    @Override
+    public void setMonitorSimple(boolean monitorSimple) {
+        // do nothing
+    }
 }
