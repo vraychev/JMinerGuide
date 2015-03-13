@@ -128,14 +128,15 @@ public class MiningSession {
      * Creates session's character from the generic character.
      * Resets turrets.
      * @param character
+     * @param simpleCharacter
      * @param dCont 
      */
-    public synchronized void createSessionCharacter(EVECharacter character, DataContainer dCont) {                       
+    public synchronized void createSessionCharacter(EVECharacter character, SimpleCharacter simpleCharacter, DataContainer dCont) {                       
         if (character == null) return;   
         
         unbindAllTurrets();
         
-        ISessionCharacter schar = new SessionCharacter(character, dCont);
+        ISessionCharacter schar = new SessionCharacter(character, simpleCharacter, dCont);
         this.character = schar;
     }     
     

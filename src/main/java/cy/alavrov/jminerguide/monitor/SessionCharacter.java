@@ -28,11 +28,13 @@ package cy.alavrov.jminerguide.monitor;
 import cy.alavrov.jminerguide.data.CalculatedStats;
 import cy.alavrov.jminerguide.data.DataContainer;
 import cy.alavrov.jminerguide.data.ICalculatedStats;
+import cy.alavrov.jminerguide.data.SimpleCalculatedStats;
 import cy.alavrov.jminerguide.data.booster.BoosterShip;
 import cy.alavrov.jminerguide.data.booster.BoosterShipContainer;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.character.ICoreCharacter;
+import cy.alavrov.jminerguide.data.character.SimpleCharacter;
 import cy.alavrov.jminerguide.data.ship.Ship;
 import cy.alavrov.jminerguide.data.ship.ShipContainer;
 
@@ -42,6 +44,7 @@ import cy.alavrov.jminerguide.data.ship.ShipContainer;
  */
 public class SessionCharacter implements ISessionCharacter{
     private final EVECharacter character;
+    private final SimpleCharacter simpleCharacter;
     private Ship ship;
     private EVECharacter booster;
     private BoosterShip boosterShip;
@@ -49,8 +52,9 @@ public class SessionCharacter implements ISessionCharacter{
     private boolean useBoosterShip;
     private ICalculatedStats stats; 
     private ICalculatedStats statsMercoxit;    
+    private ICalculatedStats simpleStats; 
     
-    public SessionCharacter(EVECharacter character, DataContainer dCont) {       
+    public SessionCharacter(EVECharacter character, SimpleCharacter simpleCharacter, DataContainer dCont) {       
         CharacterContainer cCont = dCont.getCharacterContainer();
         ShipContainer sCont = dCont.getShipContainer();
         BoosterShipContainer bCont = dCont.getBoosterShipContainer();
@@ -75,12 +79,14 @@ public class SessionCharacter implements ISessionCharacter{
         useBoosterShip = isUseBoosterShip;
         noBoosterShip = bCont.getNoBooster();
         this.character = character; 
+        this.simpleCharacter = simpleCharacter;
         
         recalculateStats();
         
     }
     
-    private void recalculateStats() {
+    @Override
+    public synchronized void recalculateStats() {
         CalculatedStats newStats = new CalculatedStats(character, booster, ship, 
                 useBoosterShip ? boosterShip : noBoosterShip, false);
         
@@ -90,13 +96,21 @@ public class SessionCharacter implements ISessionCharacter{
                 useBoosterShip ? boosterShip : noBoosterShip, true);
         
         statsMercoxit = newMercoStats;
+        
+        SimpleCalculatedStats newSimpleStats = new SimpleCalculatedStats(simpleCharacter);
+        
+        simpleStats = newSimpleStats;
     }
 
     @Override
-    public synchronized ICoreCharacter getCoreCharacter() {
+    public synchronized ICoreCharacter getCoreCharacter() {        
         return character;
     }
 
+    public synchronized SimpleCharacter getSimpleCharacter() {
+        return simpleCharacter;
+    }
+    
     public synchronized Ship getShip() {
         return ship;
     }
@@ -135,12 +149,20 @@ public class SessionCharacter implements ISessionCharacter{
     
     @Override
     public synchronized ICalculatedStats getStats() {
-        return stats;
+        if (character.isMonitorSimple()) {
+            return simpleStats;
+        } else {
+            return stats;
+        }
     }        
 
     @Override
     public synchronized ICalculatedStats getStatsMercoxit() {
-        return statsMercoxit;
+        if (character.isMonitorSimple()) {
+            return simpleStats;
+        } else {
+            return statsMercoxit;
+        }
     }        
 
     @Override
@@ -150,6 +172,10 @@ public class SessionCharacter implements ISessionCharacter{
 
     @Override
     public synchronized int getTurretCount() {
-        return ship.getTurretCount();
+        if (character.isMonitorSimple()) {
+            return simpleCharacter.getTurrets();
+        } else {
+            return ship.getTurretCount();
+        }
     }
 }

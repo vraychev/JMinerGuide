@@ -539,7 +539,7 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
         jButtonClose.setEnabled(false);
         jLabelStatus.setText("Fetching key data...");
         
-        APIKey newkey = new APIKey(key.getID(), ver);
+        APIKey newkey = key.clone();
         APIKeyLoader loader = new APIKeyLoader(newkey, this);
         dCont.startAPILoader(loader);
     }//GEN-LAST:event_jButtonReloadActionPerformed

@@ -223,7 +223,7 @@ public class APIKey {
                 int charid = row.getAttribute("characterID").getIntValue();
                 EVECharacter theChar = chars.get(charid);
                 
-                if (theChar == null) {
+                if (theChar == null) {                    
                     String name = row.getAttributeValue("characterName");
                     theChar = new EVECharacter(charid, name, this);
                 } else {
@@ -272,6 +272,18 @@ public class APIKey {
           
         for (EVECharacter chr : chars.values()) {
             out.add(chr);
+        }
+        
+        return out;
+    }
+    
+    @Override
+    public synchronized APIKey clone() {
+        APIKey out = new APIKey(id, verification);
+        out.expires = expires;
+        out.chars = new LinkedHashMap<>();
+        for (EVECharacter character : chars.values()) {
+            out.chars.put(character.getID(), character.clone(out));
         }
         
         return out;

@@ -33,6 +33,7 @@ import cy.alavrov.jminerguide.data.character.ICoreCharacter;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public interface ISessionCharacter {
+    public void recalculateStats();
     public ICoreCharacter getCoreCharacter();
     public ICalculatedStats getStats();       
     public ICalculatedStats getStatsMercoxit();   

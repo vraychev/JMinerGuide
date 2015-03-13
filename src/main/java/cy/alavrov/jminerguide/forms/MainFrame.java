@@ -1793,13 +1793,13 @@ public final class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosing
 
     private void JButtonManageAPIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JButtonManageAPIActionPerformed
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                JAPIDialog dlg = new JAPIDialog(MainFrame.this, true, dCont);
-                dlg.setLocationRelativeTo(MainFrame.this);
-                dlg.setVisible(true);
-            }
-        });
+        processEvents = false;
+        
+        JAPIDialog dlg = new JAPIDialog(MainFrame.this, true, dCont);
+        dlg.setLocationRelativeTo(MainFrame.this);
+        dlg.setVisible(true);
+        
+        processEvents = true;
     }//GEN-LAST:event_JButtonManageAPIActionPerformed
 
     private void jComboBoxMinerItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxMinerItemStateChanged

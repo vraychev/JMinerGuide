@@ -110,11 +110,11 @@ public class MiningSessionMonitor {
                     ISessionCharacter curChar = session.getSessionCharacter();
                     if (curChar == null) {
                         // not very optimal, but will do for now, performance overhead is minimal.
-                        EVECharacter newChar = dCont.getCharacterContainer().getCharacterByName(name);                        
-                        if (newChar != null) {
-                            session.createSessionCharacter(newChar, dCont);
+                        EVECharacter newChar = dCont.getCharacterContainer().getCharacterByName(name); 
+                        SimpleCharacter sChar = dCont.getSimplecCharacterCointainer().getCharacterByName(name);
+                        if (newChar != null) {                            
+                            session.createSessionCharacter(newChar, sChar, dCont);
                         } else {
-                            SimpleCharacter sChar = dCont.getSimplecCharacterCointainer().getCharacterByName(name);
                             session.createSessionCharacter(sChar);
                         }
                     } else if (!curChar.getCoreCharacter().getName().equals(name)) {
@@ -131,11 +131,11 @@ public class MiningSessionMonitor {
                 MiningSession newSession = new MiningSession(window);
                 String name = newSession.getCharacterName();
                 if (name != null) {
-                    EVECharacter newChar = dCont.getCharacterContainer().getCharacterByName(name);                        
+                    EVECharacter newChar = dCont.getCharacterContainer().getCharacterByName(name);        
+                    SimpleCharacter sChar = dCont.getSimplecCharacterCointainer().getCharacterByName(name);
                     if (newChar != null) {
-                        newSession.createSessionCharacter(newChar, dCont);
+                        newSession.createSessionCharacter(newChar, sChar, dCont);
                     } else {
-                        SimpleCharacter sChar = dCont.getSimplecCharacterCointainer().getCharacterByName(name);
                         newSession.createSessionCharacter(sChar);
                     }
                 }

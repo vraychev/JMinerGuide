@@ -27,7 +27,9 @@ package cy.alavrov.jminerguide.forms;
 
 import cy.alavrov.jminerguide.data.character.SimpleCharacter;
 import cy.alavrov.jminerguide.log.JMGLogger;
+import cy.alavrov.jminerguide.monitor.ISessionCharacter;
 import cy.alavrov.jminerguide.monitor.MiningSession;
+import cy.alavrov.jminerguide.monitor.SessionCharacter;
 import cy.alavrov.jminerguide.monitor.SimpleSessionCharacter;
 import cy.alavrov.jminerguide.util.FloatDocumentFilter;
 import cy.alavrov.jminerguide.util.IntegerDocumentFilter;
@@ -63,25 +65,32 @@ public class JSimpleCharacterSettingsDialog extends javax.swing.JDialog {
         jComboBoxTurrets.setModel(MainFrame.getIntegerModel(3));
         
         synchronized(session) {
-            SimpleSessionCharacter character = (SimpleSessionCharacter) session.getSessionCharacter();
+            ISessionCharacter character = session.getSessionCharacter();
+            SimpleCharacter sChar;
+            if (character.isSimple()) {
+                sChar = ((SimpleCharacter)character.getCoreCharacter());
+            } else {
+                sChar = ((SessionCharacter)character).getSimpleCharacter();
+            }
+            
             
             jTextFieldTurretCycle.setText(String.valueOf(
-                    ((SimpleCharacter)character.getCoreCharacter()).getTurretCycle()
+                    sChar.getTurretCycle()
             ));
             
             jTextFieldTurretYield.setText(String.valueOf(
-                    ((SimpleCharacter)character.getCoreCharacter()).getTurretYield()
+                    sChar.getTurretYield()
             ));
             
             jTextFieldOreHold.setText(String.valueOf(
-                    ((SimpleCharacter)character.getCoreCharacter()).getOreHold()
+                    sChar.getOreHold()
             ));
             
             jComboBoxTurrets.setSelectedItem(
-                    ((SimpleCharacter)character.getCoreCharacter()).getTurrets()
+                    sChar.getTurrets()
             );
             
-            jLabelName.setText(character.getCoreCharacter().getName());
+            jLabelName.setText(sChar.getName());
         }
     }
 
@@ -194,9 +203,14 @@ public class JSimpleCharacterSettingsDialog extends javax.swing.JDialog {
 
     private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
         synchronized(session) {
-            SimpleSessionCharacter character = (SimpleSessionCharacter) session.getSessionCharacter();
+            ISessionCharacter character = session.getSessionCharacter();
 
-            SimpleCharacter sChar = (SimpleCharacter) character.getCoreCharacter();
+            SimpleCharacter sChar;
+            if (character.isSimple()) {
+                sChar = ((SimpleCharacter)character.getCoreCharacter());
+            } else {
+                sChar = ((SessionCharacter)character).getSimpleCharacter();
+            }
 
             try {
                 sChar.setTurretYield(Integer.parseInt(jTextFieldTurretYield.getText(), 10));                

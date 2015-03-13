@@ -1306,7 +1306,11 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                     } 
                 } else {
                     if (scsDlog == null) {
-                        scsDlog = new JSessionCharacterSettingsDialog(this, sess, dCont);
+                        if (schar.getCoreCharacter().isMonitorSimple()) {
+                            scsDlog = new JSimpleCharacterSettingsDialog(this, sess);
+                        } else {
+                            scsDlog = new JSessionCharacterSettingsDialog(this, sess, dCont);
+                        }
                         scsDlog.setLocationRelativeTo(this);
                     }                    
                 }
@@ -1324,6 +1328,8 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             ISessionCharacter character = sess.getSessionCharacter();
             if (character != null) {
                 character.getCoreCharacter().setMonitorSimple(jCheckBoxSimpleConfig.isSelected());
+                updateCharacterStatsIfCurrent(sess);
+                checkTurretButtons();
             }
         }
         
