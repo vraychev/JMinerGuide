@@ -333,6 +333,14 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jCheckBoxCharacterIgnore.setSelected(character.getCoreCharacter().isMonitorIgnore());
         jSpinnerSequence.setValue(character.getCoreCharacter().getMonitorSequence());
         
+        if (character.isSimple()) {
+            if (jCheckBoxSimpleConfig.isEnabled()) jCheckBoxSimpleConfig.setEnabled(false);
+            if (jCheckBoxSimpleConfig.isSelected()) jCheckBoxSimpleConfig.setSelected(false);
+        } else {
+            if (!jCheckBoxSimpleConfig.isEnabled()) jCheckBoxSimpleConfig.setEnabled(true);
+            jCheckBoxSimpleConfig.setSelected(character.getCoreCharacter().isMonitorSimple());
+        }
+        
         updateCharacterStats(session);
     }
     
@@ -630,6 +638,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         jButtonCustomTimer = new javax.swing.JButton();
         jLabelTimer = new javax.swing.JLabel();
         jButtonConfigureShip = new javax.swing.JButton();
+        jCheckBoxSimpleConfig = new javax.swing.JCheckBox();
         jPanelSelector = new javax.swing.JPanel();
         jButtonClose = new javax.swing.JButton();
         jLabelMinerName = new javax.swing.JLabel();
@@ -825,6 +834,14 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             }
         });
 
+        jCheckBoxSimpleConfig.setText("Simple");
+        jCheckBoxSimpleConfig.setToolTipText("Overrides complex skill/equipment-based configuration with simple one, used in API-less characters.");
+        jCheckBoxSimpleConfig.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxSimpleConfigItemStateChanged(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelSetupLayout = new javax.swing.GroupLayout(jPanelSetup);
         jPanelSetup.setLayout(jPanelSetupLayout);
         jPanelSetupLayout.setHorizontalGroup(
@@ -832,7 +849,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
             .addGroup(jPanelSetupLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButtonConfigureShip, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(jPanelSetupLayout.createSequentialGroup()
                         .addComponent(jLabelStats)
@@ -846,15 +862,6 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                         .addComponent(jToggleButtonTurret3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButtonCleanupAsteroids))
-                    .addGroup(jPanelSetupLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldHold, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonSetOreHold)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonResetOreHold))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
                         .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanelSetupLayout.createSequentialGroup()
@@ -883,14 +890,30 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButtonClearAsteroids))
                             .addComponent(jLabel5))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
+                            .addGap(0, 0, Short.MAX_VALUE)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jTextFieldHold, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jButtonSetOreHold)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jButtonResetOreHold))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSetupLayout.createSequentialGroup()
+                            .addComponent(jButtonConfigureShip, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(jCheckBoxSimpleConfig))))
                 .addContainerGap())
         );
         jPanelSetupLayout.setVerticalGroup(
             jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelSetupLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButtonConfigureShip)
+                .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonConfigureShip)
+                    .addComponent(jCheckBoxSimpleConfig))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelSetupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabelStats)
@@ -1292,6 +1315,21 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButtonConfigureShipActionPerformed
 
+    private void jCheckBoxSimpleConfigItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxSimpleConfigItemStateChanged
+        if (!processEvents) return;
+        processEvents = false;
+        
+        MiningSession sess = currentSession;
+        if (sess != null) { 
+            ISessionCharacter character = sess.getSessionCharacter();
+            if (character != null) {
+                character.getCoreCharacter().setMonitorSimple(jCheckBoxSimpleConfig.isSelected());
+            }
+        }
+        
+        processEvents = true;
+    }//GEN-LAST:event_jCheckBoxSimpleConfigItemStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton15sec;
     private javax.swing.JButton jButton1min;
@@ -1309,6 +1347,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     private javax.swing.JButton jButtonSettings;
     private javax.swing.JButton jButtonStopTimer;
     private javax.swing.JCheckBox jCheckBoxCharacterIgnore;
+    private javax.swing.JCheckBox jCheckBoxSimpleConfig;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
