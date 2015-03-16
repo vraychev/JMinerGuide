@@ -594,7 +594,9 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (sess != null) {            
             try {
                 int secs = Integer.parseInt(jTextFieldCustomTimer.getText(), 10);
-                sess.newTimer(secs, settings.getTimerAlertRemoveTimeout());
+                if (secs > 0) {
+                    sess.newTimer(secs, settings.getTimerAlertRemoveTimeout());
+                }
                 updateTimerLabel();
             } catch (NumberFormatException | NullPointerException e) {
                 // do nothing

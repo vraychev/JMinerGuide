@@ -70,6 +70,12 @@ public class JSessionCharacterSettingsDialog extends javax.swing.JDialog {
             boolean isUsingBS = character.isUseBoosterShip();
             jCheckBoxUseBoosterShip.setSelected(isUsingBS);     
 
+            if (isUsingBS) {
+                if (!jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(true);
+            } else {
+                if (jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(false);
+            }
+            
             jLabelName.setText(character.getCoreCharacter().getName());
         }
     }
@@ -104,6 +110,12 @@ public class JSessionCharacterSettingsDialog extends javax.swing.JDialog {
         jLabel3.setText("Booster");
 
         jLabel4.setText("B. Ship");
+
+        jCheckBoxUseBoosterShip.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxUseBoosterShipItemStateChanged(evt);
+            }
+        });
 
         jButtonSave.setText("Save");
         jButtonSave.addActionListener(new java.awt.event.ActionListener() {
@@ -206,6 +218,14 @@ public class JSessionCharacterSettingsDialog extends javax.swing.JDialog {
         parent.deleteSessionCharacterSettingsDialog();
         this.dispose();
     }//GEN-LAST:event_jButtonCancelActionPerformed
+
+    private void jCheckBoxUseBoosterShipItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxUseBoosterShipItemStateChanged
+        if (jCheckBoxUseBoosterShip.isSelected()) {
+            if (!jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(true);
+        } else {
+            if (jComboBoxBoosterShip.isEnabled()) jComboBoxBoosterShip.setEnabled(false);
+        }
+    }//GEN-LAST:event_jCheckBoxUseBoosterShipItemStateChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

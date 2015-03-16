@@ -67,7 +67,7 @@ public class SessionCharacter implements ISessionCharacter{
         Ship newShip = sCont.getShip(shipName);
         if (newShip == null) newShip = sCont.getShipModel().getElementAt(0); // always have something, so safe.
         
-        String boosterShipName = character.getMonitorBooster();
+        String boosterShipName = character.getMonitorBoosterShip();
         BoosterShip newBoosterShip = bCont.getBoosterShip(boosterShipName);
         if (newBoosterShip == null) newBoosterShip = bCont.getBoosterShipModel().getElementAt(0);                
    
@@ -117,7 +117,8 @@ public class SessionCharacter implements ISessionCharacter{
 
     public synchronized void setShip(Ship ship) {
         this.ship = ship;
-        recalculateStats();
+        character.setMonitorShip(ship.getName());
+        recalculateStats();        
     }        
 
     public synchronized EVECharacter getBooster() {
@@ -126,6 +127,7 @@ public class SessionCharacter implements ISessionCharacter{
 
     public synchronized void setBooster(EVECharacter booster) {
         this.booster = booster;
+        character.setMonitorBooster(booster.getName());
         recalculateStats();
     }   
     
@@ -135,6 +137,7 @@ public class SessionCharacter implements ISessionCharacter{
 
     public synchronized void setBoosterShip(BoosterShip boosterShip) {
         this.boosterShip = boosterShip;
+        character.setMonitorBoosterShip(boosterShip.getName());
         recalculateStats();
     }
 
@@ -144,6 +147,7 @@ public class SessionCharacter implements ISessionCharacter{
 
     public synchronized void setUseBoosterShip(boolean useBoosterShip) {
         this.useBoosterShip = useBoosterShip;
+        character.setMonitorUseBoosterShip(useBoosterShip);
         recalculateStats();
     }
     
