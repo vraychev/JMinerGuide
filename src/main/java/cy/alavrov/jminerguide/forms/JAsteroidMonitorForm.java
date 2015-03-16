@@ -359,7 +359,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (character == null) return;                
         
         ICalculatedStats stats = character.getStats();
-        jLabelStats.setText(fmt.format(stats.getTurretYield())+" m3 / "+stats.getTurretCycle()+" sec / turret");
+        jLabelStats.setText(fmt.format(stats.getTurretYield())+" m3 / "+fmt.format(stats.getTurretCycle())+" sec / turret");
         jLabelHoldStats.setText(fmt.format(session.getUsedCargo())+" / "+stats.getOreHold()+" m3");
         
         checkTurretButtons();
