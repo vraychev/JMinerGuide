@@ -44,7 +44,10 @@ Or:
 
 * Just start a Monitor
 * Set up ore hold volume, number of turrets, ore yield per turret and turret cycle for every pilot without the API key.
+* Check "Simple" checkbox for every API character, that you want to use simple setup for, and set them up same way
 * You can see yield and cycle time in a turret mouseover, by the way.
+
+You can mix pilots with API and full setup, pilots with API and simple setup and API-less pilots any way you see fit for yourself.
 
 And then:
 
@@ -66,6 +69,6 @@ And then:
 
 JMinerGuide source code is distributed under the BSD 2-clause license.
 
-All EVE Online related materials, information and images are property of CCP hf.
+All EVE Online related materials, information and images, including application, dialog and window icons are a property of CCP hf.
 
 ting.wav was downloaded from https://www.freesound.org/people/robni7/sounds/174027/ and is distributed under Creative Commons Attribution 3.0 license.
