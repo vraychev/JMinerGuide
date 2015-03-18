@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.http.client.methods.HttpGet;
 import org.jdom2.Attribute;
+import org.jdom2.DataConversionException;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -81,6 +82,9 @@ public class EVECharacter implements ICoreCharacter{
     private final Integer id;
     private final String name;
     
+    private int stationTripSecs;
+    private boolean usingHauler;
+    
     private Implant slot7;
     private Implant slot8;
     private Implant slot10;
@@ -109,6 +113,9 @@ public class EVECharacter implements ICoreCharacter{
         this.id = id;
         this.name = name;
         this.parentKey = parentKey;
+        
+        this.stationTripSecs = 150;
+        this.usingHauler = false;
         
         this.skills = new HashMap<>();
         
@@ -141,13 +148,22 @@ public class EVECharacter implements ICoreCharacter{
         } catch (Exception e) {
             hidden = false;
         }
+        
+        Element tripConf = root.getChild("stationtrip");
+        try {
+            this.stationTripSecs = tripConf.getAttribute("seconds").getIntValue();
+            this.usingHauler = tripConf.getAttribute("hauler").getBooleanValue();
+        } catch (Exception e) {
+            this.stationTripSecs = 150;
+            this.usingHauler = false;
+        }
             
         this.slot7 = Implant.NOTHING;
         this.slot8 = Implant.NOTHING;
         this.slot10 = Implant.NOTHING;
         this.roidFilter = new HashSet<>();
         
-        // skills and implants on the other hand are expendable.
+        // skills and implants are expendable.
         // they can be pulled via API anyway.
         HashMap<Integer, Integer> newSkills = new HashMap<>();
         Element skillSet = root.getChild("skills");
@@ -158,7 +174,7 @@ public class EVECharacter implements ICoreCharacter{
                 int skvalue = skill.getAttribute("value").getIntValue();
                 newSkills.put(skid, skvalue);
             }
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             JMGLogger.logWarning("Unable to load character skills for "+name, e);
         }
         
@@ -182,7 +198,7 @@ public class EVECharacter implements ICoreCharacter{
                     }
                 }                
             }
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             JMGLogger.logWarning("Unable to load character implants for "+name, e);
         }
         
@@ -250,6 +266,11 @@ public class EVECharacter implements ICoreCharacter{
         root.setAttribute(new Attribute("hidden", String.valueOf(hidden)));    
         root.addContent(new Element("name").setText(name));
 
+        Element tripConf = new Element("stationtrip");
+        tripConf.setAttribute("seconds", String.valueOf(stationTripSecs));
+        tripConf.setAttribute("hauler", String.valueOf(usingHauler));
+        root.addContent(tripConf);
+        
         Element skillSet = new Element("skills");
         for(Map.Entry<Integer, Integer> skill : skills.entrySet()) {
             Element skillElem = new Element("skill");
@@ -866,6 +887,41 @@ public class EVECharacter implements ICoreCharacter{
     public synchronized int getMonitorSequence() {
             return monitorSequence;
     }        
+
+    /**
+     * Length of a trip to the station, in seconds.
+     * @return 
+     */
+    public synchronized int getStationTripSecs() {
+        return stationTripSecs;
+    }
+
+    /**
+     * Sets a length of a trip to the station in seconds.
+     * @param stationTripSecs 
+     */
+    public synchronized void setStationTripSecs(int stationTripSecs) {
+        this.stationTripSecs = stationTripSecs;
+    }
+
+    /**
+     * Is the pilot is using a dedicated hauler for ore hauling?
+     * Using hauler is effectively same as setting trip length to 0.
+     * @return 
+     */
+    public synchronized boolean isUsingHauler() {
+        return usingHauler;
+    }
+
+    /**
+     * Sets, if the pilot is using a dedicated hauler for ore hauling.
+     * @param usingHauler 
+     */
+    public synchronized void setUsingHauler(boolean usingHauler) {
+        this.usingHauler = usingHauler;
+    }
+    
+    
     
     protected synchronized void resetSkilsAndImplants() {                
         this.skills = new HashMap<>();

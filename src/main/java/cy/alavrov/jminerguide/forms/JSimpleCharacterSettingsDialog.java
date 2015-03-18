@@ -26,11 +26,9 @@
 package cy.alavrov.jminerguide.forms;
 
 import cy.alavrov.jminerguide.data.character.SimpleCharacter;
-import cy.alavrov.jminerguide.log.JMGLogger;
 import cy.alavrov.jminerguide.monitor.ISessionCharacter;
 import cy.alavrov.jminerguide.monitor.MiningSession;
 import cy.alavrov.jminerguide.monitor.SessionCharacter;
-import cy.alavrov.jminerguide.monitor.SimpleSessionCharacter;
 import cy.alavrov.jminerguide.util.FloatDocumentFilter;
 import cy.alavrov.jminerguide.util.IntegerDocumentFilter;
 import javax.swing.text.AbstractDocument;

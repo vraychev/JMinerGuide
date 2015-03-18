@@ -307,8 +307,7 @@ public class CalculatedStats implements ICalculatedStats {
         }
                                       
         float totalM3S = combinedTurretM3S + droneM3S;
-        totalM3H = totalM3S * 60 * 60;
-        
+                
         int baseOptimal = turret.getOptimalRange();
         int effectiveOptimal;
         
@@ -331,7 +330,18 @@ public class CalculatedStats implements ICalculatedStats {
         
         oreHold = effectiveOreHold;
         
-        secsForOreHold = (int) (oreHold / totalM3S);
+        float secsForOreHoldF = oreHold / totalM3S;
+        secsForOreHold = (int) secsForOreHoldF;
+        
+        int stationTripSecs = 0;
+        if (!miner.isUsingHauler()) {
+            stationTripSecs = miner.getStationTripSecs();
+        }
+        
+        float totalMiningCycle = secsForOreHoldF + stationTripSecs;        
+        float cyclesInHr = 60*60 / totalMiningCycle;
+        
+        totalM3H = oreHold * cyclesInHr;
     }
 
     /**

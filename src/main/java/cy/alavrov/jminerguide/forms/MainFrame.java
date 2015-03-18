@@ -48,6 +48,7 @@ import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
 import cy.alavrov.jminerguide.data.implant.Implant;
 import cy.alavrov.jminerguide.log.JMGLogger;
+import cy.alavrov.jminerguide.util.IntegerDocumentFilter;
 import cy.alavrov.jminerguide.util.winmanager.IWindowManager;
 import cy.alavrov.jminerguide.util.winmanager.win32.Win32WindowManager;
 import java.awt.Image;
@@ -55,6 +56,9 @@ import java.io.InputStream;
 import java.text.DecimalFormat;
 import javax.imageio.ImageIO;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.AbstractDocument;
 import org.joda.time.Seconds;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
@@ -103,7 +107,11 @@ public final class MainFrame extends javax.swing.JFrame {
         this.setTitle("JMinerGuide "+App.getVersion());
         initComponents();
         this.setLocationRelativeTo(null);
-
+        
+        AbstractDocument idDoc = ((AbstractDocument)jTextFieldTrip.getDocument());
+        idDoc.setDocumentFilter(new IntegerDocumentFilter());
+        idDoc.addDocumentListener(new StationTripDocumentListener());
+        
         loadCharacterList(false);
         jComboBoxMiner.setSelectedItem(dCont.getCharacterContainer().getLastSelectedMiner());
         loadSelectedMiner();
@@ -274,6 +282,15 @@ public final class MainFrame extends javax.swing.JFrame {
         jComboBoxImplant10.setSelectedItem(sel.getSlot10Implant());
 
         jCheckBoxMichi.setSelected(sel.getSlot7Implant() == Implant.MICHI);
+                            
+        jTextFieldTrip.setText(String.valueOf(sel.getStationTripSecs()));
+        if (sel.isUsingHauler()) {
+            if (jTextFieldTrip.isEnabled()) jTextFieldTrip.setEnabled(false);
+        } else {
+            if (!jTextFieldTrip.isEnabled()) jTextFieldTrip.setEnabled(true);
+        }
+        
+        jCheckBoxHauler.setSelected(sel.isUsingHauler());        
     }
 
     public void loadSelectedBooster() {
@@ -573,6 +590,30 @@ public final class MainFrame extends javax.swing.JFrame {
         monitorForm = null;
     }
     
+    
+    public void updateTripTime() {
+        if (!processEvents) return;
+
+        processEvents = false;
+        
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        
+        int tripTime;
+        
+        try {
+            tripTime = Integer.parseInt(jTextFieldTrip.getText(), 10);
+        } catch (NumberFormatException e) {
+            tripTime = 0;
+        }
+        
+        if (tripTime < 0) tripTime = 0;
+        
+        curChar.setStationTripSecs(tripTime);
+        recalculateStats();        
+        
+        processEvents = true;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -582,8 +623,6 @@ public final class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jSeparator2 = new javax.swing.JSeparator();
-        jTextField1 = new javax.swing.JTextField();
         jToolBar1 = new javax.swing.JToolBar();
         JButtonManageAPI = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
@@ -707,8 +746,6 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel27 = new javax.swing.JLabel();
         jLabelOreHoldFill = new javax.swing.JLabel();
         jCheckBoxStatsMerco = new javax.swing.JCheckBox();
-
-        jTextField1.setText("jTextField1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setResizable(false);
@@ -887,6 +924,11 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel33.setText("Station Trip, sec:");
 
         jCheckBoxHauler.setText("Dedicated Hauler");
+        jCheckBoxHauler.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxHaulerItemStateChanged(evt);
+            }
+        });
 
         jComboBoxRig2.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -1720,10 +1762,6 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel30)
                     .addComponent(jLabelDroneM3S))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabelM3H)
-                    .addComponent(jLabel23))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel22)
@@ -1736,6 +1774,10 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel27)
                     .addComponent(jLabelOreHoldFill))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelM3H)
+                    .addComponent(jLabel23))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -2760,6 +2802,26 @@ public final class MainFrame extends javax.swing.JFrame {
         processEvents = true;
     }//GEN-LAST:event_jComboBoxBoosterShipItemStateChanged
 
+    private void jCheckBoxHaulerItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxHaulerItemStateChanged
+        if (!processEvents) return;
+
+        processEvents = false;
+
+        EVECharacter curChar = (EVECharacter) jComboBoxMiner.getSelectedItem();
+        
+        boolean selected = jCheckBoxHauler.isSelected();
+        curChar.setUsingHauler(selected);
+        
+        if (selected) {
+            if (jTextFieldTrip.isEnabled()) jTextFieldTrip.setEnabled(false);
+        } else {
+            if (!jTextFieldTrip.isEnabled()) jTextFieldTrip.setEnabled(true);
+        }
+        
+        recalculateStats();
+        processEvents = true;
+    }//GEN-LAST:event_jCheckBoxHaulerItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JButtonManageAPI;
@@ -2883,10 +2945,26 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
-    private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextFieldTrip;
     private javax.swing.JToolBar jToolBar1;
     // End of variables declaration//GEN-END:variables
+
+    private class StationTripDocumentListener implements DocumentListener {
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            updateTripTime();
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            updateTripTime();
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            updateTripTime();
+        }
+        
+    }
 }
 
