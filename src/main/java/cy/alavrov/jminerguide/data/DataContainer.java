@@ -30,6 +30,7 @@ import cy.alavrov.jminerguide.data.booster.BoosterShipContainer;
 import cy.alavrov.jminerguide.data.ship.ShipContainer;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.data.character.SimpleCharacterCointainer;
+import cy.alavrov.jminerguide.data.price.ItemPriceContainer;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,6 +54,7 @@ public class DataContainer {
     private ShipContainer ships;
     private BoosterShipContainer boosters;
     private SimpleCharacterCointainer simpleChars;
+    private ItemPriceContainer itemPrices;
     
     private ExecutorService pool;
     
@@ -66,6 +68,7 @@ public class DataContainer {
         ships = new ShipContainer(path);
         boosters = new BoosterShipContainer(path);
         simpleChars = new SimpleCharacterCointainer(path);
+        itemPrices = new ItemPriceContainer(path);
         pool = Executors.newCachedThreadPool();
     }
     
@@ -84,7 +87,10 @@ public class DataContainer {
     public SimpleCharacterCointainer getSimplecCharacterCointainer() {
         return simpleChars;
     }
-        
+
+    public ItemPriceContainer getItemPriceContainer() {
+        return itemPrices;
+    }                
     
     /**
      * Loads all the data from configuration files.
@@ -96,6 +102,7 @@ public class DataContainer {
         ships.load();
         boosters.load();
         simpleChars.load();
+        itemPrices.load();
     }
     
     /**
@@ -107,6 +114,7 @@ public class DataContainer {
         ships.save();
         boosters.save();
         simpleChars.save();
+        itemPrices.save();
     }
     
     /**

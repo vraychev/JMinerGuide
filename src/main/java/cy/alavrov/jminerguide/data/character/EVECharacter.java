@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.http.client.methods.HttpGet;
 import org.jdom2.Attribute;
-import org.jdom2.DataConversionException;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;

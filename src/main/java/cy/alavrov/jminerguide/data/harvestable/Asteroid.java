@@ -25,7 +25,6 @@
  */
 package cy.alavrov.jminerguide.data.harvestable;
 
-import cy.alavrov.jminerguide.data.CalculatedStats;
 import cy.alavrov.jminerguide.data.ICalculatedStats;
 import cy.alavrov.jminerguide.monitor.TurretInstance;
 import java.util.ArrayList;
