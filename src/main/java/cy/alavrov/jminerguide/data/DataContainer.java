@@ -31,6 +31,7 @@ import cy.alavrov.jminerguide.data.ship.ShipContainer;
 import cy.alavrov.jminerguide.data.character.CharacterContainer;
 import cy.alavrov.jminerguide.data.character.SimpleCharacterCointainer;
 import cy.alavrov.jminerguide.data.price.ItemPriceContainer;
+import cy.alavrov.jminerguide.data.universe.MarketZoneContainer;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,6 +57,8 @@ public class DataContainer {
     private SimpleCharacterCointainer simpleChars;
     private ItemPriceContainer itemPrices;
     
+    private MarketZoneContainer marketZones;
+    
     private ExecutorService pool;
     
     /**
@@ -69,6 +72,9 @@ public class DataContainer {
         boosters = new BoosterShipContainer(path);
         simpleChars = new SimpleCharacterCointainer(path);
         itemPrices = new ItemPriceContainer(path);
+        
+        marketZones = new MarketZoneContainer();
+        
         pool = Executors.newCachedThreadPool();
     }
     
@@ -91,6 +97,10 @@ public class DataContainer {
     public ItemPriceContainer getItemPriceContainer() {
         return itemPrices;
     }                
+
+    public MarketZoneContainer getMarketZoneContainer() {
+        return marketZones;
+    }        
     
     /**
      * Loads all the data from configuration files.
