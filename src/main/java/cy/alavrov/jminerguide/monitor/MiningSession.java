@@ -506,7 +506,7 @@ public class MiningSession {
         return haveAlerts;
     }
     
-    public class AsteroidTableModel extends AbstractTableModel {                
+    public class AsteroidTableModel extends AbstractTableModel {                        
 
         @Override
         public int getRowCount() {

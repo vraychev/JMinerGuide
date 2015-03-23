@@ -625,7 +625,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jToolBar1 = new javax.swing.JToolBar();
         JButtonManageAPI = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        jButtonSetupPrices = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         jButtonAsteroidMonitor = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
@@ -768,11 +768,16 @@ public final class MainFrame extends javax.swing.JFrame {
         });
         jToolBar1.add(JButtonManageAPI);
 
-        jButton4.setText("Prices");
-        jButton4.setFocusable(false);
-        jButton4.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButton4.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(jButton4);
+        jButtonSetupPrices.setText("Prices");
+        jButtonSetupPrices.setFocusable(false);
+        jButtonSetupPrices.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonSetupPrices.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButtonSetupPrices.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonSetupPricesActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(jButtonSetupPrices);
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
@@ -1837,7 +1842,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private void JButtonManageAPIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JButtonManageAPIActionPerformed
         processEvents = false;
         
-        JAPIDialog dlg = new JAPIDialog(MainFrame.this, true, dCont);
+        JAPIDialog dlg = new JAPIDialog(MainFrame.this, dCont);
         dlg.setLocationRelativeTo(MainFrame.this);
         dlg.setVisible(true);
         
@@ -2822,12 +2827,21 @@ public final class MainFrame extends javax.swing.JFrame {
         processEvents = true;
     }//GEN-LAST:event_jCheckBoxHaulerItemStateChanged
 
+    private void jButtonSetupPricesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSetupPricesActionPerformed
+        processEvents = false;
+        
+        JPriceSetupDialog dlg = new JPriceSetupDialog(MainFrame.this, dCont);
+        dlg.setLocationRelativeTo(MainFrame.this);
+        dlg.setVisible(true);
+        
+        processEvents = true;
+    }//GEN-LAST:event_jButtonSetupPricesActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JButtonManageAPI;
     private javax.swing.JButton JButtonQuit;
     private javax.swing.JLabel JLabel14;
-    private javax.swing.JButton jButton4;
     private javax.swing.JButton jButtonAsteroidMonitor;
     private javax.swing.JButton jButtonBoosterReload;
     private javax.swing.JButton jButtonBoosterShipAdd;
@@ -2835,6 +2849,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton jButtonBoosterShipRename;
     private javax.swing.JButton jButtonCharReload;
     private javax.swing.JButton jButtonSave;
+    private javax.swing.JButton jButtonSetupPrices;
     private javax.swing.JButton jButtonShipAdd;
     private javax.swing.JButton jButtonShipRemove;
     private javax.swing.JButton jButtonShipRename;

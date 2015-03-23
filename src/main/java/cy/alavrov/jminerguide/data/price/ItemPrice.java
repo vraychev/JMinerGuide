@@ -26,6 +26,8 @@
 package cy.alavrov.jminerguide.data.price;
 
 import cy.alavrov.jminerguide.log.JMGLogger;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import org.jdom2.Element;
 
 /**
@@ -34,11 +36,17 @@ import org.jdom2.Element;
  */
 public class ItemPrice {
     private final int itemID;
+    private final String name;
+    private final ItemType type;
+    private final CompressionType cType;
     private int buyPrice;
-    private int sellPrice;
+    private int sellPrice;    
 
-    public ItemPrice(int itemID) {
+    public ItemPrice(int itemID, String name, ItemType type, CompressionType cType) {
         this.itemID = itemID;
+        this.name = name;
+        this.type = type;
+        this.cType = cType;
         this.buyPrice = 0;
         this.sellPrice = 0;
     }
@@ -62,6 +70,14 @@ public class ItemPrice {
     public synchronized void setSellPrice(int sellPrice) {
         this.sellPrice = sellPrice;
     }
+
+    public ItemType getType() {
+        return type;
+    }
+
+    public CompressionType getCompressionType() {
+        return cType;
+    }        
     
     public synchronized Element getXMLElement() {
         Element root = new Element("itemprice");
@@ -85,5 +101,64 @@ public class ItemPrice {
         } catch (Exception e) {
             JMGLogger.logWarning("Unable to update price for item #"+itemID, e);
         }        
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+    
+    public static enum ItemType {
+        ALL ("All Types"),
+        ORE ("Ores"),
+        ICE ("Ices"),
+        GAS ("Gases"),
+        BASIC("Basic Elements");
+        
+        private final String name;
+
+        private ItemType(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }                
+        
+        public static ComboBoxModel<ItemType> getModel() {
+            DefaultComboBoxModel<ItemType> out = new DefaultComboBoxModel<>();
+            for (ItemType type : values()) {
+                out.addElement(type);
+            }
+            
+            return out;
+        }
+    }
+    
+    public static enum CompressionType {
+        ALL ("All"),
+        UNCOMPRESSED ("Uncompressed"),
+        COMPRESSED ("Compressed");
+        
+        private final String name;
+
+        private CompressionType(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+        
+        public static ComboBoxModel<CompressionType> getModel() {
+            DefaultComboBoxModel<CompressionType> out = new DefaultComboBoxModel<>();
+            for (CompressionType type : values()) {
+                out.addElement(type);
+            }
+            
+            return out;
+        }
     }
 }

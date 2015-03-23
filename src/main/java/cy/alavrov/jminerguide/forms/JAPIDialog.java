@@ -55,11 +55,10 @@ public final class JAPIDialog extends javax.swing.JDialog implements IKeyLoading
     /**
      * Creates new form JAPIDialog
      * @param parent
-     * @param modal
      * @param container 
      */
-    public JAPIDialog(MainFrame parent, boolean modal, DataContainer container) {        
-        super(parent, modal);
+    public JAPIDialog(MainFrame parent, DataContainer container) {        
+        super(parent, true);
         dCont = container;       
         this.parent = parent;
         

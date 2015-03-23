@@ -33,8 +33,10 @@ import cy.alavrov.jminerguide.log.JMGLogger;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import javax.swing.table.AbstractTableModel;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
@@ -46,29 +48,35 @@ import org.jdom2.output.XMLOutputter;
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public class ItemPriceContainer {
-    private final HashMap<Integer, ItemPrice> prices;
+    private final LinkedHashMap<Integer, ItemPrice> prices;
     
     private final String path; 
 
     public ItemPriceContainer(String path) {
-        this.prices = new HashMap<>();
+        this.prices = new LinkedHashMap<>();
         
         for (Ore ore : Ore.values()) {
-            prices.put(ore.getItemID(), new ItemPrice(ore.getItemID()));
-            prices.put(ore.getCompressedItemID(), new ItemPrice(ore.getCompressedItemID()));
+            prices.put(ore.getItemID(), new ItemPrice(ore.getItemID(), ore.getName(), 
+                    ItemPrice.ItemType.ORE, ItemPrice.CompressionType.UNCOMPRESSED));
+            prices.put(ore.getCompressedItemID(), new ItemPrice(ore.getCompressedItemID(), "Compressed "+ore.getName(), 
+                    ItemPrice.ItemType.ORE, ItemPrice.CompressionType.COMPRESSED));
         }
         
         for (Ice ice : Ice.values()) {
-            prices.put(ice.getItemID(), new ItemPrice(ice.getItemID()));
-            prices.put(ice.getCompressedItemID(), new ItemPrice(ice.getCompressedItemID()));
+            prices.put(ice.getItemID(), new ItemPrice(ice.getItemID(), ice.getName(), 
+                    ItemPrice.ItemType.ICE, ItemPrice.CompressionType.UNCOMPRESSED));
+            prices.put(ice.getCompressedItemID(), new ItemPrice(ice.getCompressedItemID(), "Compressed "+ice.getName(),
+                    ItemPrice.ItemType.ICE, ItemPrice.CompressionType.COMPRESSED));
         }
         
         for (Gas gas : Gas.values()) {
-            prices.put(gas.getItemID(), new ItemPrice(gas.getItemID()));
+            prices.put(gas.getItemID(), new ItemPrice(gas.getItemID(), gas.getName(),
+                    ItemPrice.ItemType.GAS, ItemPrice.CompressionType.UNCOMPRESSED));
         }
         
         for (BaseElement res : BaseElement.values()) {
-            prices.put(res.getItemID(), new ItemPrice(res.getItemID()));
+            prices.put(res.getItemID(), new ItemPrice(res.getItemID(), res.getName(),
+                    ItemPrice.ItemType.BASIC, ItemPrice.CompressionType.UNCOMPRESSED));
         }
         
         this.path = path;
@@ -139,5 +147,83 @@ public class ItemPriceContainer {
     
     public synchronized ItemPrice getItemPrice(int itemID) {
         return prices.get(itemID);
+    }
+    
+    public synchronized ItemPriceTableModel getTableModel(ItemPrice.ItemType itemTypeFilter, ItemPrice.CompressionType comprTypeFilter) {
+        List<ItemPrice> outList = new ArrayList<>();
+        
+        for (ItemPrice price : prices.values()) {
+            boolean passed;
+            
+            passed = itemTypeFilter == ItemPrice.ItemType.ALL 
+                    || itemTypeFilter == price.getType();
+            passed = passed && (comprTypeFilter == ItemPrice.CompressionType.ALL 
+                    || comprTypeFilter == price.getCompressionType());
+            
+            if (passed) {
+                outList.add(price);
+            }
+        }
+        
+        return new ItemPriceTableModel(outList);
+    }
+    
+    public class ItemPriceTableModel extends AbstractTableModel {
+        private final List<ItemPrice> localPrices;
+
+        public ItemPriceTableModel(List<ItemPrice> prices) {
+            this.localPrices = prices;
+        }
+        
+        
+        
+        @Override
+        public int getRowCount() {
+            return localPrices.size();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return 3;
+        }
+
+        @Override
+        public String getColumnName(int column) {
+            switch (column) {
+                case 0:
+                    return "Item";
+                    
+                case 1:
+                    return "Buy";
+                    
+                case 2:
+                    return "Sell";
+                    
+                default:
+                    return "";
+                    
+            }
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            if (rowIndex >= localPrices.size() || columnIndex > 2) return null;
+
+            ItemPrice price = localPrices.get(rowIndex);
+            switch (columnIndex) {
+                case 0:
+                    return price;
+
+                case 1:
+                    return price.getBuyPrice();
+
+                case 2:
+                    return price.getSellPrice();
+
+                default:
+                    return null;
+
+            }
+        }        
     }
 }
