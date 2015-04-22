@@ -70,7 +70,10 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
         jComboBoxItemTypeFilter.setModel(ItemPrice.ItemType.getModel());
         jComboBoxCompressedFilter.setModel(ItemPrice.CompressionType.getModel());        
         
-        setPrices(iCont.getTableModel(ItemPrice.ItemType.ALL, ItemPrice.CompressionType.ALL));
+        ItemPrice.ItemType itype = (ItemPrice.ItemType) jComboBoxItemTypeFilter.getSelectedItem();
+        ItemPrice.CompressionType ctype = (ItemPrice.CompressionType) jComboBoxCompressedFilter.getSelectedItem();
+        
+        setPrices(iCont.getTableModel(itype, ctype));
         jComboBoxMarketZone.setModel(mCont.getComboBoxModel());                
         
         jTablePrices.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -100,6 +103,14 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
         jTablePrices.getColumnModel().getColumn(1).setPreferredWidth(50);
         jTablePrices.getColumnModel().getColumn(2).setResizable(false);
         jTablePrices.getColumnModel().getColumn(2).setPreferredWidth(50);
+    }
+    
+    private void filterPriceList() {
+        ItemPrice.ItemType itype = (ItemPrice.ItemType) jComboBoxItemTypeFilter.getSelectedItem();
+        ItemPrice.CompressionType ctype = (ItemPrice.CompressionType) jComboBoxCompressedFilter.getSelectedItem();
+        
+        ItemPriceContainer iCont = dCont.getItemPriceContainer();
+        setPrices(iCont.getTableModel(itype, ctype));
     }
     
     private ItemPrice getSelectedItemPrice() {        
@@ -269,6 +280,18 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
 
         jLabel5.setText("Compressed");
 
+        jComboBoxItemTypeFilter.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxItemTypeFilterItemStateChanged(evt);
+            }
+        });
+
+        jComboBoxCompressedFilter.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxCompressedFilterItemStateChanged(evt);
+            }
+        });
+
         jButtonPriceUpdate.setText("Update");
         jButtonPriceUpdate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -381,6 +404,26 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
         
         processEvents = true;
     }//GEN-LAST:event_jTextFieldSellActionPerformed
+
+    private void jComboBoxItemTypeFilterItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxItemTypeFilterItemStateChanged
+        if (!processEvents) return;
+        processEvents = false;
+        
+        filterPriceList();
+        checkTableSelection();
+        
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxItemTypeFilterItemStateChanged
+
+    private void jComboBoxCompressedFilterItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxCompressedFilterItemStateChanged
+        if (!processEvents) return;
+        processEvents = false;
+        
+        filterPriceList();
+        checkTableSelection();
+        
+        processEvents = true;
+    }//GEN-LAST:event_jComboBoxCompressedFilterItemStateChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
