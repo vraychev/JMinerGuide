@@ -31,6 +31,12 @@ import cy.alavrov.jminerguide.data.price.ItemPriceContainer;
 import cy.alavrov.jminerguide.data.price.ItemPriceContainer.ItemPriceTableModel;
 import cy.alavrov.jminerguide.data.universe.MarketZone;
 import cy.alavrov.jminerguide.data.universe.MarketZoneContainer;
+import cy.alavrov.jminerguide.log.JMGLogger;
+import cy.alavrov.jminerguide.util.IntegerDocumentFilter;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.text.AbstractDocument;
 
 /**
  * A dialog to setup prices.
@@ -39,6 +45,8 @@ import cy.alavrov.jminerguide.data.universe.MarketZoneContainer;
 public class JPriceSetupDialog extends javax.swing.JDialog {
     private final DataContainer dCont;
     private final MainFrame parent;
+    
+    private volatile boolean processEvents = false;
     
     /**
      * Creates new form JPriceSetupDialog
@@ -50,6 +58,12 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
         this.parent = parent;
         this.dCont = dCont;
         
+        AbstractDocument idDoc = ((AbstractDocument)jTextFieldBuy.getDocument());
+        idDoc.setDocumentFilter(new IntegerDocumentFilter());
+        
+        idDoc = ((AbstractDocument)jTextFieldSell.getDocument());
+        idDoc.setDocumentFilter(new IntegerDocumentFilter());
+        
         ItemPriceContainer iCont = dCont.getItemPriceContainer();
         MarketZoneContainer mCont = dCont.getMarketZoneContainer();
         
@@ -57,7 +71,24 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
         jComboBoxCompressedFilter.setModel(ItemPrice.CompressionType.getModel());        
         
         setPrices(iCont.getTableModel(ItemPrice.ItemType.ALL, ItemPrice.CompressionType.ALL));
-        jComboBoxMarketZone.setModel(mCont.getComboBoxModel());
+        jComboBoxMarketZone.setModel(mCont.getComboBoxModel());                
+        
+        jTablePrices.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                // we should trigger event processor only on a final mouse release.
+                // that's when getValueIsAdjusting will return false, on a first
+                // click or dragging it will be true.
+                if(!e.getValueIsAdjusting()) {
+                    jTablePricesRowSelected();
+                }
+            }
+        });
+        
+        checkTableSelection();
+        
+        processEvents = true;
     }
 
     private void setPrices(ItemPriceTableModel model) {
@@ -69,6 +100,70 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
         jTablePrices.getColumnModel().getColumn(1).setPreferredWidth(50);
         jTablePrices.getColumnModel().getColumn(2).setResizable(false);
         jTablePrices.getColumnModel().getColumn(2).setPreferredWidth(50);
+    }
+    
+    private ItemPrice getSelectedItemPrice() {        
+        int row = jTablePrices.getSelectedRow();
+        if (row == -1) return null;
+        
+        try {
+            return (ItemPrice) jTablePrices.getModel().getValueAt(row, 0);
+        } catch (ClassCastException e) {
+            JMGLogger.logSevere("Unable to get item price", e);
+            return null;
+        }
+    }
+    
+    private void jTablePricesRowSelected() {
+        if (!processEvents) return;
+        processEvents = false;
+        
+        checkTableSelection();
+        processEvents = true;
+    }
+    
+    private void checkTableSelection() {
+        ItemPrice price = getSelectedItemPrice();
+        if (price == null) {
+            jTextFieldBuy.setEnabled(false);
+            jTextFieldBuy.setText("0");
+            jTextFieldSell.setEnabled(false);
+            jTextFieldSell.setText("0");
+            
+            jButtonPriceUpdate.setEnabled(false);
+        } else {
+            jTextFieldBuy.setEnabled(true);
+            jTextFieldBuy.setText(String.valueOf(price.getBuyPrice()));
+            jTextFieldSell.setEnabled(true);
+            jTextFieldSell.setText(String.valueOf(price.getSellPrice()));
+            
+            jButtonPriceUpdate.setEnabled(true);
+        }
+    }
+    
+    private void updateItemPrices() {
+        ItemPrice price = getSelectedItemPrice();
+        if (price != null) {
+            try {
+                String buyStr = jTextFieldBuy.getText();
+                if (buyStr == null || buyStr.isEmpty()) buyStr = "0";
+                String sellStr = jTextFieldSell.getText();
+                if (sellStr == null || sellStr.isEmpty()) sellStr = "0";
+                
+                Integer newBuyPrice = Integer.parseInt(buyStr, 10);
+                if (newBuyPrice < 0) newBuyPrice = 0;                                
+                Integer newSellPrice = Integer.parseInt(sellStr, 10);
+                if (newSellPrice < 0) newBuyPrice = 0;                
+                
+                price.setBuyPrice(newBuyPrice);
+                price.setSellPrice(newSellPrice);
+                                
+                int row = jTablePrices.getSelectedRow();
+                ((AbstractTableModel)jTablePrices.getModel()).fireTableRowsUpdated(row, row);
+            } catch (Exception e) {
+                JMGLogger.logSevere("Unable to update item prices", e);            
+            }
+        }
     }
     
     /**
@@ -95,6 +190,7 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
         jLabel5 = new javax.swing.JLabel();
         jComboBoxItemTypeFilter = new javax.swing.JComboBox<ItemPrice.ItemType>();
         jComboBoxCompressedFilter = new javax.swing.JComboBox<ItemPrice.CompressionType>();
+        jButtonPriceUpdate = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Setup Prices");
@@ -153,6 +249,18 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
             jTablePrices.getColumnModel().getColumn(2).setResizable(false);
         }
 
+        jTextFieldBuy.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldBuyActionPerformed(evt);
+            }
+        });
+
+        jTextFieldSell.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldSellActionPerformed(evt);
+            }
+        });
+
         jLabel2.setText("Buy");
 
         jLabel3.setText("Sell");
@@ -161,25 +269,32 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
 
         jLabel5.setText("Compressed");
 
+        jButtonPriceUpdate.setText("Update");
+        jButtonPriceUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonPriceUpdateActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jTextFieldBuy, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel2)
-                .addGap(44, 44, 44)
-                .addComponent(jTextFieldSell, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel3)
-                .addGap(66, 66, 66))
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addComponent(jTextFieldBuy, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel2)
+                        .addGap(24, 24, 24)
+                        .addComponent(jTextFieldSell, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButtonPriceUpdate))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jButtonOK)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonCancel)
@@ -189,7 +304,7 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
                         .addComponent(jComboBoxMarketZone, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonLoad))
-                    .addGroup(layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4)
                             .addComponent(jLabel5))
@@ -217,7 +332,8 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
                     .addComponent(jTextFieldBuy, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jTextFieldSell, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2)
-                    .addComponent(jLabel3))
+                    .addComponent(jLabel3)
+                    .addComponent(jButtonPriceUpdate))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonOK)
@@ -239,11 +355,39 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
         this.dispose();
     }//GEN-LAST:event_jButtonCancelActionPerformed
 
+    private void jButtonPriceUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPriceUpdateActionPerformed
+        if (!processEvents) return;
+        processEvents = false;
+        
+        updateItemPrices();
+        
+        processEvents = true;
+    }//GEN-LAST:event_jButtonPriceUpdateActionPerformed
+
+    private void jTextFieldBuyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldBuyActionPerformed
+        if (!processEvents) return;
+        processEvents = false;
+        
+        updateItemPrices();
+        
+        processEvents = true;
+    }//GEN-LAST:event_jTextFieldBuyActionPerformed
+
+    private void jTextFieldSellActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldSellActionPerformed
+        if (!processEvents) return;
+        processEvents = false;
+        
+        updateItemPrices();
+        
+        processEvents = true;
+    }//GEN-LAST:event_jTextFieldSellActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonCancel;
     private javax.swing.JButton jButtonLoad;
     private javax.swing.JButton jButtonOK;
+    private javax.swing.JButton jButtonPriceUpdate;
     private javax.swing.JComboBox<ItemPrice.CompressionType> jComboBoxCompressedFilter;
     private javax.swing.JComboBox<ItemPrice.ItemType> jComboBoxItemTypeFilter;
     private javax.swing.JComboBox<MarketZone> jComboBoxMarketZone;

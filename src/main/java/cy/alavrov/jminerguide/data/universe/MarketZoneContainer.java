@@ -89,7 +89,7 @@ public class MarketZoneContainer {
             }
 
         } catch (Exception e) {
-            JMGLogger.logSevere("Unable to load an item price file", e);
+            JMGLogger.logSevere("Unable to load an region file", e);
         }
         
         if (!regions.isEmpty()) {
