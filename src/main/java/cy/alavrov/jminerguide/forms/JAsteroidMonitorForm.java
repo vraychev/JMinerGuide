@@ -39,6 +39,7 @@ import cy.alavrov.jminerguide.monitor.MiningTimer;
 import cy.alavrov.jminerguide.monitor.TurretInstance;
 import cy.alavrov.jminerguide.monitor.UpdateWindowTask;
 import cy.alavrov.jminerguide.util.IntegerDocumentFilter;
+import cy.alavrov.jminerguide.util.SwingUtils;
 import cy.alavrov.jminerguide.util.winmanager.IWindowManager;
 import java.awt.Color;
 import java.awt.Component;
@@ -313,7 +314,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     
     private void disableMonitorPanel() {
         if (jPanelSetup.getComponent(0).isEnabled()) {
-            enableSubcomponents(jPanelSetup, false);
+            SwingUtils.enableSubcomponents(jPanelSetup, false);
         }
         
         if (jCheckBoxCharacterIgnore.isEnabled()) jCheckBoxCharacterIgnore.setEnabled(false);
@@ -322,7 +323,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
     
     private void loadCharacterData(MiningSession session) {
         if (!jPanelSetup.getComponent(0).isEnabled()) {
-            enableSubcomponents(jPanelSetup, true);
+            SwingUtils.enableSubcomponents(jPanelSetup, true);
         }
         
         if (!jCheckBoxCharacterIgnore.isEnabled()) jCheckBoxCharacterIgnore.setEnabled(true);
@@ -370,20 +371,7 @@ public class JAsteroidMonitorForm extends javax.swing.JFrame {
         if (sess != null) updateCharacterStats(sess);
     }
     
-    /**
-     * Recursively enables (or disables) subcomponents of a given container.
-     * Container itself doesn't have its enabled flag changed.
-     * @param container a given container.
-     * @param enable true to enable, false to disable.
-     */
-    private void enableSubcomponents(Container container, boolean enable) {
-        for (Component component : container.getComponents()) {
-            component.setEnabled(enable);
-            if (component instanceof Container) {
-                enableSubcomponents((Container) component, enable);
-            }
-        }
-    }
+    
     
     /**
      * Cleans up old EVE selector buttons (if any) and recreates them

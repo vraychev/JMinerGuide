@@ -28,7 +28,7 @@ package cy.alavrov.jminerguide.data.api;
 import cy.alavrov.jminerguide.data.character.EVECharacter;
 
 /**
- * Something to receive result of a API char loading.
+ * Something to receive result of an API char loading.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
 public interface ICharLoadingResultReceiver {

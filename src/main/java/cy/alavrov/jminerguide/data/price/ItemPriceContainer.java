@@ -47,8 +47,10 @@ import org.jdom2.output.XMLOutputter;
  * Container for item prices.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class ItemPriceContainer {
-    private final LinkedHashMap<Integer, ItemPrice> prices;
+public class ItemPriceContainer {    
+    private final static String baseURI = "http://api.eve-central.com/api/marketstat";
+    
+    private LinkedHashMap<Integer, ItemPrice> prices;
     
     private final String path; 
 
@@ -145,10 +147,21 @@ public class ItemPriceContainer {
         }
     }
     
+    /**
+     * Returns a price of an item with the given ID.
+     * @param itemID ID of the item.
+     * @return 
+     */
     public synchronized ItemPrice getItemPrice(int itemID) {
         return prices.get(itemID);
     }
     
+    /**
+     * Get a TableModel with item prices, filtered by type and compression (or not).     
+     * @param itemTypeFilter filter by item type (or ALL)
+     * @param comprTypeFilter filter by compression (or ALL)
+     * @return 
+     */
     public synchronized ItemPriceTableModel getTableModel(ItemPrice.ItemType itemTypeFilter, ItemPrice.CompressionType comprTypeFilter) {
         List<ItemPrice> outList = new ArrayList<>();
         
@@ -166,6 +179,23 @@ public class ItemPriceContainer {
         }
         
         return new ItemPriceTableModel(outList);
+    }
+    
+    /**
+     * Returns string with comma-delimetered IDs of all the items in the container.
+     * @return 
+     */
+    public synchronized String getAllItemIDs() {
+        System.err.println(prices.size());
+        String out = "";
+        for (ItemPrice price : prices.values()) {
+            if (out.isEmpty()) {
+                out = String.valueOf(price.getItemID());
+            } else {
+                out = out + "," + String.valueOf(price.getItemID());
+            }
+        }
+        return out;
     }
     
     public class ItemPriceTableModel extends AbstractTableModel {

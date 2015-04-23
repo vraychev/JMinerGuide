@@ -23,21 +23,40 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 package cy.alavrov.jminerguide.data.api;
 
-import cy.alavrov.jminerguide.data.character.APIKey;
+import cy.alavrov.jminerguide.data.price.ItemPriceContainer;
+import cy.alavrov.jminerguide.data.universe.MarketZone;
 
 /**
- * Something to receive result of an API key loading.
+ * A task to load prices from the EveCentral
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public interface IKeyLoadingResultReceiver {
-    /**
-     * Called when loading is done - doesn't matter, if successful, or not.
-     * @param success true, if succeed, false if failed on any stage.
-     * @param result null, if success, error text if not.
-     * @param processedKey key, that was processed.
-     */
-    public void loadingDone(boolean success, String result, APIKey processedKey);
+public class ItemPriceLoader implements Runnable{
+    
+    private final ItemPriceContainer target;
+    private final IItemPriceLoadingResultReceiver receiver;
+    private final MarketZone zone;
+    
+    public ItemPriceLoader(ItemPriceContainer target, IItemPriceLoadingResultReceiver receiver, MarketZone zone) {
+        this.target = target;
+        this.receiver = receiver;
+        this.zone = zone;
+    }
+    
+    @Override
+    public void run() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                receiver.loadingDone(true, "OK");
+            }
+        });
+    }
+    
 }

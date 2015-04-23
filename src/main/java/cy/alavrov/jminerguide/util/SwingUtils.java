@@ -23,21 +23,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package cy.alavrov.jminerguide.util;
 
-package cy.alavrov.jminerguide.data.api;
-
-import cy.alavrov.jminerguide.data.character.APIKey;
+import java.awt.Component;
+import java.awt.Container;
 
 /**
- * Something to receive result of an API key loading.
+ * Swing-related utils.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public interface IKeyLoadingResultReceiver {
+public class SwingUtils {
     /**
-     * Called when loading is done - doesn't matter, if successful, or not.
-     * @param success true, if succeed, false if failed on any stage.
-     * @param result null, if success, error text if not.
-     * @param processedKey key, that was processed.
+     * Recursively enables (or disables) subcomponents of a given container.
+     * Container itself doesn't have its enabled flag changed.
+     * @param container a given container.
+     * @param enable true to enable, false to disable.
      */
-    public void loadingDone(boolean success, String result, APIKey processedKey);
+    public static void enableSubcomponents(Container container, boolean enable) {
+        for (Component component : container.getComponents()) {
+            component.setEnabled(enable);
+            if (component instanceof Container) {
+                enableSubcomponents((Container) component, enable);
+            }
+        }
+    }
 }

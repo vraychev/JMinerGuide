@@ -23,21 +23,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 package cy.alavrov.jminerguide.data.api;
 
-import cy.alavrov.jminerguide.data.character.APIKey;
-
 /**
- * Something to receive result of an API key loading.
+ * Something to receive result of an item price loading.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public interface IKeyLoadingResultReceiver {
+public interface IItemPriceLoadingResultReceiver {
     /**
      * Called when loading is done - doesn't matter, if successful, or not.
      * @param success true, if succeed, false if failed on any stage.
-     * @param result null, if success, error text if not.
-     * @param processedKey key, that was processed.
+     * @param result null, if success, error text if not.     
      */
-    public void loadingDone(boolean success, String result, APIKey processedKey);
+    public void loadingDone(boolean success, String result);
 }

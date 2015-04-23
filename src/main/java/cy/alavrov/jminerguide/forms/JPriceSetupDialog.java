@@ -26,6 +26,8 @@
 package cy.alavrov.jminerguide.forms;
 
 import cy.alavrov.jminerguide.data.DataContainer;
+import cy.alavrov.jminerguide.data.api.IItemPriceLoadingResultReceiver;
+import cy.alavrov.jminerguide.data.api.ItemPriceLoader;
 import cy.alavrov.jminerguide.data.price.ItemPrice;
 import cy.alavrov.jminerguide.data.price.ItemPriceContainer;
 import cy.alavrov.jminerguide.data.price.ItemPriceContainer.ItemPriceTableModel;
@@ -33,6 +35,7 @@ import cy.alavrov.jminerguide.data.universe.MarketZone;
 import cy.alavrov.jminerguide.data.universe.MarketZoneContainer;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import cy.alavrov.jminerguide.util.IntegerDocumentFilter;
+import cy.alavrov.jminerguide.util.SwingUtils;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
@@ -42,11 +45,12 @@ import javax.swing.text.AbstractDocument;
  * A dialog to setup prices.
  * @author Andrey Lavrov <lavroff@gmail.com>
  */
-public class JPriceSetupDialog extends javax.swing.JDialog {
+public class JPriceSetupDialog extends javax.swing.JDialog implements IItemPriceLoadingResultReceiver{
     private final DataContainer dCont;
     private final MainFrame parent;
     
     private volatile boolean processEvents = false;
+    private volatile boolean loading = false;
     
     /**
      * Creates new form JPriceSetupDialog
@@ -126,7 +130,7 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
     }
     
     private void jTablePricesRowSelected() {
-        if (!processEvents) return;
+        if (!processEvents || loading) return;
         processEvents = false;
         
         checkTableSelection();
@@ -190,7 +194,6 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
         jComboBoxMarketZone = new javax.swing.JComboBox<MarketZone>();
         jButtonLoad = new javax.swing.JButton();
         jButtonOK = new javax.swing.JButton();
-        jButtonCancel = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTablePrices = new javax.swing.JTable();
         jTextFieldBuy = new javax.swing.JTextField();
@@ -207,22 +210,25 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
         setTitle("Setup Prices");
         setModal(true);
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jLabel1.setText("Region:");
 
         jButtonLoad.setText("Load");
+        jButtonLoad.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonLoadActionPerformed(evt);
+            }
+        });
 
         jButtonOK.setText("OK");
         jButtonOK.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonOKActionPerformed(evt);
-            }
-        });
-
-        jButtonCancel.setText("Cancel");
-        jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonCancelActionPerformed(evt);
             }
         });
 
@@ -319,9 +325,7 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jButtonOK)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonCancel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 109, Short.MAX_VALUE)
                         .addComponent(jLabel1)
                         .addGap(18, 18, 18)
                         .addComponent(jComboBoxMarketZone, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -360,7 +364,6 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonOK)
-                    .addComponent(jButtonCancel)
                     .addComponent(jLabel1)
                     .addComponent(jComboBoxMarketZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonLoad))
@@ -374,12 +377,8 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
         this.dispose();
     }//GEN-LAST:event_jButtonOKActionPerformed
 
-    private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
-        this.dispose();
-    }//GEN-LAST:event_jButtonCancelActionPerformed
-
     private void jButtonPriceUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPriceUpdateActionPerformed
-        if (!processEvents) return;
+        if (!processEvents || loading) return;
         processEvents = false;
         
         updateItemPrices();
@@ -388,7 +387,7 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_jButtonPriceUpdateActionPerformed
 
     private void jTextFieldBuyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldBuyActionPerformed
-        if (!processEvents) return;
+        if (!processEvents || loading) return;
         processEvents = false;
         
         updateItemPrices();
@@ -397,7 +396,7 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_jTextFieldBuyActionPerformed
 
     private void jTextFieldSellActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldSellActionPerformed
-        if (!processEvents) return;
+        if (!processEvents || loading) return;
         processEvents = false;
         
         updateItemPrices();
@@ -406,7 +405,7 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_jTextFieldSellActionPerformed
 
     private void jComboBoxItemTypeFilterItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxItemTypeFilterItemStateChanged
-        if (!processEvents) return;
+        if (!processEvents || loading) return;
         processEvents = false;
         
         filterPriceList();
@@ -416,7 +415,7 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_jComboBoxItemTypeFilterItemStateChanged
 
     private void jComboBoxCompressedFilterItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxCompressedFilterItemStateChanged
-        if (!processEvents) return;
+        if (!processEvents || loading) return;
         processEvents = false;
         
         filterPriceList();
@@ -425,9 +424,28 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
         processEvents = true;
     }//GEN-LAST:event_jComboBoxCompressedFilterItemStateChanged
 
+    private void jButtonLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLoadActionPerformed
+        if (!processEvents || loading) return;
+        
+        MarketZone zone = (MarketZone) jComboBoxMarketZone.getSelectedItem();
+        
+        if (zone == null) return;
+        
+        SwingUtils.enableSubcomponents(rootPane, false);
+        loading = true;
+                
+        ItemPriceLoader loader = new ItemPriceLoader(dCont.getItemPriceContainer(), this, zone);
+        dCont.startAPILoader(loader);
+    }//GEN-LAST:event_jButtonLoadActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        if (!loading) {
+            this.dispose();
+        }
+    }//GEN-LAST:event_formWindowClosing
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButtonCancel;
     private javax.swing.JButton jButtonLoad;
     private javax.swing.JButton jButtonOK;
     private javax.swing.JButton jButtonPriceUpdate;
@@ -444,4 +462,10 @@ public class JPriceSetupDialog extends javax.swing.JDialog {
     private javax.swing.JTextField jTextFieldBuy;
     private javax.swing.JTextField jTextFieldSell;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void loadingDone(boolean success, String result) {
+        loading = false;
+        SwingUtils.enableSubcomponents(rootPane, true);
+    }
 }
