@@ -39,8 +39,8 @@ public class ItemPrice {
     private final String name;
     private final ItemType type;
     private final CompressionType cType;
-    private int buyPrice;
-    private int sellPrice;    
+    private float buyPrice;
+    private float sellPrice;    
 
     public ItemPrice(int itemID, String name, ItemType type, CompressionType cType) {
         this.itemID = itemID;
@@ -55,19 +55,19 @@ public class ItemPrice {
         return itemID;
     }
 
-    public synchronized int getBuyPrice() {
+    public synchronized float getBuyPrice() {
         return buyPrice;
     }
 
-    public synchronized int getSellPrice() {
+    public synchronized float getSellPrice() {
         return sellPrice;
     }
 
-    public synchronized void setBuyPrice(int buyPrice) {
+    public synchronized void setBuyPrice(float buyPrice) {
         this.buyPrice = buyPrice;
     }
 
-    public synchronized void setSellPrice(int sellPrice) {
+    public synchronized void setSellPrice(float sellPrice) {
         this.sellPrice = sellPrice;
     }
 
@@ -93,8 +93,8 @@ public class ItemPrice {
         try {
             if (elem.getAttribute("itemid").getIntValue() != itemID) return;
             
-            int newBuy = elem.getAttribute("buy").getIntValue();
-            int newSell = elem.getAttribute("sell").getIntValue();
+            float newBuy = elem.getAttribute("buy").getFloatValue();
+            float newSell = elem.getAttribute("sell").getFloatValue();
             
             buyPrice = newBuy;
             sellPrice = newSell;

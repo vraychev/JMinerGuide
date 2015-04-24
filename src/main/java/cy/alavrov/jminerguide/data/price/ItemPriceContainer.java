@@ -25,6 +25,7 @@
  */
 package cy.alavrov.jminerguide.data.price;
 
+import cy.alavrov.jminerguide.data.character.APIException;
 import cy.alavrov.jminerguide.data.harvestable.Gas;
 import cy.alavrov.jminerguide.data.harvestable.Ice;
 import cy.alavrov.jminerguide.data.harvestable.Ore;
@@ -186,7 +187,6 @@ public class ItemPriceContainer {
      * @return 
      */
     public synchronized String getAllItemIDs() {
-        System.err.println(prices.size());
         String out = "";
         for (ItemPrice price : prices.values()) {
             if (out.isEmpty()) {
@@ -196,6 +196,10 @@ public class ItemPriceContainer {
             }
         }
         return out;
+    }
+    
+    public synchronized void loadFromEVECEntral() throws APIException {
+        
     }
     
     public class ItemPriceTableModel extends AbstractTableModel {

@@ -25,6 +25,7 @@
  */
 package cy.alavrov.jminerguide.data.api;
 
+import cy.alavrov.jminerguide.data.character.APIException;
 import cy.alavrov.jminerguide.data.price.ItemPriceContainer;
 import cy.alavrov.jminerguide.data.universe.MarketZone;
 
@@ -47,9 +48,15 @@ public class ItemPriceLoader implements Runnable{
     @Override
     public void run() {
         try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            target.loadFromEVECEntral();
+        } catch (APIException e) {
+            final String message = e.getMessage();
+            java.awt.EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    receiver.loadingDone(false, message);
+                }
+            });
+            return;
         }
         
         java.awt.EventQueue.invokeLater(new Runnable() {

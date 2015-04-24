@@ -34,7 +34,7 @@ import cy.alavrov.jminerguide.data.price.ItemPriceContainer.ItemPriceTableModel;
 import cy.alavrov.jminerguide.data.universe.MarketZone;
 import cy.alavrov.jminerguide.data.universe.MarketZoneContainer;
 import cy.alavrov.jminerguide.log.JMGLogger;
-import cy.alavrov.jminerguide.util.IntegerDocumentFilter;
+import cy.alavrov.jminerguide.util.FloatDocumentFilter;
 import cy.alavrov.jminerguide.util.SwingUtils;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -63,10 +63,10 @@ public class JPriceSetupDialog extends javax.swing.JDialog implements IItemPrice
         this.dCont = dCont;
         
         AbstractDocument idDoc = ((AbstractDocument)jTextFieldBuy.getDocument());
-        idDoc.setDocumentFilter(new IntegerDocumentFilter());
+        idDoc.setDocumentFilter(new FloatDocumentFilter());
         
         idDoc = ((AbstractDocument)jTextFieldSell.getDocument());
-        idDoc.setDocumentFilter(new IntegerDocumentFilter());
+        idDoc.setDocumentFilter(new FloatDocumentFilter());
         
         ItemPriceContainer iCont = dCont.getItemPriceContainer();
         MarketZoneContainer mCont = dCont.getMarketZoneContainer();
@@ -165,10 +165,10 @@ public class JPriceSetupDialog extends javax.swing.JDialog implements IItemPrice
                 String sellStr = jTextFieldSell.getText();
                 if (sellStr == null || sellStr.isEmpty()) sellStr = "0";
                 
-                Integer newBuyPrice = Integer.parseInt(buyStr, 10);
-                if (newBuyPrice < 0) newBuyPrice = 0;                                
-                Integer newSellPrice = Integer.parseInt(sellStr, 10);
-                if (newSellPrice < 0) newBuyPrice = 0;                
+                Float newBuyPrice = Float.parseFloat(buyStr);
+                if (newBuyPrice < 0f) newBuyPrice = 0f;                                
+                Float newSellPrice = Float.parseFloat(sellStr);
+                if (newSellPrice < 0f) newBuyPrice = 0f;                
                 
                 price.setBuyPrice(newBuyPrice);
                 price.setSellPrice(newSellPrice);
@@ -205,6 +205,7 @@ public class JPriceSetupDialog extends javax.swing.JDialog implements IItemPrice
         jComboBoxItemTypeFilter = new javax.swing.JComboBox<ItemPrice.ItemType>();
         jComboBoxCompressedFilter = new javax.swing.JComboBox<ItemPrice.CompressionType>();
         jButtonPriceUpdate = new javax.swing.JButton();
+        jLabelStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Setup Prices");
@@ -305,6 +306,8 @@ public class JPriceSetupDialog extends javax.swing.JDialog implements IItemPrice
             }
         });
 
+        jLabelStatus.setText("OK");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -312,6 +315,22 @@ public class JPriceSetupDialog extends javax.swing.JDialog implements IItemPrice
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabelStatus)
+                        .addGap(18, 18, 18))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel5))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jComboBoxItemTypeFilter, 0, 360, Short.MAX_VALUE)
+                            .addComponent(jComboBoxCompressedFilter, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(10, 10, 10))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jTextFieldBuy, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -321,25 +340,17 @@ public class JPriceSetupDialog extends javax.swing.JDialog implements IItemPrice
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButtonPriceUpdate))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addComponent(jButtonPriceUpdate)
+                        .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jButtonOK)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 109, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel1)
                         .addGap(18, 18, 18)
                         .addComponent(jComboBoxMarketZone, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonLoad))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel5))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jComboBoxItemTypeFilter, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jComboBoxCompressedFilter, 0, 352, Short.MAX_VALUE))))
-                .addGap(18, 18, 18))
+                        .addComponent(jButtonLoad)
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -361,13 +372,15 @@ public class JPriceSetupDialog extends javax.swing.JDialog implements IItemPrice
                     .addComponent(jLabel2)
                     .addComponent(jLabel3)
                     .addComponent(jButtonPriceUpdate))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabelStatus)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonOK)
                     .addComponent(jLabel1)
                     .addComponent(jComboBoxMarketZone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonLoad))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -434,6 +447,7 @@ public class JPriceSetupDialog extends javax.swing.JDialog implements IItemPrice
         SwingUtils.enableSubcomponents(rootPane, false);
         loading = true;
                 
+        jLabelStatus.setText("Loading...");
         ItemPriceLoader loader = new ItemPriceLoader(dCont.getItemPriceContainer(), this, zone);
         dCont.startAPILoader(loader);
     }//GEN-LAST:event_jButtonLoadActionPerformed
@@ -457,6 +471,7 @@ public class JPriceSetupDialog extends javax.swing.JDialog implements IItemPrice
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabelStatus;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTablePrices;
     private javax.swing.JTextField jTextFieldBuy;
@@ -466,6 +481,8 @@ public class JPriceSetupDialog extends javax.swing.JDialog implements IItemPrice
     @Override
     public void loadingDone(boolean success, String result) {
         loading = false;
+        
+        jLabelStatus.setText("Loading finished");
         SwingUtils.enableSubcomponents(rootPane, true);
     }
 }
