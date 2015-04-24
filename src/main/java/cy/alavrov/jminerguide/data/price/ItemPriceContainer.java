@@ -25,21 +25,29 @@
  */
 package cy.alavrov.jminerguide.data.price;
 
+import cy.alavrov.jminerguide.App;
 import cy.alavrov.jminerguide.data.character.APIException;
 import cy.alavrov.jminerguide.data.harvestable.Gas;
 import cy.alavrov.jminerguide.data.harvestable.Ice;
 import cy.alavrov.jminerguide.data.harvestable.Ore;
 import cy.alavrov.jminerguide.data.harvestable.BaseElement;
+import cy.alavrov.jminerguide.data.universe.MarketZone;
 import cy.alavrov.jminerguide.log.JMGLogger;
+import cy.alavrov.jminerguide.util.HTTPClient;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.StringReader;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import org.apache.http.client.methods.HttpGet;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
@@ -198,8 +206,65 @@ public class ItemPriceContainer {
         return out;
     }
     
-    public synchronized void loadFromEVECEntral() throws APIException {
+    public synchronized void loadFromEVECEntral(MarketZone zone) throws APIException {        
+        String url = baseURI + "?typeid=" + getAllItemIDs() + "&";
+        if (zone.getType() == MarketZone.ZoneType.REGION) {
+            url = url + "regionlimit="+zone.getId();
+        } else {
+            url = url + "usesystem="+zone.getId();
+        }
         
+        // we're doing this instead of just passing URI into the builder because 
+        // we need to provide an User-Agent header.
+        HTTPClient client;
+        try {
+            client = new HTTPClient();
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            JMGLogger.logSevere("Unable to create http client", e);
+            throw new APIException("Critical error, please see logs.");
+        }
+        
+        HttpGet req = new HttpGet(url);
+        // EVECentral does not ask us to pass useragent, but we'll do that anyway.
+        req.addHeader("User-Agent", "JMinerGuide "+App.getVersion()+", https://github.com/alavrov/JMinerGuide");
+        String xml = client.getStringFromURL(req);
+        if (xml == null) {
+            // logging will be done in a client already.
+            throw new APIException("Unable to fetch price data, please see logs.");        
+        }        
+        
+        SAXBuilder builder = new SAXBuilder();
+        try {            
+            Document doc = builder.build(new StringReader(xml));
+            Element rootNode = doc.getRootElement();  
+            Element marketstat = rootNode.getChild("marketstat");
+            List<Element> priceElemList = marketstat.getChildren("type");
+            if (priceElemList.isEmpty()) {
+                throw new APIException("No market data returned.");
+            } else {
+                // we'll make a full clone here for updating, so if something will break half-way,
+                // it won't break old prices.
+                LinkedHashMap<Integer, ItemPrice> newPrices = new LinkedHashMap<>();
+                for (ItemPrice oldprice : prices.values()) {
+                    newPrices.put(oldprice.getItemID(), oldprice.clone());
+                }
+                
+                for (Element priceElem : priceElemList) {
+                    int itemID = priceElem.getAttribute("id").getIntValue();
+                    ItemPrice itemPrice = newPrices.get(itemID);
+                    if (itemPrice == null) {
+                        JMGLogger.logWarning("Unknown item "+itemID+" in the EVECentral data");   
+                    } else {
+                        itemPrice.updatePriceEVECentral(priceElem);
+                    }
+                }
+                
+                prices = newPrices;
+            }
+        } catch (JDOMException | IOException | IllegalArgumentException | NullPointerException e ) {
+            JMGLogger.logSevere("Critical failure during price parsing", e);
+            throw new APIException("Unable to parse data, please see logs.");        
+        } 
     }
     
     public class ItemPriceTableModel extends AbstractTableModel {

@@ -481,8 +481,28 @@ public class JPriceSetupDialog extends javax.swing.JDialog implements IItemPrice
     @Override
     public void loadingDone(boolean success, String result) {
         loading = false;
-        
-        jLabelStatus.setText("Loading finished");
+                
+        processEvents = false;
         SwingUtils.enableSubcomponents(rootPane, true);
+        
+        if (success) {
+            jLabelStatus.setText("Loading finished");
+            
+            int row = jTablePrices.getSelectedRow();
+            
+            ItemPrice.ItemType itype = (ItemPrice.ItemType) jComboBoxItemTypeFilter.getSelectedItem();
+            ItemPrice.CompressionType ctype = (ItemPrice.CompressionType) jComboBoxCompressedFilter.getSelectedItem();
+
+            setPrices(dCont.getItemPriceContainer().getTableModel(itype, ctype));
+            if (row > -1) {
+                jTablePrices.setRowSelectionInterval(row, row);
+            }
+            
+            checkTableSelection();
+        } else {
+            jLabelStatus.setText(result);
+        }
+        
+        processEvents = true;
     }
 }

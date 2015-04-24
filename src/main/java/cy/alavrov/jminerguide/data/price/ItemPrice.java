@@ -25,6 +25,7 @@
  */
 package cy.alavrov.jminerguide.data.price;
 
+import cy.alavrov.jminerguide.data.character.APIException;
 import cy.alavrov.jminerguide.log.JMGLogger;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
@@ -101,11 +102,43 @@ public class ItemPrice {
         } catch (Exception e) {
             JMGLogger.logWarning("Unable to update price for item #"+itemID, e);
         }        
+    }   
+    
+    public synchronized void updatePriceEVECentral(Element elem) throws APIException{
+        try {
+            if (elem.getAttribute("id").getIntValue() != itemID) return;
+            
+            Element buyData = elem.getChild("buy");
+            Element sellData = elem.getChild("sell");
+            
+            String buyText = buyData.getChildText("max");
+            if (buyText == null || buyText.isEmpty()) buyText = "0";
+            
+            String sellText = sellData.getChildText("min");
+            if (sellText == null || sellText.isEmpty()) sellText = "0";
+            
+            float newBuy = Float.parseFloat(buyText);
+            float newSell = Float.parseFloat(sellText);
+            
+            buyPrice = newBuy;
+            sellPrice = newSell;
+        } catch (Exception e) {
+            JMGLogger.logWarning("Unable to update price for item #"+itemID+" with EVECentral data", e);   
+            throw new APIException("Unable to parse item price data, please see logs");
+        }
     }
-
+    
     @Override
     public String toString() {
         return name;
+    }
+    
+    @Override
+    public synchronized ItemPrice clone() {
+        ItemPrice out = new ItemPrice(itemID, name, type, cType);
+        out.buyPrice = buyPrice;
+        out.sellPrice = sellPrice;
+        return out;
     }
     
     public static enum ItemType {

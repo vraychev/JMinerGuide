@@ -241,7 +241,7 @@ public class APIKey {
             expires = expiresNew;
             chars = newChars;                        
         } catch (JDOMException | IOException | IllegalArgumentException | NullPointerException e ) {
-            JMGLogger.logSevere("Cricical failure during API parsing", e);
+            JMGLogger.logSevere("Critical failure during API parsing", e);
             throw new APIException("Unable to parse data, please see logs.");        
         } 
     }

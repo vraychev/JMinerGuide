@@ -48,7 +48,7 @@ public class ItemPriceLoader implements Runnable{
     @Override
     public void run() {
         try {
-            target.loadFromEVECEntral();
+            target.loadFromEVECEntral(zone);
         } catch (APIException e) {
             final String message = e.getMessage();
             java.awt.EventQueue.invokeLater(new Runnable() {
